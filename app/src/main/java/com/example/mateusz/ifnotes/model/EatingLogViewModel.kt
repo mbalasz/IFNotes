@@ -27,9 +27,9 @@ class EatingLogViewModel(application: Application): AndroidViewModel(application
     val timeSinceLastActivity = Transformations.map(currentEatingLogLiveData) { eatingLog ->
         eatingLog?.let {
             if (isEatingLogFinished(eatingLog)) {
-                eatingLog.endTime
+                getElapsedRealTimeSinceBaseInMillis(eatingLog.endTime)
             } else {
-                eatingLog.startTime
+                getElapsedRealTimeSinceBaseInMillis(eatingLog.startTime)
             }
         } ?: run { null }
     }
@@ -55,13 +55,13 @@ class EatingLogViewModel(application: Application): AndroidViewModel(application
             throw IllegalStateException("Eating log was already finished while attempting to" +
                     " finish it")
         }
-        val finishedEatingLog = eatingLog.copy(endTime = getCurrentTime())
+        val finishedEatingLog = eatingLog.copy(endTime = getCurrentCalendarTime())
         currentEatingLogLiveData.value = finishedEatingLog
         repository.updateEatingLog(finishedEatingLog)
     }
 
     private fun startNewEatingLog() {
-        val newEatingLog = EatingLog(startTime = getCurrentTime())
+        val newEatingLog = EatingLog(startTime = getCurrentCalendarTime())
         currentEatingLogLiveData.value = newEatingLog
         repository.insertEatingLog(newEatingLog)
     }
@@ -70,7 +70,11 @@ class EatingLogViewModel(application: Application): AndroidViewModel(application
         return eatingLog.startTime != 0L && eatingLog.endTime != 0L
     }
 
-    private fun getCurrentTime(): Long {
-        return SystemClock.elapsedRealtime()
+    private fun getElapsedRealTimeSinceBaseInMillis(baseInMillis: Long): Long {
+        return SystemClock.elapsedRealtime() - (System.currentTimeMillis() - baseInMillis)
+    }
+
+    private fun getCurrentCalendarTime(): Long {
+        return System.currentTimeMillis()
     }
 }
