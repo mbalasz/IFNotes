@@ -70,6 +70,10 @@ class EatingLogViewModel(application: Application): AndroidViewModel(application
         return eatingLog.startTime != 0L && eatingLog.endTime != 0L
     }
 
+    /**
+     * Calculates how much time has passed since {@param baseInMillis} and shifts that value in
+     * reference to elapsed real time.
+     */
     private fun getElapsedRealTimeSinceBaseInMillis(baseInMillis: Long): Long {
         return SystemClock.elapsedRealtime() - (System.currentTimeMillis() - baseInMillis)
     }
