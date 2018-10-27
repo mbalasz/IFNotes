@@ -19,11 +19,11 @@ interface EatingLogDao {
     @Delete
     fun delete(eatingLog: EatingLog)
 
-    @Query("SELECT * FROM eatingLog where date = :date")
-    fun getEatingLogByDate(date: Long): EatingLog
+    @Query("DELETE FROM EatingLog")
+    fun deleteAll()
 
-    @Query("SELECT * FROM eatingLog where date = (SELECT max(date) FROM eatinglog)")
-    fun getMostRecentEatingLog(): LiveData<EatingLog>
+    @Query("SELECT * FROM eatingLog where startTime = (SELECT max(startTime) FROM eatinglog)")
+    fun getMostRecentEatingLog(): EatingLog
 
     @Query("SELECT * FROM eatingLog")
     fun getEatingLogs(): List<EatingLog>

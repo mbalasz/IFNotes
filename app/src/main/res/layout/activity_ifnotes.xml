@@ -8,7 +8,7 @@
     tools:context="com.example.mateusz.ifnotes.IFNotesActivity">
 
     <Button
-        android:id="@+id/log_activity_button"
+        android:id="@+id/logActivityButton"
         android:layout_width="194dp"
         android:layout_height="57dp"
         android:text="Button"
@@ -26,7 +26,7 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/log_activity_button"
+        app:layout_constraintBottom_toTopOf="@+id/logActivityButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.503"
         app:layout_constraintStart_toStartOf="parent"
@@ -45,7 +45,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/log_activity_button"
+        app:layout_constraintTop_toBottomOf="@+id/logActivityButton"
         app:layout_constraintVertical_bias="0.523"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
