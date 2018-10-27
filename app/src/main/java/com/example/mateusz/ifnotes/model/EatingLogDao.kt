@@ -1,5 +1,6 @@
 package com.example.mateusz.ifnotes.model
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -20,4 +21,10 @@ interface EatingLogDao {
 
     @Query("SELECT * FROM eatingLog where date = :date")
     fun getEatingLogByDate(date: Long): EatingLog
+
+    @Query("SELECT * FROM eatingLog where date = (SELECT max(date) FROM eatinglog)")
+    fun getMostRecentEatingLog(): LiveData<EatingLog>
+
+    @Query("SELECT * FROM eatingLog")
+    fun getEatingLogs(): List<EatingLog>
 }

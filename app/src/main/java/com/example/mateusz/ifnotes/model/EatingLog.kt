@@ -6,7 +6,8 @@ import androidx.room.PrimaryKey
 @Entity
 data class EatingLog(
     @PrimaryKey(autoGenerate = true)
-    val startTime: Int,
-    val endTime: Int,
+    val id: Int,
+    val startTime: Long,
+    val endTime: Long,
     val date: Long = System.currentTimeMillis()
 )
