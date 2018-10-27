@@ -18,7 +18,7 @@ class IFNotesActivity : AppCompatActivity() {
         setContentView(R.layout.activity_ifnotes)
 
         eatingLogViewModel.timeSinceLastActivity.observe(this, Observer<Long> {
-            time -> timeSinceLastActivityChronometer.base = time
+            time -> if (time != null) timeSinceLastActivityChronometer.base = time
         })
 
 
