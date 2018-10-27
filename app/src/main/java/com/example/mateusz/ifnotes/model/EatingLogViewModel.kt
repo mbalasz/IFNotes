@@ -6,7 +6,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
+import org.jetbrains.anko.coroutines.experimental.bg
 
 class EatingLogViewModel(application: Application): AndroidViewModel(application) {
     enum class LogButtonState {
@@ -35,9 +37,9 @@ class EatingLogViewModel(application: Application): AndroidViewModel(application
     }
 
     init {
-        repository.deleteAll()
-        async(CommonPool) {
-            currentEatingLogLiveData.value = repository.getMostRecentEatingLog()
+        async(UI) {
+            val mostRecentEatingLogDeferred = async { repository.getMostRecentEatingLog() }
+            currentEatingLogLiveData.value = mostRecentEatingLogDeferred.await()
         }
     }
 

@@ -1,10 +1,8 @@
 package com.example.mateusz.ifnotes.model
 
 import android.app.Application
-import androidx.lifecycle.LiveData
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.async
-import java.util.Date
 
 class Repository(application: Application) {
     val iFNotesDatabase: IFNotesDatabase = IFNotesDatabase.getDatabase(application)
