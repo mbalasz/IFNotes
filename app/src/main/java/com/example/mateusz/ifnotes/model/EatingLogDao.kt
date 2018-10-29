@@ -7,6 +7,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import io.reactivex.Flowable
 
 @Dao
 interface EatingLogDao {
@@ -23,7 +24,7 @@ interface EatingLogDao {
     fun deleteAll()
 
     @Query("SELECT * FROM eatingLog where startTime = (SELECT max(startTime) FROM eatinglog)")
-    fun getMostRecentEatingLog(): EatingLog
+    fun getMostRecentEatingLog(): Flowable<EatingLog>
 
     @Query("SELECT * FROM eatingLog")
     fun getEatingLogs(): List<EatingLog>

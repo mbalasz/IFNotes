@@ -52,6 +52,10 @@ class IFNotesDatabaseTest {
         eatingLogDao.insert(eatingLog2)
         eatingLogDao.insert(eatingLog3)
 
-        assertThat(eatingLogDao.getMostRecentEatingLog().startTime, `is`(11L))
+        eatingLogDao.getMostRecentEatingLog()
+                .map{it.startTime}
+                .test()
+                .awaitCount(1)
+                .assertValue(11L)
     }
 }
