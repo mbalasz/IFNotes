@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">IFNotes</string>
+    <string name="title_activity_eating_logs">EatingLogsActivity</string>
 </resources>

@@ -1,10 +1,12 @@
 package com.example.mateusz.ifnotes
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.example.mateusz.ifnotes.model.EatingLogViewModel
+import com.example.mateusz.ifnotes.model.ifnotes.IFNotesViewModel
+import kotlinx.android.synthetic.main.activity_ifnotes.history
 import kotlinx.android.synthetic.main.activity_ifnotes.logActivityButton
 import kotlinx.android.synthetic.main.activity_ifnotes.timeSinceLastActivityChronometer
 import java.lang.IllegalStateException
@@ -15,15 +17,15 @@ class IFNotesActivity : AppCompatActivity() {
         const val LOG_LAST_MEAL = "Log my last meal"
     }
 
-    val eatingLogViewModel: EatingLogViewModel by lazy {
-        ViewModelProviders.of(this).get(EatingLogViewModel::class.java)
+    val ifNotesViewModel: IFNotesViewModel by lazy {
+        ViewModelProviders.of(this).get(IFNotesViewModel::class.java)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ifnotes)
 
-        eatingLogViewModel.timeSinceLastActivity.observe(this, Observer { time ->
+        ifNotesViewModel.timeSinceLastActivity.observe(this, Observer { time ->
             if (time != null) {
                 timeSinceLastActivityChronometer.base = time
                 timeSinceLastActivityChronometer.start()
@@ -33,15 +35,19 @@ class IFNotesActivity : AppCompatActivity() {
         })
 
         logActivityButton.text = LOG_FIRST_MEAL
-        eatingLogViewModel.logButtonState.observe(this, Observer { state ->
+        ifNotesViewModel.logButtonState.observe(this, Observer { state ->
             when (state) {
-                EatingLogViewModel.LogButtonState.LOG_FIRST_MEAL ->
+                IFNotesViewModel.LogButtonState.LOG_FIRST_MEAL ->
                     logActivityButton.text = LOG_FIRST_MEAL
-                EatingLogViewModel.LogButtonState.LOG_LAST_MEAL ->
+                IFNotesViewModel.LogButtonState.LOG_LAST_MEAL ->
                     logActivityButton.text = LOG_LAST_MEAL
                 else -> throw IllegalStateException("Incorrect log button state")
             }
         })
-        logActivityButton.setOnClickListener { eatingLogViewModel.onLogButtonClicked() }
+        logActivityButton.setOnClickListener { ifNotesViewModel.onLogButtonClicked() }
+
+        history.setOnClickListener {
+            startActivity(Intent(this, EatingLogsActivity::class.java))
+        }
     }
 }

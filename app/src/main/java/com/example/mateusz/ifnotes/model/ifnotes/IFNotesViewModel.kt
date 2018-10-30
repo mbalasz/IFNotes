@@ -1,15 +1,17 @@
-package com.example.mateusz.ifnotes.model
+package com.example.mateusz.ifnotes.model.ifnotes
 
 import android.app.Application
 import android.os.SystemClock
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
+import com.example.mateusz.ifnotes.model.EatingLog
+import com.example.mateusz.ifnotes.model.Repository
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 
-class EatingLogViewModel(application: Application): AndroidViewModel(application) {
+class IFNotesViewModel(application: Application): AndroidViewModel(application) {
     enum class LogButtonState {
         LOG_FIRST_MEAL,
         LOG_LAST_MEAL
