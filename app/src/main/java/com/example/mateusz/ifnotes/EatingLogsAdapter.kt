@@ -7,12 +7,16 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mateusz.ifnotes.model.EatingLog
 import java.text.SimpleDateFormat
+import java.util.Locale
 
 class EatingLogsAdapter(val context: Context)
     : RecyclerView.Adapter<EatingLogsAdapter.EatingLogViewHolder>() {
     var eatingLogs: List<EatingLog> = ArrayList()
 
-    class EatingLogViewHolder(val view: ViewGroup): RecyclerView.ViewHolder(view)
+    inner class EatingLogViewHolder(val view: ViewGroup): RecyclerView.ViewHolder(view) {
+        val startTimeTextView = view.findViewById(R.id.eating_log_start_time) as TextView
+        val endTimeTextView = view.findViewById(R.id.eating_log_end_time) as TextView
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EatingLogViewHolder {
         val viewGroup =
@@ -28,10 +32,18 @@ class EatingLogsAdapter(val context: Context)
 
     override fun onBindViewHolder(holder: EatingLogViewHolder, position: Int) {
         val eatingLog = eatingLogs[position]
-        val simpleDateFormat = SimpleDateFormat.getDateTimeInstance()
-        (holder.view.findViewById(R.id.eating_log_date_log) as TextView).text =
-                "${simpleDateFormat.format(eatingLog.startTime)} " +
-                "${simpleDateFormat.format(eatingLog.endTime)}"
+        val simpleDateFormat = SimpleDateFormat("dd/M/yyyy HH:mm:ss", Locale.ENGLISH)
+        holder.startTimeTextView.text = simpleDateFormat.format(eatingLog.startTime)
+        if (eatingLog.endTime > 0) {
+            holder.endTimeTextView.text =
+                    simpleDateFormat.format(eatingLog.endTime)
+        }
+    }
+
+    override fun onViewRecycled(holder: EatingLogViewHolder) {
+        super.onViewRecycled(holder)
+        holder.startTimeTextView.text = ""
+        holder.endTimeTextView.text = ""
     }
 
     fun setData(eatingLogs: List<EatingLog>) {

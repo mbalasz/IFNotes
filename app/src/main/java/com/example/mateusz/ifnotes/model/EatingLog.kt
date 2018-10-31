@@ -7,6 +7,6 @@ import androidx.room.PrimaryKey
 data class EatingLog(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val startTime: Long = 0L,
-    val endTime: Long = 0L
+    val startTime: Long = -1L,
+    val endTime: Long = -1L
 )
