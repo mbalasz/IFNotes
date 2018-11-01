@@ -3,19 +3,46 @@ package com.example.mateusz.ifnotes
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.mateusz.ifnotes.model.EatingLog
+import com.example.mateusz.ifnotes.model.eatinglogs.EatingLogsViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class EatingLogsAdapter(val context: Context)
+class EatingLogsAdapter(val context: Context, private val eatingLogsViewModel: EatingLogsViewModel)
     : RecyclerView.Adapter<EatingLogsAdapter.EatingLogViewHolder>() {
-    var eatingLogs: List<EatingLog> = ArrayList()
 
-    inner class EatingLogViewHolder(val view: ViewGroup): RecyclerView.ViewHolder(view) {
+    inner class EatingLogViewHolder(val view: ViewGroup):
+            RecyclerView.ViewHolder(view), EatingLogsViewModel.EatingLogsItemView {
+
         val startTimeTextView = view.findViewById(R.id.eating_log_start_time) as TextView
         val endTimeTextView = view.findViewById(R.id.eating_log_end_time) as TextView
+        val removeButton = view.findViewById(R.id.item_row_remove_button) as ImageButton
+        val simpleDateFormat = SimpleDateFormat("dd/M/yyyy HH:mm:ss", Locale.ENGLISH)
+
+        init {
+            removeButton.setOnClickListener {
+                eatingLogsViewModel.onRemoveEatingLogItemClicked(this, adapterPosition)
+            }
+        }
+
+        override fun setStartTme(startTime: Long) {
+            startTimeTextView.text = simpleDateFormat.format(startTime)
+        }
+
+        override fun setEndTime(endTime: Long) {
+            endTimeTextView.text = simpleDateFormat.format(endTime)
+        }
+
+        override fun clearView() {
+            startTimeTextView.text = ""
+            endTimeTextView.text = ""
+        }
+
+        override fun notifyItemRemoved() {
+            notifyItemRemoved(adapterPosition)
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EatingLogViewHolder {
@@ -27,27 +54,15 @@ class EatingLogsAdapter(val context: Context)
     }
 
     override fun getItemCount(): Int {
-        return eatingLogs.size
+        return eatingLogsViewModel.getEatingLogsCount()
     }
 
     override fun onBindViewHolder(holder: EatingLogViewHolder, position: Int) {
-        val eatingLog = eatingLogs[position]
-        val simpleDateFormat = SimpleDateFormat("dd/M/yyyy HH:mm:ss", Locale.ENGLISH)
-        holder.startTimeTextView.text = simpleDateFormat.format(eatingLog.startTime)
-        if (eatingLog.endTime > 0) {
-            holder.endTimeTextView.text =
-                    simpleDateFormat.format(eatingLog.endTime)
-        }
+        eatingLogsViewModel.onBindEatingLogsItemView(holder, position)
     }
 
     override fun onViewRecycled(holder: EatingLogViewHolder) {
         super.onViewRecycled(holder)
-        holder.startTimeTextView.text = ""
-        holder.endTimeTextView.text = ""
-    }
-
-    fun setData(eatingLogs: List<EatingLog>) {
-        this.eatingLogs = eatingLogs
-        notifyDataSetChanged()
+        eatingLogsViewModel.onEatingLogItemViewRecycled(holder)
     }
 }

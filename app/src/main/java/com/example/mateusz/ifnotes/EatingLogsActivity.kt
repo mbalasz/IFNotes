@@ -12,17 +12,15 @@ class EatingLogsActivity : AppCompatActivity() {
     val eatingLogsViewModel: EatingLogsViewModel by lazy {
         ViewModelProviders.of(this).get(EatingLogsViewModel::class.java)
     }
-    val adapter = EatingLogsAdapter(this)
+    lateinit var adapter: EatingLogsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_eating_logs)
 
+        adapter = EatingLogsAdapter(this, eatingLogsViewModel)
         eatingLogsRecyclerView.adapter = adapter
         eatingLogsRecyclerView.layoutManager = LinearLayoutManager(this)
-        eatingLogsViewModel.getEatingLogs().observe(this, Observer {
-            adapter.setData(it)
-        })
     }
 
 }

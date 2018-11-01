@@ -1,17 +1,24 @@
 package com.example.mateusz.ifnotes.model
 
 import android.app.Application
-import androidx.lifecycle.LiveData
 import io.reactivex.Flowable
+import io.reactivex.Observable
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.async
 
 class Repository(application: Application) {
     val iFNotesDatabase: IFNotesDatabase = IFNotesDatabase.getDatabase(application)
-    val eatingLogDao: EatingLogDao = iFNotesDatabase.eatingLogDao()
+    private val eatingLogsStore = EatingLogsStore()
 
-    fun getEatingLogs(): LiveData<List<EatingLog>> {
-        return iFNotesDatabase.eatingLogDao().getEatingLogs()
+    init {
+        async(CommonPool) {
+            eatingLogsStore.setEatingLogs(
+                    iFNotesDatabase.eatingLogDao().getEatingLogs().toMutableList())
+        }
+    }
+
+    fun getEatingLogsObservable(): Observable<List<EatingLog>> {
+        return eatingLogsStore.observe()
     }
 
     fun updateEatingLog(eatingLog: EatingLog) {
@@ -24,7 +31,15 @@ class Repository(application: Application) {
         return iFNotesDatabase.eatingLogDao().getMostRecentEatingLog()
     }
 
+    fun deleteEatingLog(eatingLog: EatingLog) {
+        eatingLogsStore.deleteEatingLog(eatingLog)
+        async(CommonPool) {
+            iFNotesDatabase.eatingLogDao().delete(eatingLog)
+        }
+    }
+
     fun insertEatingLog(eatingLog: EatingLog) {
+        eatingLogsStore.insertEatingLog(eatingLog)
         async(CommonPool) {
             iFNotesDatabase.eatingLogDao().insert(eatingLog)
         }
