@@ -10,6 +10,7 @@ import com.example.mateusz.ifnotes.model.Repository
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
+import java.util.Calendar
 
 class IFNotesViewModel(application: Application): AndroidViewModel(application) {
     enum class LogButtonState {
@@ -51,33 +52,32 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
         }
     }
 
-    fun onManualLogCreated(hour: Int, minute: Int) {
-
+    fun onNewManualLog(hour: Int, minute: Int) {
+        val logTime = Calendar.getInstance()
+        logTime.set(
+                logTime.get(Calendar.YEAR),
+                logTime.get(Calendar.MONTH),
+                logTime.get(Calendar.DAY_OF_MONTH),
+                hour,
+                minute)
+        updateCurrentEatingLog(logTime.timeInMillis)
     }
 
     fun onLogButtonClicked() {
+        updateCurrentEatingLog(getCurrentCalendarTime())
+    }
+
+    private fun updateCurrentEatingLog(logTime: Long) {
         val currentEatingLog = currentEatingLogLiveData.value
+        val newEatingLog: EatingLog
         if (currentEatingLog == null || isEatingLogFinished(currentEatingLog)) {
-            startNewEatingLog()
+            newEatingLog = EatingLog(startTime = logTime)
+            repository.insertEatingLog(newEatingLog)
         } else {
-            finishEatingLog(currentEatingLog)
+            newEatingLog = currentEatingLog.copy(endTime = logTime)
+            repository.updateEatingLog(newEatingLog)
         }
-    }
-
-    private fun finishEatingLog(eatingLog: EatingLog) {
-        if (eatingLog.endTime != 0L) {
-            throw IllegalStateException("Eating log was already finished while attempting to" +
-                    " finish it")
-        }
-        val finishedEatingLog = eatingLog.copy(endTime = getCurrentCalendarTime())
-        currentEatingLogLiveData.value = finishedEatingLog
-        repository.updateEatingLog(finishedEatingLog)
-    }
-
-    private fun startNewEatingLog() {
-        val newEatingLog = EatingLog(startTime = getCurrentCalendarTime())
         currentEatingLogLiveData.value = newEatingLog
-        repository.insertEatingLog(newEatingLog)
     }
 
     private fun isEatingLogFinished(eatingLog: EatingLog): Boolean {

@@ -6,23 +6,19 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
-import kotlinx.android.synthetic.main.dialog_manual_log.*
-import kotlinx.android.synthetic.main.dialog_manual_log.view.*
+import kotlinx.android.synthetic.main.dialog_date_time.view.*
 import java.lang.ClassCastException
 import java.lang.IllegalStateException
 
-class ManualLogDialogFragment : DialogFragment() {
+class DateTimeDialogFragment : DialogFragment() {
     companion object {
         const val BUTTON_SAVE_STRING = "Save"
         const val BUTTON_CANCEL_STRING = "Cancel"
     }
 
-    private lateinit var manualLogDialogListener: ManualLogDialogListener
-    private var selectedHour: Int? = null
-    private var selectedMinute: Int? = null
+    private lateinit var dateTimeDialogListener: DateTimeDialogListener
 
-
-    interface ManualLogDialogListener {
+    interface DateTimeDialogListener {
         fun onTimeSaved(hour: Int, minute: Int)
     }
 
@@ -30,26 +26,26 @@ class ManualLogDialogFragment : DialogFragment() {
         super.onAttach(context)
 
         try {
-            manualLogDialogListener = context as ManualLogDialogListener
+            dateTimeDialogListener = context as DateTimeDialogListener
         } catch (e: ClassCastException) {
             throw ClassCastException(
-                    "${context.toString()} must implement ${ManualLogDialogListener::class}")
+                    "${context.toString()} must implement ${DateTimeDialogListener::class}")
         }
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         return activity?.let {
             val alertDialogBuilder = AlertDialog.Builder(it)
-            val dialogView = it.layoutInflater.inflate(R.layout.dialog_manual_log, null)
+            val dialogView = it.layoutInflater.inflate(R.layout.dialog_date_time, null)
             alertDialogBuilder
                     .setMessage("Manual log")
                     .setView(dialogView)
                     .setPositiveButton(BUTTON_SAVE_STRING) { dialog, id ->
                         val timePicker = dialogView.timePicker
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            manualLogDialogListener.onTimeSaved(timePicker.hour, timePicker.minute)
+                            dateTimeDialogListener.onTimeSaved(timePicker.hour, timePicker.minute)
                         } else {
-                            manualLogDialogListener.onTimeSaved(
+                            dateTimeDialogListener.onTimeSaved(
                                     timePicker.currentHour, timePicker.currentMinute)
                         }
                     }

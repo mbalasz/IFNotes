@@ -9,7 +9,7 @@ import com.example.mateusz.ifnotes.model.ifnotes.IFNotesViewModel
 import kotlinx.android.synthetic.main.activity_ifnotes.*
 import java.lang.IllegalStateException
 
-class IFNotesActivity : AppCompatActivity(), ManualLogDialogFragment.ManualLogDialogListener{
+class IFNotesActivity : AppCompatActivity(), DateTimeDialogFragment.DateTimeDialogListener{
     companion object {
         const val LOG_FIRST_MEAL = "Log my first meal"
         const val LOG_LAST_MEAL = "Log my last meal"
@@ -45,7 +45,7 @@ class IFNotesActivity : AppCompatActivity(), ManualLogDialogFragment.ManualLogDi
         logActivityButton.setOnClickListener { ifNotesViewModel.onLogButtonClicked() }
 
         manualLogButton.setOnClickListener {
-            val manualLogDialogFragment = ManualLogDialogFragment()
+            val manualLogDialogFragment = DateTimeDialogFragment()
             manualLogDialogFragment.show(supportFragmentManager, "manualLog")
         }
 
@@ -55,7 +55,7 @@ class IFNotesActivity : AppCompatActivity(), ManualLogDialogFragment.ManualLogDi
     }
 
     override fun onTimeSaved(hour: Int, minute: Int) {
-        ifNotesViewModel.onManualLogCreated(hour, minute)
+        ifNotesViewModel.onNewManualLog(hour, minute)
     }
 
 }
