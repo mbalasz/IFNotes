@@ -6,12 +6,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.example.mateusz.ifnotes.model.ifnotes.IFNotesViewModel
-import kotlinx.android.synthetic.main.activity_ifnotes.history
-import kotlinx.android.synthetic.main.activity_ifnotes.logActivityButton
-import kotlinx.android.synthetic.main.activity_ifnotes.timeSinceLastActivityChronometer
+import kotlinx.android.synthetic.main.activity_ifnotes.*
 import java.lang.IllegalStateException
 
-class IFNotesActivity : AppCompatActivity() {
+class IFNotesActivity : AppCompatActivity(), ManualLogDialogFragment.ManualLogDialogListener{
     companion object {
         const val LOG_FIRST_MEAL = "Log my first meal"
         const val LOG_LAST_MEAL = "Log my last meal"
@@ -46,8 +44,18 @@ class IFNotesActivity : AppCompatActivity() {
         })
         logActivityButton.setOnClickListener { ifNotesViewModel.onLogButtonClicked() }
 
+        manualLogButton.setOnClickListener {
+            val manualLogDialogFragment = ManualLogDialogFragment()
+            manualLogDialogFragment.show(supportFragmentManager, "manualLog")
+        }
+
         history.setOnClickListener {
             startActivity(Intent(this, EatingLogsActivity::class.java))
         }
     }
+
+    override fun onTimeSaved(hour: Int, minute: Int) {
+        ifNotesViewModel.onManualLogCreated(hour, minute)
+    }
+
 }

@@ -51,6 +51,10 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
         }
     }
 
+    fun onManualLogCreated(hour: Int, minute: Int) {
+
+    }
+
     fun onLogButtonClicked() {
         val currentEatingLog = currentEatingLogLiveData.value
         if (currentEatingLog == null || isEatingLogFinished(currentEatingLog)) {
