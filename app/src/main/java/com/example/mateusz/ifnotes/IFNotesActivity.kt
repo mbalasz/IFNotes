@@ -12,8 +12,11 @@ import java.lang.IllegalStateException
 
 class IFNotesActivity : AppCompatActivity(), DateTimeDialogFragment.DateTimeDialogListener{
     companion object {
-        const val LOG_FIRST_MEAL = "Log my first meal"
-        const val LOG_LAST_MEAL = "Log my last meal"
+        const val LOG_FIRST_MEAL_BUTTON_TEXT = "Log my first meal"
+        const val LOG_LAST_MEAL_BUTTON_TEXT = "Log my last meal"
+
+        const val CURRENT_EATING_LOG_DISPLAY_FIRST_MEAL = "Time of first meal"
+        const val CURRENT_EATING_LOG_DISPLAY_LAST_MEAL = "Time of last meal"
     }
 
     val ifNotesViewModel: IFNotesViewModel by lazy {
@@ -24,6 +27,20 @@ class IFNotesActivity : AppCompatActivity(), DateTimeDialogFragment.DateTimeDial
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ifnotes)
 
+        ifNotesViewModel.currentEatingLogDisplayLiveData.observe(
+                this, Observer { eatingLogDisplay ->
+            if (eatingLogDisplay == null) {
+                throw IllegalStateException("EatingLogDisplay cannot be null")
+            }
+            val logStateText = when (eatingLogDisplay.logState) {
+                IFNotesViewModel.LogState.LOG_FIRST_MEAL ->
+                    CURRENT_EATING_LOG_DISPLAY_FIRST_MEAL
+                IFNotesViewModel.LogState.LOG_LAST_MEAL->
+                    CURRENT_EATING_LOG_DISPLAY_LAST_MEAL
+            }
+            currentEatingLog.text = "$logStateText: ${eatingLogDisplay.logTime}"
+        })
+
         ifNotesViewModel.timeSinceLastActivity.observe(this, Observer { time ->
             if (time != null) {
                 timeSinceLastActivityChronometer.base = time
@@ -33,13 +50,13 @@ class IFNotesActivity : AppCompatActivity(), DateTimeDialogFragment.DateTimeDial
             }
         })
 
-        logActivityButton.text = LOG_FIRST_MEAL
+        logActivityButton.text = LOG_FIRST_MEAL_BUTTON_TEXT
         ifNotesViewModel.logButtonState.observe(this, Observer { state ->
             when (state) {
-                IFNotesViewModel.LogButtonState.LOG_FIRST_MEAL ->
-                    logActivityButton.text = LOG_FIRST_MEAL
-                IFNotesViewModel.LogButtonState.LOG_LAST_MEAL ->
-                    logActivityButton.text = LOG_LAST_MEAL
+                IFNotesViewModel.LogState.LOG_FIRST_MEAL ->
+                    logActivityButton.text = LOG_FIRST_MEAL_BUTTON_TEXT
+                IFNotesViewModel.LogState.LOG_LAST_MEAL ->
+                    logActivityButton.text = LOG_LAST_MEAL_BUTTON_TEXT
                 else -> throw IllegalStateException("Incorrect log button state")
             }
         })

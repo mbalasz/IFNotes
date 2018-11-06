@@ -7,6 +7,7 @@ class EatingLogHelper {
     enum class LogTimeValidationStatus {
         SUCCESS,
         ERROR_TIME_TOO_EARLY
+        //TODO: Add an error of time in the future
     }
 
     fun validateNewLogTime(logTime: Long, currentEatingLog: EatingLog?): LogTimeValidationStatus {

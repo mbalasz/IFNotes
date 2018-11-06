@@ -12,15 +12,19 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import java.lang.IllegalStateException
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 class IFNotesViewModel(application: Application): AndroidViewModel(application) {
-    enum class LogButtonState {
+    enum class LogState {
         LOG_FIRST_MEAL,
         LOG_LAST_MEAL
     }
 
     data class LogTimeValidationMessage(val message: String)
+
+    data class EatingLogDisplay(val logState: LogState, val logTime: String)
 
     private val repository = Repository(application)
     private val eatingLogHelper = EatingLogHelper()
@@ -30,11 +34,11 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
     val logButtonState = Transformations.map(currentEatingLogLiveData) { eatingLog ->
         eatingLog?.let {
             if (eatingLogHelper.isEatingLogFinished(eatingLog)) {
-                LogButtonState.LOG_FIRST_MEAL
+                LogState.LOG_FIRST_MEAL
             } else {
-                LogButtonState.LOG_LAST_MEAL
+                LogState.LOG_LAST_MEAL
             }
-        } ?: run { LogButtonState.LOG_FIRST_MEAL }
+        } ?: run { LogState.LOG_FIRST_MEAL }
     }
     val timeSinceLastActivity = Transformations.map(currentEatingLogLiveData) { eatingLog ->
         eatingLog?.let {
@@ -44,6 +48,21 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
                 getElapsedRealTimeSinceBaseInMillis(eatingLog.startTime)
             }
         } ?: run { null }
+    }
+    val currentEatingLogDisplayLiveData =
+            Transformations.map(currentEatingLogLiveData) { eatingLog ->
+                eatingLog?.let {
+                    val simpleDateFormat =
+                            SimpleDateFormat("dd/M/yyyy HH:mm:ss", Locale.ENGLISH)
+                    if (eatingLogHelper.isEatingLogFinished(eatingLog)) {
+                        EatingLogDisplay(
+                                LogState.LOG_LAST_MEAL, simpleDateFormat.format(eatingLog.endTime))
+                    } else {
+                        EatingLogDisplay(
+                                LogState.LOG_FIRST_MEAL,
+                                simpleDateFormat.format(eatingLog.startTime))
+                    }
+                } ?: run { null }
     }
 
     init {
