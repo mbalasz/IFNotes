@@ -3,6 +3,7 @@ package com.example.mateusz.ifnotes.model.ifnotes
 import android.app.Application
 import android.os.SystemClock
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import com.example.mateusz.ifnotes.model.EatingLog
@@ -10,6 +11,7 @@ import com.example.mateusz.ifnotes.model.Repository
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
+import java.lang.IllegalStateException
 import java.util.Calendar
 
 class IFNotesViewModel(application: Application): AndroidViewModel(application) {
@@ -17,11 +19,17 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
         LOG_FIRST_MEAL,
         LOG_LAST_MEAL
     }
+
+    data class LogTimeValidationMessage(val message: String)
+
     private val repository = Repository(application)
+    private val eatingLogHelper = EatingLogHelper()
     private val currentEatingLogLiveData = MutableLiveData<EatingLog>()
+    private val logTimeValidationMessageLiveData =
+            MutableLiveData<LogTimeValidationMessage>()
     val logButtonState = Transformations.map(currentEatingLogLiveData) { eatingLog ->
         eatingLog?.let {
-            if (isEatingLogFinished(eatingLog)) {
+            if (eatingLogHelper.isEatingLogFinished(eatingLog)) {
                 LogButtonState.LOG_FIRST_MEAL
             } else {
                 LogButtonState.LOG_LAST_MEAL
@@ -30,7 +38,7 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
     }
     val timeSinceLastActivity = Transformations.map(currentEatingLogLiveData) { eatingLog ->
         eatingLog?.let {
-            if (isEatingLogFinished(eatingLog)) {
+            if (eatingLogHelper.isEatingLogFinished(eatingLog)) {
                 getElapsedRealTimeSinceBaseInMillis(eatingLog.endTime)
             } else {
                 getElapsedRealTimeSinceBaseInMillis(eatingLog.startTime)
@@ -52,6 +60,10 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
         }
     }
 
+    fun getLogTimeValidationMessageLiveData(): LiveData<LogTimeValidationMessage> {
+        return logTimeValidationMessageLiveData
+    }
+
     fun onNewManualLog(hour: Int, minute: Int) {
         val logTime = Calendar.getInstance()
         logTime.set(
@@ -60,6 +72,18 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
                 logTime.get(Calendar.DAY_OF_MONTH),
                 hour,
                 minute)
+        when (eatingLogHelper.validateNewLogTime(
+                logTime.timeInMillis, currentEatingLogLiveData.value)) {
+            EatingLogHelper.LogTimeValidationStatus.SUCCESS -> Unit
+            EatingLogHelper.LogTimeValidationStatus.ERROR_TIME_TOO_EARLY -> {
+                val validationMessage =
+                        LogTimeValidationMessage(
+                                message = "New log time cannot be sooner than the previous log" +
+                                        " time")
+                logTimeValidationMessageLiveData.value = validationMessage
+                return
+            }
+        }
         updateCurrentEatingLog(logTime.timeInMillis)
     }
 
@@ -69,8 +93,15 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
 
     private fun updateCurrentEatingLog(logTime: Long) {
         val currentEatingLog = currentEatingLogLiveData.value
+        val logTimeValidationStatus =
+                eatingLogHelper.validateNewLogTime(logTime, currentEatingLog)
+        if (logTimeValidationStatus != EatingLogHelper.LogTimeValidationStatus.SUCCESS) {
+            throw IllegalStateException(
+                    "Attempt to update most recent eating log with an invalid logTime:" +
+                            " $logTimeValidationStatus")
+        }
         val newEatingLog: EatingLog
-        if (currentEatingLog == null || isEatingLogFinished(currentEatingLog)) {
+        if (currentEatingLog == null || eatingLogHelper.isEatingLogFinished(currentEatingLog)) {
             newEatingLog = EatingLog(startTime = logTime)
             repository.insertEatingLog(newEatingLog)
         } else {
@@ -78,10 +109,6 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
             repository.updateEatingLog(newEatingLog)
         }
         currentEatingLogLiveData.value = newEatingLog
-    }
-
-    private fun isEatingLogFinished(eatingLog: EatingLog): Boolean {
-        return eatingLog.startTime != 0L && eatingLog.endTime != 0L
     }
 
     /**

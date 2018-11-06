@@ -3,7 +3,7 @@ package com.example.mateusz.ifnotes.model
 import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 
-class EatingLogsStore() {
+class EatingLogsStore {
     private lateinit var eatingLogs: MutableList<EatingLog>
     val listSubject = BehaviorSubject.create<List<EatingLog>>()
 

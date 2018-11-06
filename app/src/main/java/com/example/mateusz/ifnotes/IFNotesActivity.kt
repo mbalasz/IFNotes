@@ -2,6 +2,7 @@ package com.example.mateusz.ifnotes
 
 import android.content.Intent
 import android.os.Bundle
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -48,6 +49,15 @@ class IFNotesActivity : AppCompatActivity(), DateTimeDialogFragment.DateTimeDial
             val manualLogDialogFragment = DateTimeDialogFragment()
             manualLogDialogFragment.show(supportFragmentManager, "manualLog")
         }
+        ifNotesViewModel.getLogTimeValidationMessageLiveData().observe(
+                this, Observer { validationMessage ->
+            val validationDialogBuilder = AlertDialog.Builder(this)
+            validationDialogBuilder
+                    .setMessage(validationMessage.message)
+                    .setCancelable(false)
+                    .setPositiveButton("OK") {_, _ -> }
+            validationDialogBuilder.create().show()
+        })
 
         history.setOnClickListener {
             startActivity(Intent(this, EatingLogsActivity::class.java))
