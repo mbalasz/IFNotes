@@ -15,8 +15,11 @@ class IFNotesActivity : AppCompatActivity(), DateTimeDialogFragment.DateTimeDial
         const val LOG_FIRST_MEAL_BUTTON_TEXT = "Log my first meal"
         const val LOG_LAST_MEAL_BUTTON_TEXT = "Log my last meal"
 
-        const val CURRENT_EATING_LOG_DISPLAY_FIRST_MEAL = "Time of first meal"
-        const val CURRENT_EATING_LOG_DISPLAY_LAST_MEAL = "Time of last meal"
+        const val TIME_OF_FIRST_MEAL_TEXT = "Time of first meal today"
+        const val TIME_OF_LAST_MEAL_TEXT = "Time of last meal today"
+
+        const val TIME_SINCE_FIRST_MEAL_TEXT = "Time since first meal"
+        const val TIME_SINCE_LAST_MEAL_TEXT = "Time since last meal"
     }
 
     val ifNotesViewModel: IFNotesViewModel by lazy {
@@ -32,13 +35,20 @@ class IFNotesActivity : AppCompatActivity(), DateTimeDialogFragment.DateTimeDial
             if (eatingLogDisplay == null) {
                 throw IllegalStateException("EatingLogDisplay cannot be null")
             }
-            val logStateText = when (eatingLogDisplay.logState) {
-                IFNotesViewModel.LogState.LOG_FIRST_MEAL ->
-                    CURRENT_EATING_LOG_DISPLAY_FIRST_MEAL
-                IFNotesViewModel.LogState.LOG_LAST_MEAL->
-                    CURRENT_EATING_LOG_DISPLAY_LAST_MEAL
+            var lastActivityLogText: String? = null
+            var timeSinceLastActivityLabelText: String? = null
+            when (eatingLogDisplay.logState) {
+                IFNotesViewModel.LogState.LOG_FIRST_MEAL -> {
+                    lastActivityLogText = TIME_OF_FIRST_MEAL_TEXT
+                    timeSinceLastActivityLabelText = TIME_SINCE_FIRST_MEAL_TEXT
+                }
+                IFNotesViewModel.LogState.LOG_LAST_MEAL-> {
+                    lastActivityLogText = TIME_OF_LAST_MEAL_TEXT
+                    timeSinceLastActivityLabelText = TIME_SINCE_LAST_MEAL_TEXT
+                }
             }
-            currentEatingLog.text = "$logStateText: ${eatingLogDisplay.logTime}"
+            lastActivityLog.text = "$lastActivityLogText: ${eatingLogDisplay.logTime}"
+            timeSinceLastActivityLabel.text = timeSinceLastActivityLabelText
         })
 
         ifNotesViewModel.timeSinceLastActivity.observe(this, Observer { time ->
