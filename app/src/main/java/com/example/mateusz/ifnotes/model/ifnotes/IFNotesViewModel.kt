@@ -1,6 +1,7 @@
 package com.example.mateusz.ifnotes.model.ifnotes
 
 import android.app.Application
+import android.graphics.Color
 import android.os.SystemClock
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -17,10 +18,16 @@ import java.util.Calendar
 import java.util.Locale
 
 class IFNotesViewModel(application: Application): AndroidViewModel(application) {
+    companion object {
+        private val DARK_GREEN = Color.parseColor("#a4c639")
+        private val DARK_RED = Color.parseColor("#8b0000")
+    }
     enum class LogState {
         LOG_FIRST_MEAL,
         LOG_LAST_MEAL
     }
+
+    data class TimeSinceLastActivityChronometerData(val baseTime: Long, val color: Int)
 
     data class LogTimeValidationMessage(val message: String)
 
@@ -43,9 +50,13 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
     val timeSinceLastActivity = Transformations.map(currentEatingLogLiveData) { eatingLog ->
         eatingLog?.let {
             if (eatingLogHelper.isEatingLogFinished(eatingLog)) {
-                getElapsedRealTimeSinceBaseInMillis(eatingLog.endTime)
+                TimeSinceLastActivityChronometerData(
+                        getElapsedRealTimeSinceBaseInMillis(eatingLog.endTime),
+                        DARK_GREEN)
             } else {
-                getElapsedRealTimeSinceBaseInMillis(eatingLog.startTime)
+                TimeSinceLastActivityChronometerData(
+                        getElapsedRealTimeSinceBaseInMillis(eatingLog.startTime),
+                        DARK_RED)
             }
         } ?: run { null }
     }

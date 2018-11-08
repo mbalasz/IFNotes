@@ -15,8 +15,8 @@ class IFNotesActivity : AppCompatActivity(), DateTimeDialogFragment.DateTimeDial
         const val LOG_FIRST_MEAL_BUTTON_TEXT = "Log my first meal"
         const val LOG_LAST_MEAL_BUTTON_TEXT = "Log my last meal"
 
-        const val TIME_OF_FIRST_MEAL_TEXT = "Time of first meal today"
-        const val TIME_OF_LAST_MEAL_TEXT = "Time of last meal today"
+        const val TIME_OF_FIRST_MEAL_TEXT = "You ate first meal at"
+        const val TIME_OF_LAST_MEAL_TEXT = "You ate last meal at"
 
         const val TIME_SINCE_FIRST_MEAL_TEXT = "Time since first meal"
         const val TIME_SINCE_LAST_MEAL_TEXT = "Time since last meal"
@@ -25,6 +25,7 @@ class IFNotesActivity : AppCompatActivity(), DateTimeDialogFragment.DateTimeDial
     val ifNotesViewModel: IFNotesViewModel by lazy {
         ViewModelProviders.of(this).get(IFNotesViewModel::class.java)
     }
+    private lateinit var lastActivityChronometerWrapper: LastActivityChronometerWrapper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -51,10 +52,13 @@ class IFNotesActivity : AppCompatActivity(), DateTimeDialogFragment.DateTimeDial
             timeSinceLastActivityLabel.text = timeSinceLastActivityLabelText
         })
 
-        ifNotesViewModel.timeSinceLastActivity.observe(this, Observer { time ->
-            if (time != null) {
-                timeSinceLastActivityChronometer.base = time
-                timeSinceLastActivityChronometer.start()
+        lastActivityChronometerWrapper =
+                LastActivityChronometerWrapper(timeSinceLastActivityChronometer)
+        ifNotesViewModel.timeSinceLastActivity.observe(this, Observer { data ->
+            if (data != null) {
+                lastActivityChronometerWrapper.setBase(data.baseTime)
+                lastActivityChronometerWrapper.setColor(data.color)
+                lastActivityChronometerWrapper.start()
             } else {
                 throw IllegalStateException("Time since last activity cannot be null")
             }
