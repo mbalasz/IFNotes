@@ -102,6 +102,12 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
                 logTimeValidationMessageLiveData.value = validationMessage
                 return
             }
+            EatingLogHelper.LogTimeValidationStatus.ERROR_TIME_IN_THE_FUTURE -> {
+                val validationMessage =
+                        LogTimeValidationMessage(message = "New log time cannot be in the future")
+                logTimeValidationMessageLiveData.value = validationMessage
+                return
+            }
         }
         updateCurrentEatingLog(logTime.timeInMillis)
     }

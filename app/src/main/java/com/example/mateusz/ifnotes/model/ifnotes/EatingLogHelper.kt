@@ -6,11 +6,14 @@ class EatingLogHelper {
 
     enum class LogTimeValidationStatus {
         SUCCESS,
-        ERROR_TIME_TOO_EARLY
-        //TODO: Add an error of time in the future
+        ERROR_TIME_TOO_EARLY,
+        ERROR_TIME_IN_THE_FUTURE
     }
 
     fun validateNewLogTime(logTime: Long, currentEatingLog: EatingLog?): LogTimeValidationStatus {
+        if (logTime > System.currentTimeMillis()) {
+            return LogTimeValidationStatus.ERROR_TIME_IN_THE_FUTURE
+        }
         if (currentEatingLog == null) {
             return LogTimeValidationStatus.SUCCESS
         }
