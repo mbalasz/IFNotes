@@ -39,11 +39,11 @@ class IFNotesActivity : AppCompatActivity(), DateTimeDialogFragment.DateTimeDial
             var lastActivityLogText: String? = null
             var timeSinceLastActivityLabelText: String? = null
             when (eatingLogDisplay.logState) {
-                IFNotesViewModel.LogState.LOG_FIRST_MEAL -> {
+                IFNotesViewModel.LogState.FIRST_MEAL -> {
                     lastActivityLogText = TIME_OF_FIRST_MEAL_TEXT
                     timeSinceLastActivityLabelText = TIME_SINCE_FIRST_MEAL_TEXT
                 }
-                IFNotesViewModel.LogState.LOG_LAST_MEAL-> {
+                IFNotesViewModel.LogState.LAST_MEAL-> {
                     lastActivityLogText = TIME_OF_LAST_MEAL_TEXT
                     timeSinceLastActivityLabelText = TIME_SINCE_LAST_MEAL_TEXT
                 }
@@ -67,9 +67,9 @@ class IFNotesActivity : AppCompatActivity(), DateTimeDialogFragment.DateTimeDial
         logActivityButton.text = LOG_FIRST_MEAL_BUTTON_TEXT
         ifNotesViewModel.logButtonState.observe(this, Observer { state ->
             when (state) {
-                IFNotesViewModel.LogState.LOG_FIRST_MEAL ->
+                IFNotesViewModel.LogState.FIRST_MEAL ->
                     logActivityButton.text = LOG_FIRST_MEAL_BUTTON_TEXT
-                IFNotesViewModel.LogState.LOG_LAST_MEAL ->
+                IFNotesViewModel.LogState.LAST_MEAL ->
                     logActivityButton.text = LOG_LAST_MEAL_BUTTON_TEXT
                 else -> throw IllegalStateException("Incorrect log button state")
             }

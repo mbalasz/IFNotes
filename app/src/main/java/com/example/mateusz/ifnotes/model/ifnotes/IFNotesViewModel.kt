@@ -21,10 +21,11 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
     companion object {
         private val DARK_GREEN = Color.parseColor("#a4c639")
         private val DARK_RED = Color.parseColor("#8b0000")
+        private val BLACK = Color.BLACK
     }
     enum class LogState {
-        LOG_FIRST_MEAL,
-        LOG_LAST_MEAL
+        FIRST_MEAL,
+        LAST_MEAL
     }
 
     data class TimeSinceLastActivityChronometerData(val baseTime: Long, val color: Int)
@@ -41,11 +42,11 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
     val logButtonState = Transformations.map(currentEatingLogLiveData) { eatingLog ->
         eatingLog?.let {
             if (eatingLogHelper.isEatingLogFinished(eatingLog)) {
-                LogState.LOG_FIRST_MEAL
+                LogState.FIRST_MEAL
             } else {
-                LogState.LOG_LAST_MEAL
+                LogState.LAST_MEAL
             }
-        } ?: run { LogState.LOG_FIRST_MEAL }
+        } ?: run { LogState.FIRST_MEAL }
     }
     val timeSinceLastActivity = Transformations.map(currentEatingLogLiveData) { eatingLog ->
         eatingLog?.let {
@@ -67,10 +68,10 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
                             SimpleDateFormat("dd/M/yyyy HH:mm:ss", Locale.ENGLISH)
                     if (eatingLogHelper.isEatingLogFinished(eatingLog)) {
                         EatingLogDisplay(
-                                LogState.LOG_LAST_MEAL, simpleDateFormat.format(eatingLog.endTime))
+                                LogState.LAST_MEAL, simpleDateFormat.format(eatingLog.endTime))
                     } else {
                         EatingLogDisplay(
-                                LogState.LOG_FIRST_MEAL,
+                                LogState.FIRST_MEAL,
                                 simpleDateFormat.format(eatingLog.startTime))
                     }
                 } ?: run { null }
