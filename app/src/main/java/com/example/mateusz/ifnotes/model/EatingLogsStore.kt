@@ -5,7 +5,7 @@ import io.reactivex.subjects.BehaviorSubject
 
 class EatingLogsStore {
     private lateinit var eatingLogs: MutableList<EatingLog>
-    val listSubject = BehaviorSubject.create<List<EatingLog>>()
+    private val listSubject = BehaviorSubject.create<List<EatingLog>>()
 
     fun setEatingLogs(eatingLogs: List<EatingLog>) {
         this.eatingLogs = eatingLogs.toMutableList()
