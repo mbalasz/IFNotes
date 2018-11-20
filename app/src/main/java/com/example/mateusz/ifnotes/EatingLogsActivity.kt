@@ -1,5 +1,6 @@
 package com.example.mateusz.ifnotes
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -11,6 +12,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.mateusz.ifnotes.model.eatinglogs.EatingLogsViewModel
 import kotlinx.android.synthetic.main.activity_eating_logs.toolbar
 import kotlinx.android.synthetic.main.content_eating_logs.eatingLogsRecyclerView
+import java.io.BufferedReader
+import java.io.File
+import java.io.FileReader
+import java.io.InputStreamReader
 
 class EatingLogsActivity : AppCompatActivity() {
     val eatingLogsViewModel: EatingLogsViewModel by lazy {
@@ -26,6 +31,12 @@ class EatingLogsActivity : AppCompatActivity() {
         eatingLogsRecyclerView.adapter = adapter
         eatingLogsRecyclerView.layoutManager = LinearLayoutManager(this)
 
+        eatingLogsViewModel.startActivityForResult.observe(this, Observer {
+            it.getContentIfNotHandled()?.let {
+                startActivityForResult(it.intent, it.requestCode)
+            }
+        })
+
         setSupportActionBar(toolbar)
     }
 
@@ -37,11 +48,15 @@ class EatingLogsActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.menu_item_import_logs -> {
-                Toast.makeText(this, "Item clicked", Toast.LENGTH_LONG).show()
+                eatingLogsViewModel.onImportLogs()
                 true
             } else -> {
                 super.onOptionsItemSelected(item)
             }
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        eatingLogsViewModel.onActivityResult(requestCode, resultCode, data)
     }
 }
