@@ -69,7 +69,13 @@ class EatingLogsViewModel(application: Application): AndroidViewModel(applicatio
         if (requestCode == CHOOSE_CSV_LOGS_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 data?.let {
-                    csvLogsManager.getEatingLogsFromCsv(it.data)
+                    val eatingLogs = csvLogsManager.getEatingLogsFromCsv(it.data)
+                    if (!eatingLogs.isEmpty()) {
+                        repository.deleteAll()
+                        for (eatingLog in eatingLogs) {
+                            repository.insertEatingLog(eatingLog)
+                        }
+                    }
                 }
             }
         }
