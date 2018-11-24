@@ -46,6 +46,7 @@ class Repository(application: Application) {
     }
 
     fun deleteAll() {
+        eatingLogsStore.deleteAll()
         async(CommonPool) {
             iFNotesDatabase.eatingLogDao().deleteAll()
         }

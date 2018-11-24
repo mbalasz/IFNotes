@@ -22,6 +22,14 @@ class EatingLogsStore {
         }
     }
 
+    fun deleteAll() {
+        if (eatingLogs.isEmpty()) {
+            return
+        }
+        eatingLogs.clear()
+        publish()
+    }
+
     fun insertEatingLog(eatingLog: EatingLog) {
         eatingLogs.add(eatingLog)
         publish()

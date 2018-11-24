@@ -21,14 +21,26 @@ class EatingLogsViewModel(application: Application): AndroidViewModel(applicatio
     private val csvLogsManager = CSVLogsManager(application)
     lateinit var eatingLogs: List<EatingLog>
     private val _startActivityForResult = MutableLiveData<Event<ActivityForResultsData>>()
+    private val _refreshData = MutableLiveData<Event<Unit>>()
+    private var eatingLogItemRemovedFlag = false
 
     val startActivityForResult: LiveData<Event<ActivityForResultsData>>
         get() = _startActivityForResult
+    val refreshData: LiveData<Event<Unit>>
+        get() = _refreshData
 
     init {
         repository.getEatingLogsObservable().subscribe {
             eatingLogs = it.sortedWith(
                     Comparator {a, b -> compareValuesBy(b, a, {it.startTime}, {it.endTime})})
+            // A fragile hack to make sure that once we remove an item as a result of
+            // calling onRemoveEatingLogItemClicked, we don't refresh data, because we want to show
+            // the animation of the item being removed. This is prone to race conditions though.
+            if (eatingLogItemRemovedFlag) {
+                eatingLogItemRemovedFlag = false
+            } else {
+                _refreshData.value = Event(Unit)
+            }
         }
     }
 
@@ -40,6 +52,7 @@ class EatingLogsViewModel(application: Application): AndroidViewModel(applicatio
         if (position < 0 || eatingLogs.size - 1 < position) {
             return
         }
+        eatingLogItemRemovedFlag = true
         repository.deleteEatingLog(eatingLogs[position])
         eatingLogsItemView.notifyItemRemoved()
     }

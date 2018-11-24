@@ -37,6 +37,12 @@ class EatingLogsActivity : AppCompatActivity() {
             }
         })
 
+        eatingLogsViewModel.refreshData.observe(this, Observer {
+            it.getContentIfNotHandled()?.let {
+                adapter.notifyDataSetChanged()
+            }
+        })
+
         setSupportActionBar(toolbar)
     }
 
