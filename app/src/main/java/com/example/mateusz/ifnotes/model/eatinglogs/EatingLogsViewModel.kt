@@ -39,7 +39,7 @@ class EatingLogsViewModel(application: Application): AndroidViewModel(applicatio
             if (eatingLogItemRemovedFlag) {
                 eatingLogItemRemovedFlag = false
             } else {
-                _refreshData.value = Event(Unit)
+                _refreshData.postValue(Event(Unit))
             }
         }
     }
