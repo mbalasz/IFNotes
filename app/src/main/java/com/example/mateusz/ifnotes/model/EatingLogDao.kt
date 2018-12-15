@@ -27,5 +27,5 @@ interface EatingLogDao {
     fun getMostRecentEatingLog(): Flowable<EatingLog>
 
     @Query("SELECT * FROM eatingLog")
-    fun getEatingLogs(): List<EatingLog>
+    fun getEatingLogs(): Flowable<List<EatingLog>>
 }

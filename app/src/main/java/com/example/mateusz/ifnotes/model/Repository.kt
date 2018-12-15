@@ -4,21 +4,14 @@ import android.app.Application
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
 
 class Repository(application: Application) {
     val iFNotesDatabase: IFNotesDatabase = IFNotesDatabase.getDatabase(application)
-    private val eatingLogsStore = EatingLogsStore()
 
-    init {
-        async(CommonPool) {
-            eatingLogsStore.setEatingLogs(
-                    iFNotesDatabase.eatingLogDao().getEatingLogs().toMutableList())
-        }
-    }
-
-    fun getEatingLogsObservable(): Observable<List<EatingLog>> {
-        return eatingLogsStore.observe()
+    fun getEatingLogsObservable(): Flowable<List<EatingLog>> {
+        return iFNotesDatabase.eatingLogDao().getEatingLogs()
     }
 
     fun updateEatingLog(eatingLog: EatingLog) {
@@ -32,22 +25,19 @@ class Repository(application: Application) {
     }
 
     fun deleteEatingLog(eatingLog: EatingLog) {
-        eatingLogsStore.deleteEatingLog(eatingLog)
         async(CommonPool) {
             iFNotesDatabase.eatingLogDao().delete(eatingLog)
         }
     }
 
     fun insertEatingLog(eatingLog: EatingLog) {
-        eatingLogsStore.insertEatingLog(eatingLog)
         async(CommonPool) {
             iFNotesDatabase.eatingLogDao().insert(eatingLog)
         }
     }
 
-    fun deleteAll() {
-        eatingLogsStore.deleteAll()
-        async(CommonPool) {
+    fun deleteAll(): Deferred<Unit> {
+        return async(CommonPool) {
             iFNotesDatabase.eatingLogDao().deleteAll()
         }
     }
