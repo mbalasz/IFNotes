@@ -22,6 +22,10 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
         private val DARK_GREEN = Color.parseColor("#a4c639")
         private val DARK_RED = Color.parseColor("#8b0000")
         private val BLACK = Color.BLACK
+
+        const val SHORT_TIME_MS = 900_000L
+        const val MID_TIME_MS = 1_800_000L
+        const val LONG_TIME_MS = 3_600_000L
     }
     enum class LogState {
         FIRST_MEAL,
@@ -103,8 +107,35 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
                 logTime.get(Calendar.DAY_OF_MONTH),
                 hour,
                 minute)
+
+        maybeUpdateCurrentEatingLog(logTime.timeInMillis)
+    }
+
+    fun onLogButtonClicked() {
+        updateCurrentEatingLog(getCurrentCalendarTime())
+    }
+
+    fun onLogShortTimeAgoClicked() {
+        maybeUpdateCurrentEatingLog(getCurrentCalendarTime() - SHORT_TIME_MS)
+    }
+
+    fun onLogMidTimeAgoClicked() {
+        maybeUpdateCurrentEatingLog(getCurrentCalendarTime() - MID_TIME_MS)
+    }
+
+    fun onLogLongTimeAgoClicked() {
+        maybeUpdateCurrentEatingLog(getCurrentCalendarTime() - LONG_TIME_MS)
+    }
+
+    fun maybeUpdateCurrentEatingLog(newLogTime: Long) {
+        if (validateNewLogTime(newLogTime)) {
+            updateCurrentEatingLog(newLogTime)
+        }
+    }
+
+    fun validateNewLogTime(logTime: Long): Boolean {
         when (eatingLogHelper.validateNewLogTime(
-                logTime.timeInMillis, currentEatingLogLiveData.value)) {
+                logTime, currentEatingLogLiveData.value)) {
             EatingLogHelper.LogTimeValidationStatus.SUCCESS -> Unit
             EatingLogHelper.LogTimeValidationStatus.ERROR_TIME_TOO_EARLY -> {
                 val validationMessage =
@@ -112,20 +143,16 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
                                 message = "New log time cannot be sooner than the previous log" +
                                         " time")
                 logTimeValidationMessageLiveData.value = validationMessage
-                return
+                return false
             }
             EatingLogHelper.LogTimeValidationStatus.ERROR_TIME_IN_THE_FUTURE -> {
                 val validationMessage =
                         LogTimeValidationMessage(message = "New log time cannot be in the future")
                 logTimeValidationMessageLiveData.value = validationMessage
-                return
+                return false
             }
         }
-        updateCurrentEatingLog(logTime.timeInMillis)
-    }
-
-    fun onLogButtonClicked() {
-        updateCurrentEatingLog(getCurrentCalendarTime())
+        return true
     }
 
     private fun updateCurrentEatingLog(logTime: Long) {

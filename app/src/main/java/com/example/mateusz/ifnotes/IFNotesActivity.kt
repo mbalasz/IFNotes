@@ -8,8 +8,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.example.mateusz.ifnotes.model.ifnotes.IFNotesViewModel
+import com.example.mateusz.ifnotes.model.ifnotes.IFNotesViewModel.Companion.LONG_TIME_MS
+import com.example.mateusz.ifnotes.model.ifnotes.IFNotesViewModel.Companion.MID_TIME_MS
+import com.example.mateusz.ifnotes.model.ifnotes.IFNotesViewModel.Companion.SHORT_TIME_MS
 import kotlinx.android.synthetic.main.activity_ifnotes.*
 import java.lang.IllegalStateException
+import java.util.concurrent.TimeUnit
 
 class IFNotesActivity : AppCompatActivity(), DateTimeDialogFragment.DateTimeDialogListener{
     companion object {
@@ -81,6 +85,21 @@ class IFNotesActivity : AppCompatActivity(), DateTimeDialogFragment.DateTimeDial
             val manualLogDialogFragment = DateTimeDialogFragment()
             manualLogDialogFragment.show(supportFragmentManager, "manualLog")
         }
+
+        logShortTimeAgo.text = "${TimeUnit.MILLISECONDS.toMinutes(SHORT_TIME_MS)} min ago"
+        logShortTimeAgo.setOnClickListener {
+            ifNotesViewModel.onLogShortTimeAgoClicked()
+        }
+        logMidTimeAgo.text = "${TimeUnit.MILLISECONDS.toMinutes(MID_TIME_MS)} min ago"
+        logMidTimeAgo.setOnClickListener {
+            ifNotesViewModel.onLogMidTimeAgoClicked()
+        }
+        logLongTimeAgo.text = "${TimeUnit.MILLISECONDS.toMinutes(LONG_TIME_MS)} min ago"
+        logLongTimeAgo.setOnClickListener {
+            ifNotesViewModel.onLogLongTimeAgoClicked()
+        }
+
+
         ifNotesViewModel.getLogTimeValidationMessageLiveData().observe(
                 this, Observer { validationMessage ->
             val validationDialogBuilder = AlertDialog.Builder(this)

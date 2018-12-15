@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -12,10 +11,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.mateusz.ifnotes.model.eatinglogs.EatingLogsViewModel
 import kotlinx.android.synthetic.main.activity_eating_logs.toolbar
 import kotlinx.android.synthetic.main.content_eating_logs.eatingLogsRecyclerView
-import java.io.BufferedReader
-import java.io.File
-import java.io.FileReader
-import java.io.InputStreamReader
 
 class EatingLogsActivity : AppCompatActivity() {
     val eatingLogsViewModel: EatingLogsViewModel by lazy {
