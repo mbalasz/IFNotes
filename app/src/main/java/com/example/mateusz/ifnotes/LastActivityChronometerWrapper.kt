@@ -22,6 +22,11 @@ class LastActivityChronometerWrapper(private val delegate: Chronometer) {
         delegate.setTextColor(color)
     }
 
+    fun reset() {
+        delegate.stop()
+        delegate.base = SystemClock.elapsedRealtime()
+    }
+
     fun getFormattedText(elapsedTime: Long): String {
         val hour = elapsedTime / 3600000
         val minute = elapsedTime % 3600000 / 60000

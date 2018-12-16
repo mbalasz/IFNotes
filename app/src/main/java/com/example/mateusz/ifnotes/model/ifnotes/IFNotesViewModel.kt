@@ -29,7 +29,8 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
     }
     enum class LogState {
         FIRST_MEAL,
-        LAST_MEAL
+        LAST_MEAL,
+        NO_CURRENT_LOG
     }
 
     data class TimeSinceLastActivityChronometerData(val baseTime: Long, val color: Int)
@@ -78,7 +79,7 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
                                 LogState.FIRST_MEAL,
                                 simpleDateFormat.format(eatingLog.startTime))
                     }
-                } ?: run { null }
+                } ?: run { EatingLogDisplay(LogState.NO_CURRENT_LOG, "") }
     }
 
     init {
@@ -88,8 +89,9 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
             mostRecentEatingLogFlowable
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe {
-                        if (currentEatingLogLiveData.value != it) {
-                            currentEatingLogLiveData.value = it
+                        val eatingLog = it.orNull()
+                        if (currentEatingLogLiveData.value != eatingLog) {
+                            currentEatingLogLiveData.value = eatingLog
                         }
                     }
         }

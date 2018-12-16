@@ -1,8 +1,8 @@
 package com.example.mateusz.ifnotes.model
 
 import android.app.Application
+import com.google.common.base.Optional
 import io.reactivex.Flowable
-import io.reactivex.Observable
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
@@ -20,8 +20,14 @@ class Repository(application: Application) {
         }
     }
 
-    fun getMostRecentEatingLog(): Flowable<EatingLog> {
-        return iFNotesDatabase.eatingLogDao().getMostRecentEatingLog()
+    fun getMostRecentEatingLog(): Flowable<Optional<EatingLog>> {
+        return iFNotesDatabase.eatingLogDao().getMostRecentEatingLog().map {list ->
+            if (list.isNotEmpty()) {
+                Optional.of(list[0])
+            } else {
+                Optional.absent()
+            }
+        }
     }
 
     fun deleteEatingLog(eatingLog: EatingLog) {

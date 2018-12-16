@@ -1,8 +1,8 @@
 package com.example.mateusz.ifnotes
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
-import android.view.Menu
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
@@ -20,11 +20,14 @@ class IFNotesActivity : AppCompatActivity(), DateTimeDialogFragment.DateTimeDial
         const val LOG_FIRST_MEAL_BUTTON_TEXT = "Log my first meal"
         const val LOG_LAST_MEAL_BUTTON_TEXT = "Log my last meal"
 
-        const val TIME_OF_FIRST_MEAL_TEXT = "You ate first meal at"
-        const val TIME_OF_LAST_MEAL_TEXT = "You ate last meal at"
+        const val LAST_ACTIVITY_FIRST_MEAL_TEXT = "You ate first meal at"
+        const val LAST_ACTIVITY_LAST_MEAL_TEXT = "You ate last meal at"
 
         const val TIME_SINCE_FIRST_MEAL_TEXT = "Time since first meal"
         const val TIME_SINCE_LAST_MEAL_TEXT = "Time since last meal"
+
+        const val LAST_ACTIVITY_NO_CURRENT_LOG_TEXT =
+                "No log to display. Log your activity with the buttons below."
     }
 
     val ifNotesViewModel: IFNotesViewModel by lazy {
@@ -36,6 +39,10 @@ class IFNotesActivity : AppCompatActivity(), DateTimeDialogFragment.DateTimeDial
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ifnotes)
 
+        lastActivityChronometerWrapper =
+                LastActivityChronometerWrapper(timeSinceLastActivityChronometer)
+        initUi()
+
         ifNotesViewModel.currentEatingLogDisplayLiveData.observe(
                 this, Observer { eatingLogDisplay ->
             if (eatingLogDisplay == null) {
@@ -45,27 +52,29 @@ class IFNotesActivity : AppCompatActivity(), DateTimeDialogFragment.DateTimeDial
             var timeSinceLastActivityLabelText: String? = null
             when (eatingLogDisplay.logState) {
                 IFNotesViewModel.LogState.FIRST_MEAL -> {
-                    lastActivityLogText = TIME_OF_FIRST_MEAL_TEXT
+                    lastActivityLogText = "$LAST_ACTIVITY_FIRST_MEAL_TEXT: ${eatingLogDisplay.logTime}"
                     timeSinceLastActivityLabelText = TIME_SINCE_FIRST_MEAL_TEXT
                 }
                 IFNotesViewModel.LogState.LAST_MEAL-> {
-                    lastActivityLogText = TIME_OF_LAST_MEAL_TEXT
+                    lastActivityLogText = "$LAST_ACTIVITY_LAST_MEAL_TEXT: ${eatingLogDisplay.logTime}"
                     timeSinceLastActivityLabelText = TIME_SINCE_LAST_MEAL_TEXT
                 }
+                IFNotesViewModel.LogState.NO_CURRENT_LOG -> {
+                    lastActivityLogText = LAST_ACTIVITY_NO_CURRENT_LOG_TEXT
+                    timeSinceLastActivityLabelText = ""
+                }
             }
-            lastActivityLog.text = "$lastActivityLogText: ${eatingLogDisplay.logTime}"
+            lastActivityLog.text = lastActivityLogText
             timeSinceLastActivityLabel.text = timeSinceLastActivityLabelText
         })
 
-        lastActivityChronometerWrapper =
-                LastActivityChronometerWrapper(timeSinceLastActivityChronometer)
         ifNotesViewModel.timeSinceLastActivity.observe(this, Observer { data ->
             if (data != null) {
                 lastActivityChronometerWrapper.setBase(data.baseTime)
                 lastActivityChronometerWrapper.setColor(data.color)
                 lastActivityChronometerWrapper.start()
             } else {
-                throw IllegalStateException("Time since last activity cannot be null")
+                resetChronometer()
             }
         })
 
@@ -113,6 +122,17 @@ class IFNotesActivity : AppCompatActivity(), DateTimeDialogFragment.DateTimeDial
         history.setOnClickListener {
             startActivity(Intent(this, EatingLogsActivity::class.java))
         }
+    }
+
+    private fun initUi() {
+        lastActivityLog.text = LAST_ACTIVITY_NO_CURRENT_LOG_TEXT
+        timeSinceLastActivityLabel.text = ""
+        resetChronometer()
+    }
+
+    private fun resetChronometer() {
+        lastActivityChronometerWrapper.reset()
+        lastActivityChronometerWrapper.setColor(Color.BLACK)
     }
 
     override fun onTimeSaved(hour: Int, minute: Int) {

@@ -19,7 +19,7 @@ class EatingLogsViewModel(application: Application): AndroidViewModel(applicatio
 
     private val repository = Repository(application)
     private val csvLogsManager = CSVLogsManager(application)
-    lateinit var eatingLogs: List<EatingLog>
+    var eatingLogs: List<EatingLog> = emptyList()
     private val _startActivityForResult = MutableLiveData<Event<ActivityForResultsData>>()
     private val _refreshData = MutableLiveData<Event<Unit>>()
     private var eatingLogItemRemovedFlag = false
