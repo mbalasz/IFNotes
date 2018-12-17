@@ -4,10 +4,10 @@
              android:layout_width="wrap_content"
              android:layout_height="wrap_content">
     <ImageButton
-        android:id="@+id/item_row_remove_button"
+        android:id="@+id/item_row_edit_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:src="@drawable/ic_delete"
+        android:src="@drawable/ic_edit"
         android:background="@android:color/transparent"
         android:padding="6dp"/>
 </FrameLayout>

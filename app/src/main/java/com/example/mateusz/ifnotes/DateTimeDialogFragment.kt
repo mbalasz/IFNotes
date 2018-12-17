@@ -37,6 +37,7 @@ class DateTimeDialogFragment : DialogFragment() {
         return activity?.let {
             val alertDialogBuilder = AlertDialog.Builder(it)
             val dialogView = it.layoutInflater.inflate(R.layout.dialog_date_time, null)
+            dialogView.timePicker.setIs24HourView(true)
             alertDialogBuilder
                     .setMessage("Manual log")
                     .setView(dialogView)

@@ -6,13 +6,16 @@ import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.example.mateusz.ifnotes.EditEatingLogActivity
 import com.example.mateusz.ifnotes.lib.Event
 import com.example.mateusz.ifnotes.model.EatingLog
 import com.example.mateusz.ifnotes.model.Repository
+import com.example.mateusz.ifnotes.model.editlog.EditEatingLogViewModel
 
 class EatingLogsViewModel(application: Application): AndroidViewModel(application) {
     companion object {
         const val CHOOSE_CSV_LOGS_REQUEST_CODE = 1
+        const val EDIT_EATING_LOG_REQUEST_CODE = 2
     }
 
     data class ActivityForResultsData(val intent: Intent, val requestCode: Int)
@@ -46,6 +49,18 @@ class EatingLogsViewModel(application: Application): AndroidViewModel(applicatio
 
     fun onEatingLogItemViewRecycled(eatingLogsItemView: EatingLogsItemView) {
         eatingLogsItemView.clearView()
+    }
+
+    fun onEditEatingLogItemClicked(eatingLogsItemView: EatingLogsItemView, position: Int) {
+        if (position < 0 || eatingLogs.size - 1 < position) {
+            return
+        }
+        val eatingLog = eatingLogs[position]
+        val intent = Intent(getApplication(), EditEatingLogActivity::class.java).apply {
+            putExtra(EditEatingLogViewModel.EXTRA_LOG_TIME_ID, eatingLog.id)
+        }
+        _startActivityForResult.value =
+                Event(ActivityForResultsData(intent, EDIT_EATING_LOG_REQUEST_CODE))
     }
 
     fun onRemoveEatingLogItemClicked(eatingLogsItemView: EatingLogsItemView, position: Int) {

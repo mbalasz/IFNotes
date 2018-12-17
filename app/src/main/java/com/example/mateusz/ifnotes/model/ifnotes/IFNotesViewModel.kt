@@ -7,6 +7,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
+import com.example.mateusz.ifnotes.lib.DateTimeUtils
+import com.example.mateusz.ifnotes.lib.EatingLogHelper
 import com.example.mateusz.ifnotes.model.EatingLog
 import com.example.mateusz.ifnotes.model.Repository
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -14,7 +16,6 @@ import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import java.lang.IllegalStateException
 import java.text.SimpleDateFormat
-import java.util.Calendar
 import java.util.Locale
 
 class IFNotesViewModel(application: Application): AndroidViewModel(application) {
@@ -102,15 +103,7 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
     }
 
     fun onNewManualLog(hour: Int, minute: Int) {
-        val logTime = Calendar.getInstance()
-        logTime.set(
-                logTime.get(Calendar.YEAR),
-                logTime.get(Calendar.MONTH),
-                logTime.get(Calendar.DAY_OF_MONTH),
-                hour,
-                minute)
-
-        maybeUpdateCurrentEatingLog(logTime.timeInMillis)
+        maybeUpdateCurrentEatingLog(DateTimeUtils.timeToMillis(hour, minute))
     }
 
     fun onLogButtonClicked() {

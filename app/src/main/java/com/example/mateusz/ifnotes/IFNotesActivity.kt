@@ -15,7 +15,7 @@ import kotlinx.android.synthetic.main.activity_ifnotes.*
 import java.lang.IllegalStateException
 import java.util.concurrent.TimeUnit
 
-class IFNotesActivity : AppCompatActivity(), DateTimeDialogFragment.DateTimeDialogListener{
+class IFNotesActivity : AppCompatActivity(), DateTimeDialogFragment.DateTimeDialogListener {
     companion object {
         const val LOG_FIRST_MEAL_BUTTON_TEXT = "Log my first meal"
         const val LOG_LAST_MEAL_BUTTON_TEXT = "Log my last meal"

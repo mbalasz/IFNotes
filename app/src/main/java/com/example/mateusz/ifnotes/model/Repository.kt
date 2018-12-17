@@ -1,6 +1,7 @@
 package com.example.mateusz.ifnotes.model
 
 import android.app.Application
+import com.example.mateusz.ifnotes.lib.EatingLogHelper
 import com.google.common.base.Optional
 import io.reactivex.Flowable
 import kotlinx.coroutines.experimental.CommonPool
@@ -8,7 +9,8 @@ import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
 
 class Repository(application: Application) {
-    val iFNotesDatabase: IFNotesDatabase = IFNotesDatabase.getDatabase(application)
+    private val iFNotesDatabase: IFNotesDatabase = IFNotesDatabase.getDatabase(application)
+    private val eatingLogHelper = EatingLogHelper()
 
     fun getEatingLogsObservable(): Flowable<List<EatingLog>> {
         return iFNotesDatabase.eatingLogDao().getEatingLogs()
@@ -18,6 +20,10 @@ class Repository(application: Application) {
         async(CommonPool) {
             iFNotesDatabase.eatingLogDao().update(eatingLog)
         }
+    }
+
+    fun getEatingLog(id: Int): EatingLog {
+        return iFNotesDatabase.eatingLogDao().getEatingLog(id)
     }
 
     fun getMostRecentEatingLog(): Flowable<Optional<EatingLog>> {

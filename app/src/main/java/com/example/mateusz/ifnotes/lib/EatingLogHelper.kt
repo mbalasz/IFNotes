@@ -1,4 +1,4 @@
-package com.example.mateusz.ifnotes.model.ifnotes
+package com.example.mateusz.ifnotes.lib
 
 import com.example.mateusz.ifnotes.model.EatingLog
 

@@ -5,47 +5,47 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal">
 
-
-    <RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        xmlns:tools="http://schemas.android.com/tools">
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:paddingBottom="16dp"
             android:paddingTop="16dp"
-            android:paddingStart="16dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingEnd="16dp">
+            android:paddingStart="8dp"
+            android:paddingLeft="8dp"
+            android:paddingRight="8dp"
+            android:paddingEnd="8dp">
 
             <TextView
                 android:id="@+id/eating_log_start_time"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                tools:text="name">
+                android:layout_height="wrap_content">
             </TextView>
 
             <TextView
                 android:id="@+id/eating_log_end_time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingLeft="32dp"
-                tools:text="name">
+                android:paddingLeft="16dp">
             </TextView>
 
         </LinearLayout>
-    </RelativeLayout>
 
-    <include layout="@layout/remove_button"
-             android:layout_width="wrap_content"
-             android:layout_height="wrap_content"
-             android:layout_centerVertical="true"
-             android:layout_alignParentEnd="true"
-             android:layout_alignParentRight="true"/>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true">
+
+        <include
+            layout="@layout/edit_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <include layout="@layout/remove_button"
+                 android:layout_width="wrap_content"
+                 android:layout_height="wrap_content"/>
+    </LinearLayout>
 
 </RelativeLayout>

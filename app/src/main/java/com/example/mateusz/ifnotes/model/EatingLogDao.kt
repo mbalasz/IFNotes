@@ -28,4 +28,7 @@ interface EatingLogDao {
 
     @Query("SELECT * FROM eatingLog")
     fun getEatingLogs(): Flowable<List<EatingLog>>
+
+    @Query("SELECT * FROM eatingLog WHERE id = :id")
+    fun getEatingLog(id: Int): EatingLog
 }

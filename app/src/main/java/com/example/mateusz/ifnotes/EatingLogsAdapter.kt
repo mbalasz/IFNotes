@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.model.eatinglogs.EatingLogsViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -19,20 +20,23 @@ class EatingLogsAdapter(val context: Context, private val eatingLogsViewModel: E
         val startTimeTextView = view.findViewById(R.id.eating_log_start_time) as TextView
         val endTimeTextView = view.findViewById(R.id.eating_log_end_time) as TextView
         val removeButton = view.findViewById(R.id.item_row_remove_button) as ImageButton
-        val simpleDateFormat = SimpleDateFormat("dd/M/yyyy HH:mm:ss", Locale.ENGLISH)
+        val editButton = view.findViewById(R.id.item_row_edit_button) as ImageButton
 
         init {
             removeButton.setOnClickListener {
                 eatingLogsViewModel.onRemoveEatingLogItemClicked(this, adapterPosition)
             }
+            editButton.setOnClickListener {
+                eatingLogsViewModel.onEditEatingLogItemClicked(this, adapterPosition)
+            }
         }
 
         override fun setStartTme(startTime: Long) {
-            startTimeTextView.text = simpleDateFormat.format(startTime)
+            startTimeTextView.text = DateTimeUtils.toDateTime(startTime)
         }
 
         override fun setEndTime(endTime: Long) {
-            endTimeTextView.text = simpleDateFormat.format(endTime)
+            endTimeTextView.text = DateTimeUtils.toDateTime(endTime)
         }
 
         override fun clearView() {
