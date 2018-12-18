@@ -1,7 +1,7 @@
 package com.example.mateusz.ifnotes.model
 
 import android.app.Application
-import com.example.mateusz.ifnotes.lib.EatingLogHelper
+import com.example.mateusz.ifnotes.lib.EatingLogValidator
 import com.google.common.base.Optional
 import io.reactivex.Flowable
 import kotlinx.coroutines.experimental.CommonPool
@@ -10,15 +10,35 @@ import kotlinx.coroutines.experimental.async
 
 class Repository(application: Application) {
     private val iFNotesDatabase: IFNotesDatabase = IFNotesDatabase.getDatabase(application)
-    private val eatingLogHelper = EatingLogHelper()
+    private val eatingLogValidator = EatingLogValidator()
 
     fun getEatingLogsObservable(): Flowable<List<EatingLog>> {
-        return iFNotesDatabase.eatingLogDao().getEatingLogs()
+        return iFNotesDatabase.eatingLogDao().getEatingLogsFlowable()
     }
 
-    fun updateEatingLog(eatingLog: EatingLog) {
+    fun updateEatingLog(eatingLog: EatingLog):
+            Deferred<EatingLogValidator.EatingLogValidationStatus> {
+        return async(CommonPool) {
+            val status = validateUpdate(eatingLog)
+            if (status == EatingLogValidator.EatingLogValidationStatus.SUCCESS) {
+                iFNotesDatabase.eatingLogDao().update(eatingLog)
+            }
+            status
+        }
+    }
+
+    private fun validateUpdate(eatingLog: EatingLog): EatingLogValidator.EatingLogValidationStatus {
+        val mutableLogs = iFNotesDatabase.eatingLogDao().getEatingLogs().toMutableList()
+        val oldLog = mutableLogs.find { it.id == eatingLog.id }
+        oldLog?.let {
+            mutableLogs.remove(it)
+        }
+        return eatingLogValidator.validateNewEatingLog(eatingLog, mutableLogs)
+    }
+
+    fun insertEatingLog(eatingLog: EatingLog) {
         async(CommonPool) {
-            iFNotesDatabase.eatingLogDao().update(eatingLog)
+            iFNotesDatabase.eatingLogDao().insert(eatingLog)
         }
     }
 
@@ -39,12 +59,6 @@ class Repository(application: Application) {
     fun deleteEatingLog(eatingLog: EatingLog) {
         async(CommonPool) {
             iFNotesDatabase.eatingLogDao().delete(eatingLog)
-        }
-    }
-
-    fun insertEatingLog(eatingLog: EatingLog) {
-        async(CommonPool) {
-            iFNotesDatabase.eatingLogDao().insert(eatingLog)
         }
     }
 

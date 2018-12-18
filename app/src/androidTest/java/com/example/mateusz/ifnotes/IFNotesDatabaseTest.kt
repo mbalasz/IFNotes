@@ -7,7 +7,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.mateusz.ifnotes.model.EatingLog
 import com.example.mateusz.ifnotes.model.EatingLogDao
 import com.example.mateusz.ifnotes.model.IFNotesDatabase
-import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.hasItems
 import org.junit.Assert.assertThat
 import org.junit.Before
@@ -37,7 +36,7 @@ class IFNotesDatabaseTest {
         eatingLogDao.insert(eatingLog1)
         eatingLogDao.insert(eatingLog2)
 
-        val eatingLogs = eatingLogDao.getEatingLogs()
+        val eatingLogs = eatingLogDao.getEatingLogsFlowable()
 
         assertThat(eatingLogs.map {eatingLog -> eatingLog.startTime}, hasItems(10L, 11L))
     }
