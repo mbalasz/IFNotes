@@ -36,14 +36,7 @@ class EatingLogsViewModel(application: Application): AndroidViewModel(applicatio
         repository.getEatingLogsObservable().subscribe {
             eatingLogs = it.sortedWith(
                     Comparator {a, b -> compareValuesBy(b, a, {it.startTime}, {it.endTime})})
-            // A fragile hack to make sure that once we remove an item as a result of
-            // calling onRemoveEatingLogItemClicked, we don't refresh data, because we want to show
-            // the animation of the item being removed. This is prone to race conditions though.
-            if (eatingLogItemRemovedFlag) {
-                eatingLogItemRemovedFlag = false
-            } else {
-                _refreshData.postValue(Event(Unit))
-            }
+            _refreshData.postValue(Event(Unit))
         }
     }
 
@@ -69,7 +62,6 @@ class EatingLogsViewModel(application: Application): AndroidViewModel(applicatio
         }
         eatingLogItemRemovedFlag = true
         repository.deleteEatingLog(eatingLogs[position])
-        eatingLogsItemView.notifyItemRemoved()
     }
 
     fun getEatingLogsCount(): Int {
