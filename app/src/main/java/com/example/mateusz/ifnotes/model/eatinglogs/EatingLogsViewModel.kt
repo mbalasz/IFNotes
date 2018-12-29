@@ -77,6 +77,9 @@ class EatingLogsViewModel(application: Application): AndroidViewModel(applicatio
     }
 
     fun onBindEatingLogsItemView(eatingLogsItemView: EatingLogsItemView, position: Int) {
+        if (position < 0 || eatingLogs.size - 1 < position) {
+            return
+        }
         val eatingLog = eatingLogs[position]
         eatingLogsItemView.setStartTme(eatingLog.startTime)
         if (eatingLog.endTime > 0) {
