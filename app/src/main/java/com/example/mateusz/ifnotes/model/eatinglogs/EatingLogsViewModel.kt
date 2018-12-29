@@ -82,7 +82,7 @@ class EatingLogsViewModel(application: Application): AndroidViewModel(applicatio
     fun onImportLogs() {
         val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
-            type = "text/comma-separated-values"
+            type = "text/*"
         }
         _startActivityForResult.value =
                 Event(ActivityForResultsData(intent, CHOOSE_CSV_LOGS_REQUEST_CODE))

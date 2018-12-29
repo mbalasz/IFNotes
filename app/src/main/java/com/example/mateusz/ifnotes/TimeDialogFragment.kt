@@ -10,15 +10,15 @@ import kotlinx.android.synthetic.main.dialog_date_time.view.*
 import java.lang.ClassCastException
 import java.lang.IllegalStateException
 
-class DateTimeDialogFragment : DialogFragment() {
+class TimeDialogFragment : DialogFragment() {
     companion object {
         const val BUTTON_SAVE_STRING = "Save"
         const val BUTTON_CANCEL_STRING = "Cancel"
     }
 
-    private lateinit var dateTimeDialogListener: DateTimeDialogListener
+    private lateinit var timeDialogListener: TimeDialogListener
 
-    interface DateTimeDialogListener {
+    interface TimeDialogListener {
         fun onTimeSaved(hour: Int, minute: Int)
     }
 
@@ -26,10 +26,10 @@ class DateTimeDialogFragment : DialogFragment() {
         super.onAttach(context)
 
         try {
-            dateTimeDialogListener = context as DateTimeDialogListener
+            timeDialogListener = context as TimeDialogListener
         } catch (e: ClassCastException) {
             throw ClassCastException(
-                    "${context.toString()} must implement ${DateTimeDialogListener::class}")
+                    "${context.toString()} must implement ${TimeDialogListener::class}")
         }
     }
 
@@ -44,9 +44,9 @@ class DateTimeDialogFragment : DialogFragment() {
                     .setPositiveButton(BUTTON_SAVE_STRING) { dialog, id ->
                         val timePicker = dialogView.timePicker
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            dateTimeDialogListener.onTimeSaved(timePicker.hour, timePicker.minute)
+                            timeDialogListener.onTimeSaved(timePicker.hour, timePicker.minute)
                         } else {
-                            dateTimeDialogListener.onTimeSaved(
+                            timeDialogListener.onTimeSaved(
                                     timePicker.currentHour, timePicker.currentMinute)
                         }
                     }

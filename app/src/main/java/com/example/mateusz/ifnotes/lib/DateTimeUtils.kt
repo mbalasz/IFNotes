@@ -27,6 +27,20 @@ class DateTimeUtils {
         }
 
         /**
+         * Converts given date to milliseconds. It uses current time.
+         */
+        fun timeToMillis(day: Int, month: Int, year: Int): Long {
+            val logTime = Calendar.getInstance()
+            logTime.set(
+                    year,
+                    month,
+                    day,
+                    logTime.get(Calendar.HOUR),
+                    logTime.get(Calendar.MINUTE))
+            return logTime.timeInMillis
+        }
+
+        /**
          * Converts given time to milliseconds. It uses date from the given calendar param and the
          * time from hour and minute params.
          */
@@ -38,6 +52,21 @@ class DateTimeUtils {
                     calendar.get(Calendar.DAY_OF_MONTH),
                     hour,
                     minute)
+            return logTime.timeInMillis
+        }
+
+        /**
+         * Converts given date to milliseconds. It uses time from the given calendar param and the
+         * date from day, month and year params.
+         */
+        fun timeToMillis(day: Int, month: Int, year: Int, calendar: Calendar): Long {
+            val logTime = Calendar.getInstance()
+            logTime.set(
+                    year,
+                    month,
+                    day,
+                    calendar.get(Calendar.HOUR),
+                    calendar.get(Calendar.MINUTE))
             return logTime.timeInMillis
         }
     }
