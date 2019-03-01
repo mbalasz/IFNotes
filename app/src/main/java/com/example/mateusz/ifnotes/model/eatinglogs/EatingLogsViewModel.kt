@@ -11,6 +11,7 @@ import com.example.mateusz.ifnotes.lib.Event
 import com.example.mateusz.ifnotes.model.EatingLog
 import com.example.mateusz.ifnotes.model.Repository
 import com.example.mateusz.ifnotes.model.editlog.EditEatingLogViewModel
+import kotlinx.coroutines.experimental.async
 
 class EatingLogsViewModel(application: Application): AndroidViewModel(application) {
     companion object {
@@ -92,11 +93,13 @@ class EatingLogsViewModel(application: Application): AndroidViewModel(applicatio
         if (requestCode == CHOOSE_CSV_LOGS_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 data?.let {
-                    val eatingLogs = csvLogsManager.getEatingLogsFromCsv(it.data)
-                    if (!eatingLogs.isEmpty()) {
-                        repository.deleteAll()
-                        for (eatingLog in eatingLogs) {
-                            repository.insertEatingLog(eatingLog)
+                    async {
+                        val eatingLogs = csvLogsManager.getEatingLogsFromCsv(it.data)
+                        if (!eatingLogs.isEmpty()) {
+                            repository.deleteAll()
+                            for (eatingLog in eatingLogs) {
+                                repository.insertEatingLog(eatingLog)
+                            }
                         }
                     }
                 }
