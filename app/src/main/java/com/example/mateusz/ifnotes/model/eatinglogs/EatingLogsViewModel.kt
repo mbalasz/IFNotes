@@ -96,7 +96,7 @@ class EatingLogsViewModel(application: Application): AndroidViewModel(applicatio
                     async {
                         val eatingLogs = csvLogsManager.getEatingLogsFromCsv(it.data)
                         if (!eatingLogs.isEmpty()) {
-                            repository.deleteAll()
+                            repository.deleteAll().await()
                             for (eatingLog in eatingLogs) {
                                 repository.insertEatingLog(eatingLog)
                             }
