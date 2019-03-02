@@ -7,6 +7,8 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.mateusz.ifnotes.EditEatingLogActivity
+import com.example.mateusz.ifnotes.lib.BackupManager
+import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.lib.Event
 import com.example.mateusz.ifnotes.model.EatingLog
 import com.example.mateusz.ifnotes.model.Repository
@@ -17,12 +19,16 @@ class EatingLogsViewModel(application: Application): AndroidViewModel(applicatio
     companion object {
         const val CHOOSE_CSV_LOGS_REQUEST_CODE = 1
         const val EDIT_EATING_LOG_REQUEST_CODE = 2
+        const val CHOOSE_DIR_TO_EXPORT_CSV_CODE = 3
+
+        private const val CSV_FILE_DEFAULT_NAME = "eating_logs"
     }
 
     data class ActivityForResultsData(val intent: Intent, val requestCode: Int)
 
     private val repository = Repository(application)
     private val csvLogsManager = CSVLogsManager(application)
+    private val backupManager = BackupManager(application)
     var eatingLogs: List<EatingLog> = emptyList()
     private val _startActivityForResult = MutableLiveData<Event<ActivityForResultsData>>()
     private val _refreshData = MutableLiveData<Event<Unit>>()
@@ -89,6 +95,18 @@ class EatingLogsViewModel(application: Application): AndroidViewModel(applicatio
                 Event(ActivityForResultsData(intent, CHOOSE_CSV_LOGS_REQUEST_CODE))
     }
 
+    fun onExportLogs() {
+        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "text/*"
+            putExtra(
+                    Intent.EXTRA_TITLE,
+                    "${CSV_FILE_DEFAULT_NAME}_${DateTimeUtils.toDateString(System.currentTimeMillis())}.csv")
+        }
+        _startActivityForResult.value =
+                Event(ActivityForResultsData(intent, CHOOSE_DIR_TO_EXPORT_CSV_CODE))
+    }
+
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == CHOOSE_CSV_LOGS_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
@@ -102,6 +120,14 @@ class EatingLogsViewModel(application: Application): AndroidViewModel(applicatio
                             }
                         }
                     }
+                }
+            }
+        }
+        else if (requestCode == CHOOSE_DIR_TO_EXPORT_CSV_CODE) {
+            if (resultCode == RESULT_OK) {
+                data?.let {
+                    backupManager.backupLogsToFile(
+                            it.data, csvLogsManager.getCsvFromEatingLogs(eatingLogs))
                 }
             }
         }

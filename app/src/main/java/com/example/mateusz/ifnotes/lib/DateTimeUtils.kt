@@ -6,10 +6,19 @@ import java.util.Locale
 
 class DateTimeUtils {
     companion object {
-        val dateTimeFormat = SimpleDateFormat("dd/M/yyyy HH:mm:ss", Locale.ENGLISH)
+        val defaultDateTimeFormat = SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.ENGLISH)
+        val defaultDateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.ENGLISH)
 
-        fun toDateTime(timeInMillis: Long): String {
+        fun toDateTimeString(timeInMillis: Long): String {
+            return toDateTimeString(timeInMillis, defaultDateTimeFormat)
+        }
+
+        fun toDateTimeString(timeInMillis: Long, dateTimeFormat: SimpleDateFormat): String {
             return dateTimeFormat.format(timeInMillis)
+        }
+
+        fun toDateString(timeInMillis: Long): String {
+            return defaultDateFormat.format(timeInMillis)
         }
 
         /**

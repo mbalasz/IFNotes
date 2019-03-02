@@ -51,6 +51,9 @@ class EatingLogsActivity : AppCompatActivity() {
             R.id.menu_item_import_logs -> {
                 eatingLogsViewModel.onImportLogs()
                 true
+            } R.id.menu_item_export_logs -> {
+                eatingLogsViewModel.onExportLogs()
+                true
             } else -> {
                 super.onOptionsItemSelected(item)
             }

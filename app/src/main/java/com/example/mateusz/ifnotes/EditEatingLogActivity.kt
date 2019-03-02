@@ -40,10 +40,10 @@ class EditEatingLogActivity :
         }
 
         editEatingLogViewModel.firstMealLogTimeObservable.observe(this, Observer {
-            timeOfFirstMealTextView.text = DateTimeUtils.toDateTime(it)
+            timeOfFirstMealTextView.text = DateTimeUtils.toDateTimeString(it)
         })
         editEatingLogViewModel.lastMealLogTimeObservable.observe(this, Observer {
-            timeOfLastMealTextView.text = DateTimeUtils.toDateTime(it)
+            timeOfLastMealTextView.text = DateTimeUtils.toDateTimeString(it)
         })
 
         editEatingLogViewModel.showTimeDialogFragment.observe(this, Observer {
