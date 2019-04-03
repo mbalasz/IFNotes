@@ -119,8 +119,18 @@ class IFNotesActivity : AppCompatActivity(), DateTimeDialogFragment.DateTimeDial
             validationDialogBuilder.create().show()
         })
 
+        ifNotesViewModel.startActivityData.observe(this, Observer { intentEvent ->
+            intentEvent.getContentIfNotHandled()?.let {
+                startActivity(it)
+            }
+        })
+
         history.setOnClickListener {
-            startActivity(Intent(this, EatingLogsActivity::class.java))
+            ifNotesViewModel.onHistoryButtonClicked()
+        }
+
+        chart.setOnClickListener {
+            ifNotesViewModel.onChartButtonClicked()
         }
     }
 

@@ -7,9 +7,14 @@ import java.util.Locale
 class DateTimeUtils {
     companion object {
         val dateTimeFormat = SimpleDateFormat("dd/M/yyyy HH:mm:ss", Locale.ENGLISH)
+        val dateFormat = SimpleDateFormat("dd/M/yyyy", Locale.ENGLISH)
 
         fun toDateTime(timeInMillis: Long): String {
             return dateTimeFormat.format(timeInMillis)
+        }
+
+        fun toDate(timeInMillis: Long): String {
+            return dateFormat.format(timeInMillis)
         }
 
         /**

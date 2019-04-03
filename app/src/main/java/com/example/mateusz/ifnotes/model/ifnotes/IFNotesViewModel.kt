@@ -1,14 +1,18 @@
 package com.example.mateusz.ifnotes.model.ifnotes
 
 import android.app.Application
+import android.content.Intent
 import android.graphics.Color
 import android.os.SystemClock
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
+import com.example.mateusz.ifnotes.EatingLogsActivity
+import com.example.mateusz.ifnotes.EatingLogsChartActivity
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.lib.EatingLogValidator
+import com.example.mateusz.ifnotes.lib.Event
 import com.example.mateusz.ifnotes.model.EatingLog
 import com.example.mateusz.ifnotes.model.Repository
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -40,11 +44,17 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
 
     data class EatingLogDisplay(val logState: LogState, val logTime: String)
 
+
     private val repository = Repository(application)
     private val eatingLogValidator = EatingLogValidator()
     private val currentEatingLogLiveData = MutableLiveData<EatingLog>()
     private val logTimeValidationMessageLiveData =
             MutableLiveData<LogTimeValidationMessage>()
+
+    val startActivityData: LiveData<Event<Intent>>
+        get() = _startActivityLiveData
+    private val _startActivityLiveData = MutableLiveData<Event<Intent>>()
+
     val logButtonState = Transformations.map(currentEatingLogLiveData) { eatingLog ->
         eatingLog?.let {
             if (eatingLogValidator.isEatingLogFinished(eatingLog)) {
@@ -120,6 +130,16 @@ class IFNotesViewModel(application: Application): AndroidViewModel(application) 
 
     fun onLogLongTimeAgoClicked() {
         maybeUpdateCurrentEatingLog(getCurrentCalendarTime() - LONG_TIME_MS)
+    }
+
+    fun onHistoryButtonClicked() {
+        val intent = Intent(getApplication(), EatingLogsActivity::class.java)
+        _startActivityLiveData.value = Event(intent)
+    }
+
+    fun onChartButtonClicked() {
+        val intent = Intent(getApplication(), EatingLogsChartActivity::class.java)
+        _startActivityLiveData.value = Event(intent)
     }
 
     private fun maybeUpdateCurrentEatingLog(newLogTime: Long) {
