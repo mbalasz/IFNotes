@@ -8,8 +8,6 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.model.eatinglogs.EatingLogsViewModel
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 class EatingLogsAdapter(val context: Context, private val eatingLogsViewModel: EatingLogsViewModel)
     : RecyclerView.Adapter<EatingLogsAdapter.EatingLogViewHolder>() {
@@ -32,11 +30,11 @@ class EatingLogsAdapter(val context: Context, private val eatingLogsViewModel: E
         }
 
         override fun setStartTme(startTime: Long) {
-            startTimeTextView.text = DateTimeUtils.toDateTime(startTime)
+            startTimeTextView.text = DateTimeUtils.toDateTimeString(startTime)
         }
 
         override fun setEndTime(endTime: Long) {
-            endTimeTextView.text = DateTimeUtils.toDateTime(endTime)
+            endTimeTextView.text = DateTimeUtils.toDateTimeString(endTime)
         }
 
         override fun clearView() {

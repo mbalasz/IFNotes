@@ -4,4 +4,8 @@
     <item
         android:id="@+id/menu_item_import_logs"
         android:title="Import logs from CSV"/>
+
+    <item
+        android:id="@+id/menu_item_export_logs"
+        android:title="Export logs to CSV"/>
 </menu>

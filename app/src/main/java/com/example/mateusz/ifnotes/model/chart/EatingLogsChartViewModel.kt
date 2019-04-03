@@ -53,7 +53,7 @@ class EatingLogsChartViewModel(application: Application) : AndroidViewModel(appl
         val labels = arrayListOf<String>()
         for (dataPoint in dataPoints) {
             val eatingLog = dataPoint.eatingLog
-            labels.add(DateTimeUtils.toDate(eatingLog.startTime))
+            labels.add(DateTimeUtils.toDateString(eatingLog.startTime))
         }
         return labels
     }

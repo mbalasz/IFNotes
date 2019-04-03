@@ -52,14 +52,17 @@ class EatingLogValidator {
             throw IllegalStateException("EatingLog shouldn't exist in the list at this stage")
         }
         idx = -idx - 1
-        val prevEatingLog = sortedEatingLogs[idx - 1]
-        val nextEatingLog = sortedEatingLogs[idx]
-
-        if (!validateOrder(prevEatingLog, newEatingLog)) {
-            return EatingLogValidationStatus.START_TIME_TOO_EARLY
+        if (idx > 0) {
+            val prevEatingLog = sortedEatingLogs[idx - 1]
+            if (!validateOrder(prevEatingLog, newEatingLog)) {
+                return EatingLogValidationStatus.START_TIME_TOO_EARLY
+            }
         }
-        if (!validateOrder(newEatingLog, nextEatingLog)) {
-            return EatingLogValidationStatus.END_TIME_TOO_LATE
+        if (idx < sortedEatingLogs.size) {
+            val nextEatingLog = sortedEatingLogs[idx]
+            if (!validateOrder(newEatingLog, nextEatingLog)) {
+                return EatingLogValidationStatus.END_TIME_TOO_LATE
+            }
         }
         return EatingLogValidationStatus.SUCCESS
     }
