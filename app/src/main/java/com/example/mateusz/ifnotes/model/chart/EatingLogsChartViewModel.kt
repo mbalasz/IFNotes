@@ -12,7 +12,10 @@ import io.reactivex.disposables.Disposable
 import java.util.concurrent.TimeUnit
 
 class EatingLogsChartViewModel(application: Application) : AndroidViewModel(application) {
-    private val eatingLogsChartDataProducer: EatingLogsChartDataProducer = EatingWindowChartDataProducer()
+    companion object {
+        private const val MAX_WINDOW_HOURS = 19L
+    }
+
     private val repository = Repository(application)
 
     data class ChartData(val entryPoints: List<Entry>, val labels: List<String>)
@@ -21,17 +24,17 @@ class EatingLogsChartViewModel(application: Application) : AndroidViewModel(appl
         get() = _eatingLogsChartDataLiveData
     private val _eatingLogsChartDataLiveData = MutableLiveData<ChartData>()
     private var eatingLogsSubscription: Disposable? = null
+    private val windowValidator = WindowValidator(MAX_WINDOW_HOURS)
 
 
     init {
         eatingLogsSubscription = repository.getEatingLogsObservable().subscribe {
             val eatingLogs = it.sortedWith(
                     Comparator {a, b -> compareValuesBy(a, b, {it.startTime}, {it.endTime})})
-            val dataPoints = FastingWindowChartDataProducer().getDataPoints(eatingLogs)
+            val dataPoints = FastingWindowChartDataProducer(windowValidator).getDataPoints(eatingLogs)
             var chartData =
                     ChartData(getEntriesFromDataPoints(dataPoints), getLabelsFromDataPoints(dataPoints))
             _eatingLogsChartDataLiveData.postValue(chartData)
-
         }
     }
 

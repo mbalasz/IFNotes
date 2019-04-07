@@ -1,10 +1,9 @@
 package com.example.mateusz.ifnotes.model.chart
 
-import android.util.Log
-import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.model.EatingLog
 
-class EatingWindowChartDataProducer : EatingLogsChartDataProducer() {
+class EatingWindowChartDataProducer(windowValidator: WindowValidator)
+    : EatingLogsChartDataProducer(windowValidator) {
     override fun getDataPoints(eatingLogs: List<EatingLog>): List<DataPoint> {
         if (eatingLogs.isEmpty()) {
             return emptyList()
@@ -16,7 +15,10 @@ class EatingWindowChartDataProducer : EatingLogsChartDataProducer() {
             if (!eatingLog.hasEndTime()) {
                 continue
             }
-            dataPoints.add(DataPoint(eatingLog, eatingLog.endTime - eatingLog.startTime))
+            val timeWindow = eatingLog.endTime - eatingLog.startTime
+            if (windowValidator.isTimeWindowValid(timeWindow)) {
+                dataPoints.add(DataPoint(eatingLog, timeWindow))
+            }
         }
         return dataPoints
     }

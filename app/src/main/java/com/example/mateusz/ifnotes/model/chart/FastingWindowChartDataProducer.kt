@@ -2,7 +2,8 @@ package com.example.mateusz.ifnotes.model.chart
 
 import com.example.mateusz.ifnotes.model.EatingLog
 
-class FastingWindowChartDataProducer : EatingLogsChartDataProducer() {
+class FastingWindowChartDataProducer(windowValidator: WindowValidator)
+    : EatingLogsChartDataProducer(windowValidator) {
     override fun getDataPoints(eatingLogs: List<EatingLog>): List<DataPoint> {
         if (eatingLogs.isEmpty() || eatingLogs.size == 1) {
             return emptyList()
@@ -17,7 +18,10 @@ class FastingWindowChartDataProducer : EatingLogsChartDataProducer() {
             val currEatingLog = eatingLogs[i]
             val prevEatingLog = eatingLogs[i - 1]
             checkEatingLogValid(currEatingLog)
-            dataPoints.add(DataPoint(currEatingLog, currEatingLog.startTime - prevEatingLog.endTime))
+            val timeWindow = currEatingLog.startTime - prevEatingLog.endTime
+            if (windowValidator.isTimeWindowValid(timeWindow)) {
+                dataPoints.add(DataPoint(currEatingLog, timeWindow))
+            }
         }
         return dataPoints
     }
