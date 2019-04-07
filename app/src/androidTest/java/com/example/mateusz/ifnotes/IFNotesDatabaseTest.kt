@@ -1,5 +1,6 @@
 package com.example.mateusz.ifnotes
 
+import android.arch.core.executor.testing.InstantTaskExecutorRule
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
@@ -7,9 +8,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.mateusz.ifnotes.model.EatingLog
 import com.example.mateusz.ifnotes.model.EatingLogDao
 import com.example.mateusz.ifnotes.model.IFNotesDatabase
+import io.reactivex.subscribers.TestSubscriber
 import org.hamcrest.CoreMatchers.hasItems
-import org.junit.Assert.assertThat
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -21,10 +24,16 @@ class IFNotesDatabaseTest {
     lateinit var eatingLogDao: EatingLogDao
     lateinit var ifNotesDatabase: IFNotesDatabase
 
+    @get:Rule
+    val instantTaskExecutorRule = InstantTaskExecutorRule()
+
     @Before
     fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Context>()
-        ifNotesDatabase = Room.inMemoryDatabaseBuilder(context, IFNotesDatabase::class.java).build()
+        ifNotesDatabase =
+                Room.inMemoryDatabaseBuilder(context, IFNotesDatabase::class.java)
+                        .allowMainThreadQueries()
+                        .build()
         eatingLogDao = ifNotesDatabase.eatingLogDao()
     }
 
@@ -36,9 +45,12 @@ class IFNotesDatabaseTest {
         eatingLogDao.insert(eatingLog1)
         eatingLogDao.insert(eatingLog2)
 
-        val eatingLogs = eatingLogDao.getEatingLogsFlowable()
+        eatingLogDao.getEatingLogsFlowable().map{ eatingLogs ->
+            eatingLogs.map {
+                it.startTime
+            }
+        }.test().awaitCount(1).assertValue(listOf(10L, 11L))
 
-        assertThat(eatingLogs.map {eatingLog -> eatingLog.startTime}, hasItems(10L, 11L))
     }
 
     @Test
@@ -52,7 +64,7 @@ class IFNotesDatabaseTest {
         eatingLogDao.insert(eatingLog3)
 
         eatingLogDao.getMostRecentEatingLog()
-                .map{it.startTime}
+                .map{it[0].startTime}
                 .test()
                 .awaitCount(1)
                 .assertValue(11L)
