@@ -2,6 +2,8 @@ package com.example.mateusz.ifnotes.model
 
 import android.app.Application
 import com.example.mateusz.ifnotes.lib.EatingLogValidator
+import com.example.mateusz.ifnotes.model.data.EatingLog
+import com.example.mateusz.ifnotes.model.data.IFNotesDatabase
 import com.google.common.base.Optional
 import io.reactivex.Flowable
 import kotlinx.coroutines.experimental.CommonPool

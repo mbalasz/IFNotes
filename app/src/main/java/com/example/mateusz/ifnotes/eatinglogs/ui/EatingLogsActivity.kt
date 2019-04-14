@@ -1,4 +1,4 @@
-package com.example.mateusz.ifnotes
+package com.example.mateusz.ifnotes.eatinglogs.ui
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,7 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.mateusz.ifnotes.model.eatinglogs.EatingLogsViewModel
+import com.example.mateusz.ifnotes.R
+import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel
 import kotlinx.android.synthetic.main.activity_eating_logs.toolbar
 import kotlinx.android.synthetic.main.content_eating_logs.eatingLogsRecyclerView
 

@@ -1,11 +1,14 @@
-package com.example.mateusz.ifnotes
+package com.example.mateusz.ifnotes.eatinglogs.editlog.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.example.mateusz.ifnotes.R
+import com.example.mateusz.ifnotes.time.TimeDialogFragment
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
-import com.example.mateusz.ifnotes.model.editlog.EditEatingLogViewModel
+import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogViewModel
+import com.example.mateusz.ifnotes.time.DateDialogFragment
 import kotlinx.android.synthetic.main.activity_edit_eating_log.*
 
 class EditEatingLogActivity :

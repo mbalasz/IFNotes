@@ -1,6 +1,6 @@
 package com.example.mateusz.ifnotes.lib
 
-import com.example.mateusz.ifnotes.model.EatingLog
+import com.example.mateusz.ifnotes.model.data.EatingLog
 import java.lang.IllegalStateException
 
 class EatingLogValidator {

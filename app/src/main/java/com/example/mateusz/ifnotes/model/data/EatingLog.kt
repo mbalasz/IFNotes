@@ -1,4 +1,4 @@
-package com.example.mateusz.ifnotes.model
+package com.example.mateusz.ifnotes.model.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

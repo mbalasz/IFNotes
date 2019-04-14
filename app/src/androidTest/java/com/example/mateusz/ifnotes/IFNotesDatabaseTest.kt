@@ -5,12 +5,9 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.example.mateusz.ifnotes.model.EatingLog
-import com.example.mateusz.ifnotes.model.EatingLogDao
-import com.example.mateusz.ifnotes.model.IFNotesDatabase
-import io.reactivex.subscribers.TestSubscriber
-import org.hamcrest.CoreMatchers.hasItems
-import org.hamcrest.MatcherAssert.assertThat
+import com.example.mateusz.ifnotes.model.data.EatingLog
+import com.example.mateusz.ifnotes.model.data.EatingLogDao
+import com.example.mateusz.ifnotes.model.data.IFNotesDatabase
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test

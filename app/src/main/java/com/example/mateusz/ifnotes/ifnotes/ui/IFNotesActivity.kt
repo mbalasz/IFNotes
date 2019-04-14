@@ -1,19 +1,23 @@
-package com.example.mateusz.ifnotes
+package com.example.mateusz.ifnotes.ifnotes.ui
 
-import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.example.mateusz.ifnotes.model.ifnotes.IFNotesViewModel
-import com.example.mateusz.ifnotes.model.ifnotes.IFNotesViewModel.Companion.LONG_TIME_MS
-import com.example.mateusz.ifnotes.model.ifnotes.IFNotesViewModel.Companion.MID_TIME_MS
-import com.example.mateusz.ifnotes.model.ifnotes.IFNotesViewModel.Companion.SHORT_TIME_MS
+import com.example.mateusz.ifnotes.R
+import com.example.mateusz.ifnotes.component.ViewModelFactory
+import com.example.mateusz.ifnotes.time.TimeDialogFragment
+import com.example.mateusz.ifnotes.ifnotes.IFNotesViewModel
+import com.example.mateusz.ifnotes.ifnotes.IFNotesViewModel.Companion.LONG_TIME_MS
+import com.example.mateusz.ifnotes.ifnotes.IFNotesViewModel.Companion.MID_TIME_MS
+import com.example.mateusz.ifnotes.ifnotes.IFNotesViewModel.Companion.SHORT_TIME_MS
+import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_ifnotes.*
 import java.lang.IllegalStateException
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 class IFNotesActivity : AppCompatActivity(), TimeDialogFragment.TimeDialogListener {
     companion object {
@@ -30,14 +34,18 @@ class IFNotesActivity : AppCompatActivity(), TimeDialogFragment.TimeDialogListen
                 "No log to display. Log your activity with the buttons below."
     }
 
-    val ifNotesViewModel: IFNotesViewModel by lazy {
-        ViewModelProviders.of(this).get(IFNotesViewModel::class.java)
+    @Inject lateinit var viewModelFactory: ViewModelFactory
+
+    private val ifNotesViewModel: IFNotesViewModel by lazy {
+        ViewModelProviders.of(this, viewModelFactory).get(IFNotesViewModel::class.java)
     }
     private lateinit var lastActivityChronometerWrapper: LastActivityChronometerWrapper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ifnotes)
+
+        AndroidInjection.inject(this)
 
         lastActivityChronometerWrapper =
                 LastActivityChronometerWrapper(timeSinceLastActivityChronometer)

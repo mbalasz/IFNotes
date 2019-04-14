@@ -1,4 +1,4 @@
-package com.example.mateusz.ifnotes
+package com.example.mateusz.ifnotes.eatinglogs.ui
 
 import android.content.Context
 import android.view.LayoutInflater
@@ -6,8 +6,9 @@ import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.example.mateusz.ifnotes.R
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
-import com.example.mateusz.ifnotes.model.eatinglogs.EatingLogsViewModel
+import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel
 
 class EatingLogsAdapter(val context: Context, private val eatingLogsViewModel: EatingLogsViewModel)
     : RecyclerView.Adapter<EatingLogsAdapter.EatingLogViewHolder>() {

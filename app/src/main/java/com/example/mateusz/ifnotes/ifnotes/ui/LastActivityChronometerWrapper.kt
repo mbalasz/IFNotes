@@ -1,4 +1,4 @@
-package com.example.mateusz.ifnotes
+package com.example.mateusz.ifnotes.ifnotes.ui
 
 import android.os.SystemClock
 import android.widget.Chronometer

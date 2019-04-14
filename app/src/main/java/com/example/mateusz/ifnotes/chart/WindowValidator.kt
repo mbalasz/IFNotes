@@ -1,4 +1,4 @@
-package com.example.mateusz.ifnotes.model.chart
+package com.example.mateusz.ifnotes.chart
 
 import java.util.concurrent.TimeUnit
 

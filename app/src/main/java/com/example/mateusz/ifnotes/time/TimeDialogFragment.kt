@@ -1,4 +1,4 @@
-package com.example.mateusz.ifnotes
+package com.example.mateusz.ifnotes.time
 
 import android.app.AlertDialog
 import android.app.Dialog
@@ -6,6 +6,7 @@ import android.content.Context
 import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.DialogFragment
+import com.example.mateusz.ifnotes.R
 import kotlinx.android.synthetic.main.dialog_date_time.view.*
 import java.lang.ClassCastException
 import java.lang.IllegalStateException

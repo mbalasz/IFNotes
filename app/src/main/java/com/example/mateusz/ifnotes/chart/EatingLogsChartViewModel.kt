@@ -1,4 +1,4 @@
-package com.example.mateusz.ifnotes.model.chart
+package com.example.mateusz.ifnotes.chart
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -6,7 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.model.Repository
-import com.example.mateusz.ifnotes.model.chart.EatingLogsChartDataProducer.DataPoint
+import com.example.mateusz.ifnotes.chart.EatingLogsChartDataProducer.DataPoint
 import com.github.mikephil.charting.data.Entry
 import io.reactivex.disposables.Disposable
 import java.util.concurrent.TimeUnit

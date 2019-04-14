@@ -1,4 +1,4 @@
-package com.example.mateusz.ifnotes.model.editlog
+package com.example.mateusz.ifnotes.eatinglogs.editlog
 
 import android.app.Application
 import android.content.Intent
@@ -6,10 +6,10 @@ import android.os.Bundle
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.mateusz.ifnotes.DateDialogFragment
+import com.example.mateusz.ifnotes.time.DateDialogFragment
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.lib.Event
-import com.example.mateusz.ifnotes.model.EatingLog
+import com.example.mateusz.ifnotes.model.data.EatingLog
 import com.example.mateusz.ifnotes.model.Repository
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async

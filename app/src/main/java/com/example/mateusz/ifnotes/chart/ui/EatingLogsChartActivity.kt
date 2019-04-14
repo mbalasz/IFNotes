@@ -1,17 +1,15 @@
-package com.example.mateusz.ifnotes
+package com.example.mateusz.ifnotes.chart.ui
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.example.mateusz.ifnotes.model.chart.EatingLogsChartViewModel
-import com.github.mikephil.charting.components.XAxis
+import com.example.mateusz.ifnotes.R
+import com.example.mateusz.ifnotes.chart.EatingLogsChartViewModel
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
 import kotlinx.android.synthetic.main.content_chart.eatingLogsChart
-import kotlin.math.max
-import kotlin.math.min
 
 class EatingLogsChartActivity : AppCompatActivity() {
 

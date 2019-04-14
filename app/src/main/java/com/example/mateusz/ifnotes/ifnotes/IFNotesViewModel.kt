@@ -1,4 +1,4 @@
-package com.example.mateusz.ifnotes.model.ifnotes
+package com.example.mateusz.ifnotes.ifnotes
 
 import android.app.Application
 import android.content.Intent
@@ -8,12 +8,12 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
-import com.example.mateusz.ifnotes.EatingLogsActivity
-import com.example.mateusz.ifnotes.EatingLogsChartActivity
+import com.example.mateusz.ifnotes.eatinglogs.ui.EatingLogsActivity
+import com.example.mateusz.ifnotes.chart.ui.EatingLogsChartActivity
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.lib.EatingLogValidator
 import com.example.mateusz.ifnotes.lib.Event
-import com.example.mateusz.ifnotes.model.EatingLog
+import com.example.mateusz.ifnotes.model.data.EatingLog
 import com.example.mateusz.ifnotes.model.Repository
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.coroutines.experimental.android.UI
@@ -21,8 +21,9 @@ import kotlinx.coroutines.experimental.async
 import java.lang.IllegalStateException
 import java.text.SimpleDateFormat
 import java.util.Locale
+import javax.inject.Inject
 
-class IFNotesViewModel(application: Application): AndroidViewModel(application) {
+class IFNotesViewModel @Inject constructor(application: Application): AndroidViewModel(application) {
     companion object {
         private val DARK_GREEN = Color.parseColor("#a4c639")
         private val DARK_RED = Color.parseColor("#8b0000")

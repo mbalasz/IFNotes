@@ -1,6 +1,6 @@
-package com.example.mateusz.ifnotes.model.chart
+package com.example.mateusz.ifnotes.chart
 
-import com.example.mateusz.ifnotes.model.EatingLog
+import com.example.mateusz.ifnotes.model.data.EatingLog
 import java.lang.IllegalArgumentException
 
 abstract class EatingLogsChartDataProducer(protected val windowValidator: WindowValidator) {

@@ -1,4 +1,4 @@
-package com.example.mateusz.ifnotes.model.eatinglogs
+package com.example.mateusz.ifnotes.eatinglogs
 
 import android.app.Activity.RESULT_OK
 import android.app.Application
@@ -6,13 +6,13 @@ import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.mateusz.ifnotes.EditEatingLogActivity
+import com.example.mateusz.ifnotes.eatinglogs.editlog.ui.EditEatingLogActivity
 import com.example.mateusz.ifnotes.lib.BackupManager
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.lib.Event
-import com.example.mateusz.ifnotes.model.EatingLog
+import com.example.mateusz.ifnotes.model.data.EatingLog
 import com.example.mateusz.ifnotes.model.Repository
-import com.example.mateusz.ifnotes.model.editlog.EditEatingLogViewModel
+import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogViewModel
 import kotlinx.coroutines.experimental.async
 
 class EatingLogsViewModel(application: Application): AndroidViewModel(application) {

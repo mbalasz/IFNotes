@@ -1,9 +1,9 @@
-package com.example.mateusz.ifnotes.model.eatinglogs
+package com.example.mateusz.ifnotes.eatinglogs
 
 import android.content.Context
 import android.net.Uri
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
-import com.example.mateusz.ifnotes.model.EatingLog
+import com.example.mateusz.ifnotes.model.data.EatingLog
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.lang.StringBuilder
