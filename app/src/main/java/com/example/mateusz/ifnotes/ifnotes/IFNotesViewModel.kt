@@ -23,7 +23,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
 
-class IFNotesViewModel @Inject constructor(application: Application): AndroidViewModel(application) {
+class IFNotesViewModel @Inject constructor(application: Application, private val repository: Repository): AndroidViewModel(application) {
     companion object {
         private val DARK_GREEN = Color.parseColor("#a4c639")
         private val DARK_RED = Color.parseColor("#8b0000")
@@ -45,8 +45,6 @@ class IFNotesViewModel @Inject constructor(application: Application): AndroidVie
 
     data class EatingLogDisplay(val logState: LogState, val logTime: String)
 
-
-    private val repository = Repository(application)
     private val eatingLogValidator = EatingLogValidator()
     private val currentEatingLogLiveData = MutableLiveData<EatingLog>()
     private val logTimeValidationMessageLiveData =

@@ -8,7 +8,7 @@ import dagger.android.AndroidInjectionModule
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [ActivityBuilder::class, AndroidInjectionModule::class, AppModule::class, IFNotesModule::class])
+@Component(modules = [AndroidInjectionModule::class, AppModule::class, IFNotesModule::class])
 interface IFNotesComponent {
 
     @Component.Builder

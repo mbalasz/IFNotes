@@ -9,8 +9,11 @@ import io.reactivex.Flowable
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class Repository(application: Application) {
+@Singleton
+class Repository @Inject constructor(application: Application) {
     private val iFNotesDatabase: IFNotesDatabase = IFNotesDatabase.getDatabase(application)
     private val eatingLogValidator = EatingLogValidator()
 
