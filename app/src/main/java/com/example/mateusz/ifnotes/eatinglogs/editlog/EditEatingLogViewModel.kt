@@ -14,8 +14,9 @@ import com.example.mateusz.ifnotes.model.Repository
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import java.util.Calendar
+import javax.inject.Inject
 
-class EditEatingLogViewModel(application: Application): AndroidViewModel(application) {
+class EditEatingLogViewModel @Inject constructor(application: Application, private val repository: Repository): AndroidViewModel(application) {
     companion object {
         const val EXTRA_LOG_TIME_ID = "LOG_TIME_ID"
     }
@@ -27,7 +28,6 @@ class EditEatingLogViewModel(application: Application): AndroidViewModel(applica
     }
 
     // TODO: Implement validation logic in the repository.
-    private val repository = Repository(application)
     private var editMode = EditMode.NONE
     private lateinit var eatingLog: EatingLog
     private val _firstMealLogTimeObservable = MutableLiveData<Long>()

@@ -5,24 +5,31 @@ import android.os.Bundle
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.example.mateusz.ifnotes.R
+import com.example.mateusz.ifnotes.component.ViewModelFactory
 import com.example.mateusz.ifnotes.time.TimeDialogFragment
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogViewModel
 import com.example.mateusz.ifnotes.time.DateDialogFragment
+import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_edit_eating_log.*
+import javax.inject.Inject
 
 class EditEatingLogActivity :
         AppCompatActivity(),
         TimeDialogFragment.TimeDialogListener,
         DateDialogFragment.DateDialogListener {
 
+    @Inject lateinit var viewModelFactory: ViewModelFactory
+
     private val editEatingLogViewModel: EditEatingLogViewModel by lazy {
-        ViewModelProviders.of(this).get(EditEatingLogViewModel::class.java)
+        ViewModelProviders.of(this, viewModelFactory).get(EditEatingLogViewModel::class.java)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_eating_log)
+
+        AndroidInjection.inject(this)
 
         editEatingLogViewModel.onActivityCreated(intent)
 

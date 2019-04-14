@@ -1,6 +1,7 @@
 package com.example.mateusz.ifnotes.component
 
 import android.app.Application
+import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogModule
 import com.example.mateusz.ifnotes.ifnotes.IFNotesModule
 import dagger.BindsInstance
 import dagger.Component
@@ -8,7 +9,7 @@ import dagger.android.AndroidInjectionModule
 import javax.inject.Singleton
 
 @Singleton
-@Component(modules = [AndroidInjectionModule::class, AppModule::class, IFNotesModule::class])
+@Component(modules = [AndroidInjectionModule::class, AppModule::class, IFNotesModule::class, EditEatingLogModule::class])
 interface IFNotesComponent {
 
     @Component.Builder
