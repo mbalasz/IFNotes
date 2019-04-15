@@ -12,5 +12,4 @@ class ViewModelFactory @Inject constructor(
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         return viewModelClassToProvider[modelClass]?.get() as T
     }
-
 }

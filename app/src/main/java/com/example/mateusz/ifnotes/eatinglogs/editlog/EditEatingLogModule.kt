@@ -14,7 +14,6 @@ import javax.inject.Singleton
 abstract class EditEatingLogModule {
     @Binds
     @IntoMap
-    @Singleton
     @ViewModelKey(EditEatingLogViewModel::class)
     abstract fun editEatigLogViewModel(editEatingLogViewModel: EditEatingLogViewModel): ViewModel
 

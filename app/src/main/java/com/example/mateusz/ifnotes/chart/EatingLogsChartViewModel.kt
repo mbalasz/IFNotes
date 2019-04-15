@@ -10,13 +10,13 @@ import com.example.mateusz.ifnotes.chart.EatingLogsChartDataProducer.DataPoint
 import com.github.mikephil.charting.data.Entry
 import io.reactivex.disposables.Disposable
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
-class EatingLogsChartViewModel(application: Application) : AndroidViewModel(application) {
+class EatingLogsChartViewModel @Inject constructor(
+        application: Application, repository: Repository) : AndroidViewModel(application) {
     companion object {
         private const val MAX_WINDOW_HOURS = 19L
     }
-
-    private val repository = Repository(application)
 
     data class ChartData(val entryPoints: List<Entry>, val labels: List<String>)
 

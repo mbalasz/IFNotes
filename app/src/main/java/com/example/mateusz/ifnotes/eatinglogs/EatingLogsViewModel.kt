@@ -14,8 +14,11 @@ import com.example.mateusz.ifnotes.model.data.EatingLog
 import com.example.mateusz.ifnotes.model.Repository
 import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogViewModel
 import kotlinx.coroutines.experimental.async
+import javax.inject.Inject
 
-class EatingLogsViewModel(application: Application): AndroidViewModel(application) {
+class EatingLogsViewModel @Inject constructor (
+        application: Application,
+        private val repository: Repository): AndroidViewModel(application) {
     companion object {
         const val CHOOSE_CSV_LOGS_REQUEST_CODE = 1
         const val EDIT_EATING_LOG_REQUEST_CODE = 2
@@ -26,7 +29,6 @@ class EatingLogsViewModel(application: Application): AndroidViewModel(applicatio
 
     data class ActivityForResultsData(val intent: Intent, val requestCode: Int)
 
-    private val repository = Repository(application)
     private val csvLogsManager = CSVLogsManager(application)
     private val backupManager = BackupManager(application)
     var eatingLogs: List<EatingLog> = emptyList()

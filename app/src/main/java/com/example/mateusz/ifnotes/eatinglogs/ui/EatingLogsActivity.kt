@@ -9,19 +9,27 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.mateusz.ifnotes.R
+import com.example.mateusz.ifnotes.component.ViewModelFactory
 import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel
+import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_eating_logs.toolbar
 import kotlinx.android.synthetic.main.content_eating_logs.eatingLogsRecyclerView
+import javax.inject.Inject
 
 class EatingLogsActivity : AppCompatActivity() {
+
+    @Inject lateinit var viewModelFactory: ViewModelFactory
+
     val eatingLogsViewModel: EatingLogsViewModel by lazy {
-        ViewModelProviders.of(this).get(EatingLogsViewModel::class.java)
+        ViewModelProviders.of(this, viewModelFactory).get(EatingLogsViewModel::class.java)
     }
     lateinit var adapter: EatingLogsAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_eating_logs)
+
+        AndroidInjection.inject(this)
 
         adapter = EatingLogsAdapter(this, eatingLogsViewModel)
         eatingLogsRecyclerView.adapter = adapter

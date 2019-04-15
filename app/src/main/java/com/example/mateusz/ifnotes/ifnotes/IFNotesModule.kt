@@ -8,14 +8,12 @@ import dagger.Binds
 import dagger.Module
 import dagger.android.ContributesAndroidInjector
 import dagger.multibindings.IntoMap
-import javax.inject.Singleton
 
 @Module
 abstract class IFNotesModule {
     @Binds
     @IntoMap
     @ViewModelKey(IFNotesViewModel::class)
-    @Singleton
     abstract fun ifNotesViewModel(ifNotesViewModel: IFNotesViewModel): ViewModel
 
     @ActivityScope
