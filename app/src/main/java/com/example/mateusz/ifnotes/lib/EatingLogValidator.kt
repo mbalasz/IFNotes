@@ -2,8 +2,11 @@ package com.example.mateusz.ifnotes.lib
 
 import com.example.mateusz.ifnotes.model.data.EatingLog
 import java.lang.IllegalStateException
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class EatingLogValidator {
+@Singleton
+open class EatingLogValidator @Inject constructor() {
 
     enum class NewLogTimeValidationStatus {
         SUCCESS,
@@ -37,7 +40,7 @@ class EatingLogValidator {
         return NewLogTimeValidationStatus.SUCCESS
     }
 
-    fun validateNewEatingLog(newEatingLog: EatingLog, eatingLogs: List<EatingLog>):
+    open fun validateNewEatingLog(newEatingLog: EatingLog, eatingLogs: List<EatingLog>):
             EatingLogValidationStatus {
         if (newEatingLog.startTime > newEatingLog.endTime) {
             return EatingLogValidationStatus.START_TIME_LATER_THAN_END_TIME

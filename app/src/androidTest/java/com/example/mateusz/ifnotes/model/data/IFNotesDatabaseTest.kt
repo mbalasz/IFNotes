@@ -1,17 +1,17 @@
-package com.example.mateusz.ifnotes
+package com.example.mateusz.ifnotes.model.data
 
+import android.app.Application
 import android.arch.core.executor.testing.InstantTaskExecutorRule
-import android.content.Context
-import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.example.mateusz.ifnotes.model.data.EatingLog
-import com.example.mateusz.ifnotes.model.data.EatingLogDao
-import com.example.mateusz.ifnotes.model.data.IFNotesDatabase
+import dagger.BindsInstance
+import dagger.Component
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Unit tests for EatingLog database.
@@ -19,18 +19,18 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class IFNotesDatabaseTest {
     lateinit var eatingLogDao: EatingLogDao
-    lateinit var ifNotesDatabase: IFNotesDatabase
+    @Inject lateinit var ifNotesDatabase: IFNotesDatabase
 
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     @Before
     fun setUp() {
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        ifNotesDatabase =
-                Room.inMemoryDatabaseBuilder(context, IFNotesDatabase::class.java)
-                        .allowMainThreadQueries()
-                        .build()
+        DaggerIFNotesDatabaseTest_TestComponent
+                .builder()
+                .application(ApplicationProvider.getApplicationContext())
+                .build()
+                .inject(this)
         eatingLogDao = ifNotesDatabase.eatingLogDao()
     }
 
@@ -65,5 +65,20 @@ class IFNotesDatabaseTest {
                 .test()
                 .awaitCount(1)
                 .assertValue(11L)
+    }
+
+    @Singleton
+    @Component(modules = [
+        IFNotesDatabaseTestModule::class])
+    interface TestComponent {
+        fun inject(iFNotesDatabaseTest: IFNotesDatabaseTest)
+
+        @Component.Builder
+        interface Builder {
+            fun build(): TestComponent
+
+            @BindsInstance
+            fun application(application: Application): Builder
+        }
     }
 }

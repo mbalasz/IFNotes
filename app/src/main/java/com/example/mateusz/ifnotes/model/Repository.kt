@@ -14,8 +14,9 @@ import javax.inject.Singleton
 
 @Singleton
 class Repository @Inject constructor(
-        application: Application, private val iFNotesDatabase: IFNotesDatabase) {
-    private val eatingLogValidator = EatingLogValidator()
+        application: Application,
+        private val iFNotesDatabase: IFNotesDatabase,
+        private val eatingLogValidator: EatingLogValidator) {
 
     fun getEatingLogsObservable(): Flowable<List<EatingLog>> {
         return iFNotesDatabase.eatingLogDao().getEatingLogsFlowable()
