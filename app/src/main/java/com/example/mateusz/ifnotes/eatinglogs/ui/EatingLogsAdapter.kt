@@ -13,7 +13,7 @@ import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel
 class EatingLogsAdapter(val context: Context, private val eatingLogsViewModel: EatingLogsViewModel)
     : RecyclerView.Adapter<EatingLogsAdapter.EatingLogViewHolder>() {
 
-    inner class EatingLogViewHolder(val view: ViewGroup):
+    inner class EatingLogViewHolder(val view: ViewGroup) :
             RecyclerView.ViewHolder(view), EatingLogsViewModel.EatingLogsItemView {
 
         val startTimeTextView = view.findViewById(R.id.eating_log_start_time) as TextView

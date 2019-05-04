@@ -13,7 +13,9 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class EatingLogsChartViewModel @Inject constructor(
-        application: Application, repository: Repository) : AndroidViewModel(application) {
+    application: Application,
+    repository: Repository
+) : AndroidViewModel(application) {
     companion object {
         private const val MAX_WINDOW_HOURS = 19L
     }
@@ -26,11 +28,10 @@ class EatingLogsChartViewModel @Inject constructor(
     private var eatingLogsSubscription: Disposable? = null
     private val windowValidator = WindowValidator(MAX_WINDOW_HOURS)
 
-
     init {
         eatingLogsSubscription = repository.getEatingLogsObservable().subscribe {
             val eatingLogs = it.sortedWith(
-                    Comparator {a, b -> compareValuesBy(a, b, {it.startTime}, {it.endTime})})
+                    Comparator { a, b -> compareValuesBy(a, b, { it.startTime }, { it.endTime }) })
             val dataPoints = FastingWindowChartDataProducer(windowValidator).getDataPoints(eatingLogs)
             var chartData =
                     ChartData(getEntriesFromDataPoints(dataPoints), getLabelsFromDataPoints(dataPoints))

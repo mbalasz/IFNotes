@@ -42,12 +42,11 @@ class IFNotesDatabaseTest {
         eatingLogDao.insert(eatingLog1)
         eatingLogDao.insert(eatingLog2)
 
-        eatingLogDao.getEatingLogsFlowable().map{ eatingLogs ->
+        eatingLogDao.getEatingLogsFlowable().map { eatingLogs ->
             eatingLogs.map {
                 it.startTime
             }
         }.test().awaitCount(1).assertValue(listOf(10L, 11L))
-
     }
 
     @Test
@@ -61,7 +60,7 @@ class IFNotesDatabaseTest {
         eatingLogDao.insert(eatingLog3)
 
         eatingLogDao.getMostRecentEatingLog()
-                .map{it[0].startTime}
+                .map { it[0].startTime }
                 .test()
                 .awaitCount(1)
                 .assertValue(11L)

@@ -50,7 +50,7 @@ open class EatingLogValidator @Inject constructor() {
                 { it.endTime }
         ))
         var idx = sortedEatingLogs.binarySearch(
-                newEatingLog, compareBy<EatingLog>{ it.startTime }.thenBy { it.endTime })
+                newEatingLog, compareBy<EatingLog> { it.startTime }.thenBy { it.endTime })
         if (idx >= 0) {
             throw IllegalStateException("EatingLog shouldn't exist in the list at this stage")
         }

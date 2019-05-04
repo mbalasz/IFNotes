@@ -16,7 +16,7 @@ import kotlinx.coroutines.experimental.async
 import java.util.Calendar
 import javax.inject.Inject
 
-class EditEatingLogViewModel @Inject constructor(application: Application, private val repository: Repository): AndroidViewModel(application) {
+class EditEatingLogViewModel @Inject constructor(application: Application, private val repository: Repository) : AndroidViewModel(application) {
     companion object {
         const val EXTRA_LOG_TIME_ID = "LOG_TIME_ID"
     }
@@ -151,6 +151,5 @@ class EditEatingLogViewModel @Inject constructor(application: Application, priva
     }
 
     fun onDiscardButtonClicked() {
-
     }
 }

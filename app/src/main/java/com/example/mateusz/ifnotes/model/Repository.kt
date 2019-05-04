@@ -15,9 +15,10 @@ import javax.inject.Singleton
 
 @Singleton
 class Repository @Inject constructor(
-        application: Application,
-        private val iFNotesDatabase: IFNotesDatabase,
-        private val eatingLogValidator: EatingLogValidator) {
+    application: Application,
+    private val iFNotesDatabase: IFNotesDatabase,
+    private val eatingLogValidator: EatingLogValidator
+) {
 
     fun getEatingLogsObservable(): Flowable<List<EatingLog>> {
         return iFNotesDatabase.eatingLogDao().getEatingLogsFlowable()
@@ -54,7 +55,7 @@ class Repository @Inject constructor(
     }
 
     fun getMostRecentEatingLog(): Flowable<Optional<EatingLog>> {
-        return iFNotesDatabase.eatingLogDao().getMostRecentEatingLog().map {list ->
+        return iFNotesDatabase.eatingLogDao().getMostRecentEatingLog().map { list ->
             if (list.isNotEmpty()) {
                 Optional.of(list[0])
             } else {

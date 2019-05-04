@@ -17,8 +17,9 @@ import kotlinx.coroutines.experimental.async
 import javax.inject.Inject
 
 class EatingLogsViewModel @Inject constructor (
-        application: Application,
-        private val repository: Repository): AndroidViewModel(application) {
+    application: Application,
+    private val repository: Repository
+) : AndroidViewModel(application) {
     companion object {
         const val CHOOSE_CSV_LOGS_REQUEST_CODE = 1
         const val EDIT_EATING_LOG_REQUEST_CODE = 2
@@ -44,7 +45,7 @@ class EatingLogsViewModel @Inject constructor (
     init {
         repository.getEatingLogsObservable().subscribe {
             eatingLogs = it.sortedWith(
-                    Comparator {a, b -> compareValuesBy(b, a, {it.startTime}, {it.endTime})})
+                    Comparator { a, b -> compareValuesBy(b, a, { it.startTime }, { it.endTime }) })
             _refreshData.postValue(Event(Unit))
         }
     }
@@ -124,8 +125,7 @@ class EatingLogsViewModel @Inject constructor (
                     }
                 }
             }
-        }
-        else if (requestCode == CHOOSE_DIR_TO_EXPORT_CSV_CODE) {
+        } else if (requestCode == CHOOSE_DIR_TO_EXPORT_CSV_CODE) {
             if (resultCode == RESULT_OK) {
                 data?.let {
                     backupManager.backupLogsToFile(

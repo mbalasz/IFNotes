@@ -23,7 +23,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
 
-class IFNotesViewModel @Inject constructor(application: Application, private val repository: Repository): AndroidViewModel(application) {
+class IFNotesViewModel @Inject constructor(application: Application, private val repository: Repository) : AndroidViewModel(application) {
     companion object {
         private val DARK_GREEN = Color.parseColor("#a4c639")
         private val DARK_RED = Color.parseColor("#8b0000")

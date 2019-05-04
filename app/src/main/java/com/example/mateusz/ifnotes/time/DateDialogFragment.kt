@@ -8,7 +8,7 @@ import android.widget.DatePicker
 import androidx.fragment.app.DialogFragment
 import java.lang.ClassCastException
 import java.lang.IllegalStateException
-import java.util.*
+import java.util.Calendar
 
 class DateDialogFragment() : DialogFragment(), DatePickerDialog.OnDateSetListener {
     companion object {
@@ -30,7 +30,7 @@ class DateDialogFragment() : DialogFragment(), DatePickerDialog.OnDateSetListene
             dateDialogListener = context as DateDialogListener
         } catch (e: ClassCastException) {
             throw ClassCastException(
-                    "${context.toString()} must implement ${DateDialogListener::class}")
+                    "$context must implement ${DateDialogListener::class}")
         }
     }
 
@@ -50,7 +50,6 @@ class DateDialogFragment() : DialogFragment(), DatePickerDialog.OnDateSetListene
                 year = it.getInt(DATE_INIT_YEAR)
             }
             DatePickerDialog(it, this, year, month, day)
-
         } ?: throw IllegalStateException("Acitivity cannot be null")
     }
 }

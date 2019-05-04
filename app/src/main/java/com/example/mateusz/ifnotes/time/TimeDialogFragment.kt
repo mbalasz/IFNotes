@@ -30,7 +30,7 @@ class TimeDialogFragment : DialogFragment() {
             timeDialogListener = context as TimeDialogListener
         } catch (e: ClassCastException) {
             throw ClassCastException(
-                    "${context.toString()} must implement ${TimeDialogListener::class}")
+                    "$context must implement ${TimeDialogListener::class}")
         }
     }
 
@@ -52,11 +52,8 @@ class TimeDialogFragment : DialogFragment() {
                         }
                     }
                     .setNegativeButton(BUTTON_CANCEL_STRING) { dialog, id ->
-
                     }
             alertDialogBuilder.create()
-
         } ?: throw IllegalStateException("Acitivity cannot be null")
-
     }
 }

@@ -63,7 +63,7 @@ class IFNotesActivity : AppCompatActivity(), TimeDialogFragment.TimeDialogListen
                     lastActivityLogText = "$LAST_ACTIVITY_FIRST_MEAL_TEXT: ${eatingLogDisplay.logTime}"
                     timeSinceLastActivityLabelText = TIME_SINCE_FIRST_MEAL_TEXT
                 }
-                IFNotesViewModel.LogState.LAST_MEAL-> {
+                IFNotesViewModel.LogState.LAST_MEAL -> {
                     lastActivityLogText = "$LAST_ACTIVITY_LAST_MEAL_TEXT: ${eatingLogDisplay.logTime}"
                     timeSinceLastActivityLabelText = TIME_SINCE_LAST_MEAL_TEXT
                 }
@@ -116,14 +116,13 @@ class IFNotesActivity : AppCompatActivity(), TimeDialogFragment.TimeDialogListen
             ifNotesViewModel.onLogLongTimeAgoClicked()
         }
 
-
         ifNotesViewModel.getLogTimeValidationMessageLiveData().observe(
                 this, Observer { validationMessage ->
             val validationDialogBuilder = AlertDialog.Builder(this)
             validationDialogBuilder
                     .setMessage(validationMessage.message)
                     .setCancelable(false)
-                    .setPositiveButton("OK") {_, _ -> }
+                    .setPositiveButton("OK") { _, _ -> }
             validationDialogBuilder.create().show()
         })
 
@@ -156,5 +155,4 @@ class IFNotesActivity : AppCompatActivity(), TimeDialogFragment.TimeDialogListen
     override fun onTimeSaved(hour: Int, minute: Int) {
         ifNotesViewModel.onNewManualLog(hour, minute)
     }
-
 }

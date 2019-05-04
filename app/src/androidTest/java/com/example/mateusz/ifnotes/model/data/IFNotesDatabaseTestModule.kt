@@ -11,7 +11,7 @@ class IFNotesDatabaseTestModule {
 
     @Provides
     @Singleton
-    fun ifNotesDataBase(application: Application) : IFNotesDatabase {
+    fun ifNotesDataBase(application: Application): IFNotesDatabase {
         return Room.inMemoryDatabaseBuilder(application, IFNotesDatabase::class.java)
                 .allowMainThreadQueries()
                 .build()

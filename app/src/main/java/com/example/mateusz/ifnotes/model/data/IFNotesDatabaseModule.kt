@@ -11,7 +11,7 @@ class IFNotesDatabaseModule {
 
     @Provides
     @Singleton
-    fun ifNotesDataBase(application: Application) : IFNotesDatabase {
+    fun ifNotesDataBase(application: Application): IFNotesDatabase {
         return Room.databaseBuilder(
                 application.applicationContext,
                 IFNotesDatabase::class.java,
