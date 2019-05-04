@@ -144,9 +144,9 @@ class EditEatingLogViewModel @Inject constructor(application: Application, priva
     }
 
     fun onSaveButtonClicked() {
-        val updatedEatingLog = eatingLog.copy(
-                startTime = _firstMealLogTimeObservable.value!!,
-                endTime = _lastMealLogTimeObservable.value!!)
+        val startTime = _firstMealLogTimeObservable.value?.let { it } ?: run { eatingLog.startTime }
+        val endTime = _lastMealLogTimeObservable.value?.let { it } ?: run { eatingLog.endTime }
+        val updatedEatingLog = eatingLog.copy(startTime = startTime, endTime = endTime)
         repository.updateEatingLog(updatedEatingLog)
     }
 
