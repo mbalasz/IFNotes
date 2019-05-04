@@ -8,6 +8,7 @@ import com.google.common.base.Optional
 import io.reactivex.Flowable
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.async
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -42,8 +43,8 @@ class Repository @Inject constructor(
         return eatingLogValidator.validateNewEatingLog(eatingLog, mutableLogs)
     }
 
-    fun insertEatingLog(eatingLog: EatingLog) {
-        async(CommonPool) {
+    fun insertEatingLog(eatingLog: EatingLog): Job {
+        return async(CommonPool) {
             iFNotesDatabase.eatingLogDao().insert(eatingLog)
         }
     }

@@ -10,7 +10,9 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import dagger.BindsInstance
 import dagger.Component
-import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.runBlocking
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.equalTo
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,9 +26,11 @@ class RepositoryTest {
 
     @Before
     fun setUp() {
+        whenever(eatingLogValidator.validateNewEatingLog(any(), any()))
+                .thenReturn(EatingLogValidator.EatingLogValidationStatus.SUCCESS)
         DaggerRepositoryTest_TestComponent.builder()
                 .application(ApplicationProvider.getApplicationContext())
-                .eatingLogValidator(EatingLogValidator())
+                .eatingLogValidator(eatingLogValidator)
                 .build()
                 .inject(this)
     }
@@ -38,10 +42,12 @@ class RepositoryTest {
 
     @Test
     fun updateEatingLog() {
-        val eatingLog = EatingLog(startTime = 100L)
-        async {
-            repository.updateEatingLog(eatingLog).await()
-            repository.getEatingLogsObservable().test().awaitCount(1).assertValue(listOf(eatingLog))
+        val eatingLog = EatingLog(id = 1, startTime = 100L)
+        runBlocking {
+            repository.insertEatingLog(eatingLog).join()
+            val updatedEatingLog = eatingLog.copy(endTime = 200L)
+            repository.updateEatingLog(updatedEatingLog).await()
+            repository.getEatingLogsObservable().test().awaitCount(1).assertValue(listOf(updatedEatingLog))
         }
     }
 
@@ -50,10 +56,41 @@ class RepositoryTest {
         whenever(eatingLogValidator.validateNewEatingLog(any(), any()))
                 .thenReturn(
                         EatingLogValidator.EatingLogValidationStatus.START_TIME_LATER_THAN_END_TIME)
-        val eatingLog = EatingLog(startTime = 100L)
-        async {
+        val oldEatingLog = EatingLog(id = 1, startTime = 100L)
+        runBlocking {
+            repository.insertEatingLog(oldEatingLog).join()
+            val updatedEatingLog = oldEatingLog.copy(endTime = 200L)
+            repository.updateEatingLog(updatedEatingLog).await()
+            repository.getEatingLogsObservable().test().awaitCount(1).assertValue(listOf(oldEatingLog))
+        }
+    }
+
+    @Test
+    fun updateEatingLog_noPreviousLogToUpdate() {
+        val eatingLog = EatingLog(id = 1, startTime = 100L)
+        runBlocking {
             repository.updateEatingLog(eatingLog).await()
             repository.getEatingLogsObservable().test().awaitCount(1).assertValue(emptyList())
+        }
+    }
+
+    @Test
+    fun insertEatingLog() {
+        val eatingLog = EatingLog(id = 1, startTime = 100L)
+        runBlocking {
+            repository.insertEatingLog(eatingLog).join()
+            repository.getEatingLogsObservable().test().awaitCount(1).assertValue(listOf(eatingLog))
+        }
+    }
+
+    @Test
+    fun getEatingLog() {
+        val eatingLog = EatingLog(id = 1, startTime = 100L)
+        val eatingLogTwo = EatingLog(id = 2, startTime = 200L)
+        runBlocking {
+            repository.insertEatingLog(eatingLog).join()
+            repository.insertEatingLog(eatingLogTwo).join()
+            assertThat(repository.getEatingLog(2), equalTo(eatingLogTwo))
         }
     }
 
