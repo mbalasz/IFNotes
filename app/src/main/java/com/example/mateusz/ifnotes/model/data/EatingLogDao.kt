@@ -32,5 +32,5 @@ interface EatingLogDao {
     fun getEatingLogs(): List<EatingLog>
 
     @Query("SELECT * FROM eatingLog WHERE id = :id")
-    fun getEatingLog(id: Int): EatingLog
+    fun getEatingLog(id: Int): EatingLog?
 }

@@ -5,14 +5,19 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.mateusz.ifnotes.lib.EatingLogValidator
 import com.example.mateusz.ifnotes.model.Repository
+import com.google.common.base.Optional
 import com.nhaarman.mockitokotlin2.any
+import com.nhaarman.mockitokotlin2.isNotNull
+import com.nhaarman.mockitokotlin2.isNull
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import dagger.BindsInstance
 import dagger.Component
 import kotlinx.coroutines.experimental.runBlocking
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.equalTo
+import org.hamcrest.Matchers.nullValue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -76,10 +81,19 @@ class RepositoryTest {
 
     @Test
     fun insertEatingLog() {
-        val eatingLog = EatingLog(id = 1, startTime = 100L)
+        val eatingLogs =
+            listOf(
+                EatingLog(id = 1, startTime = 100),
+                EatingLog(id = 2, startTime = 50),
+                EatingLog(id = 3, startTime = 150),
+                EatingLog(id = 4, startTime = 350),
+                EatingLog(id = 5, startTime = 250),
+                EatingLog(id = 6, startTime = 50))
         runBlocking {
-            repository.insertEatingLog(eatingLog).join()
-            repository.getEatingLogsObservable().test().awaitCount(1).assertValue(listOf(eatingLog))
+            eatingLogs.forEach {
+                repository.insertEatingLog(it).join()
+            }
+            repository.getEatingLogsObservable().test().awaitCount(1).assertValue(eatingLogs)
         }
     }
 
@@ -92,6 +106,65 @@ class RepositoryTest {
             repository.insertEatingLog(eatingLogTwo).join()
             assertThat(repository.getEatingLog(2), equalTo(eatingLogTwo))
         }
+    }
+
+    @Test
+    fun getMostRecentEatingLog_init_logAbsent() {
+        repository.getMostRecentEatingLog().test().awaitCount(1).assertValue(Optional.absent())
+    }
+
+    @Test
+    fun getMostRecentEatingLog() {
+        val eatingLogs =
+            listOf(
+                EatingLog(id = 1, startTime = 100),
+                EatingLog(id = 2, startTime = 50),
+                EatingLog(id = 3, startTime = 150),
+                EatingLog(id = 4, startTime = 350),
+                EatingLog(id = 5, startTime = 250),
+                EatingLog(id = 6, startTime = 50))
+        runBlocking {
+            eatingLogs.forEach { repository.insertEatingLog(it).join() }
+        }
+        repository.getMostRecentEatingLog()
+            .map {
+                assertThat(it.isPresent, `is`(true))
+                it.get().startTime
+            }.test()
+            .awaitCount(1)
+            .assertValue(350)
+    }
+
+    @Test
+    fun deleteEatingLog() {
+        val eatingLog = EatingLog(id = 0)
+
+        runBlocking {
+            repository.insertEatingLog(eatingLog)
+            repository.deleteEatingLog(eatingLog)
+        }
+
+        assertThat(repository.getEatingLog(0), `is`(nullValue()))
+    }
+
+    @Test
+    fun deleteAll() {
+        val eatingLogs = listOf(
+            EatingLog(id = 1, startTime = 100),
+            EatingLog(id = 2, startTime = 50),
+            EatingLog(id = 3, startTime = 150),
+            EatingLog(id = 4, startTime = 350),
+            EatingLog(id = 5, startTime = 250),
+            EatingLog(id = 6, startTime = 50))
+
+        runBlocking {
+            eatingLogs.forEach {
+                repository.insertEatingLog(it).join()
+            }
+            repository.deleteAll().join()
+        }
+
+        repository.getEatingLogsObservable().test().awaitCount(1).assertValue(emptyList())
     }
 
     @Singleton

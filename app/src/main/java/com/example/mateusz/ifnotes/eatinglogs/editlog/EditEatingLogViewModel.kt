@@ -13,10 +13,14 @@ import com.example.mateusz.ifnotes.model.data.EatingLog
 import com.example.mateusz.ifnotes.model.Repository
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
+import java.lang.RuntimeException
 import java.util.Calendar
 import javax.inject.Inject
 
-class EditEatingLogViewModel @Inject constructor(application: Application, private val repository: Repository) : AndroidViewModel(application) {
+class EditEatingLogViewModel @Inject constructor(
+    application: Application,
+    private val repository: Repository
+) : AndroidViewModel(application) {
     companion object {
         const val EXTRA_LOG_TIME_ID = "LOG_TIME_ID"
     }
@@ -112,7 +116,9 @@ class EditEatingLogViewModel @Inject constructor(application: Application, priva
                 val eatingLogDeferred = async {
                     repository.getEatingLog(it[EXTRA_LOG_TIME_ID] as Int)
                 }
-                eatingLog = eatingLogDeferred.await()
+                val eatingLogNullable = eatingLogDeferred.await() ?: throw RuntimeException(
+                    "Attempted to obtain a non-existent log with id $EXTRA_LOG_TIME_ID")
+                eatingLog = eatingLogNullable
                 if (eatingLog.startTime > 0L) {
                     _firstMealLogTimeObservable.value = eatingLog.startTime
                 }

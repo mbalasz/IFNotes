@@ -1,6 +1,5 @@
 package com.example.mateusz.ifnotes.model
 
-import android.app.Application
 import com.example.mateusz.ifnotes.lib.EatingLogValidator
 import com.example.mateusz.ifnotes.model.data.EatingLog
 import com.example.mateusz.ifnotes.model.data.IFNotesDatabase
@@ -15,7 +14,6 @@ import javax.inject.Singleton
 
 @Singleton
 class Repository @Inject constructor(
-    application: Application,
     private val iFNotesDatabase: IFNotesDatabase,
     private val eatingLogValidator: EatingLogValidator
 ) {
@@ -50,7 +48,7 @@ class Repository @Inject constructor(
         }
     }
 
-    fun getEatingLog(id: Int): EatingLog {
+    fun getEatingLog(id: Int): EatingLog? {
         return iFNotesDatabase.eatingLogDao().getEatingLog(id)
     }
 
