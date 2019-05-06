@@ -133,6 +133,7 @@ class IFNotesViewModel @Inject constructor(
         maybeUpdateCurrentEatingLog(DateTimeUtils.timeToMillis(hour, minute))
     }
 
+    // TODO: Add logic for disabling the log button until the job is finished.
     fun onLogButtonClicked(): Job {
         return updateCurrentEatingLog(getCurrentCalendarTime())
     }
