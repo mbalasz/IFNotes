@@ -13,19 +13,24 @@ import com.example.mateusz.ifnotes.chart.ui.EatingLogsChartActivity
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.lib.EatingLogValidator
 import com.example.mateusz.ifnotes.lib.Event
+import com.example.mateusz.ifnotes.lib.SystemClockWrapper
 import com.example.mateusz.ifnotes.model.data.EatingLog
 import com.example.mateusz.ifnotes.model.Repository
 import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import java.lang.IllegalStateException
+import java.security.PrivateKey
 import java.text.SimpleDateFormat
+import java.time.Clock
 import java.util.Locale
 import javax.inject.Inject
 
 class IFNotesViewModel @Inject constructor(
     application: Application,
-    private val repository: Repository
+    private val repository: Repository,
+    private val clock: Clock,
+    private val systemClock: SystemClockWrapper
 ) : AndroidViewModel(application) {
     companion object {
         private val DARK_GREEN = Color.parseColor("#a4c639")
@@ -197,10 +202,10 @@ class IFNotesViewModel @Inject constructor(
      * reference to elapsed real time.
      */
     private fun getElapsedRealTimeSinceBaseInMillis(baseInMillis: Long): Long {
-        return SystemClock.elapsedRealtime() - (System.currentTimeMillis() - baseInMillis)
+        return systemClock.elapsedRealtime() - (clock.millis() - baseInMillis)
     }
 
     private fun getCurrentCalendarTime(): Long {
-        return System.currentTimeMillis()
+        return clock.millis()
     }
 }
