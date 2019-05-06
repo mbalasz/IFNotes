@@ -13,7 +13,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class Repository @Inject constructor(
+open class Repository @Inject constructor(
     private val iFNotesDatabase: IFNotesDatabase,
     private val eatingLogValidator: EatingLogValidator
 ) {
@@ -22,7 +22,7 @@ class Repository @Inject constructor(
         return iFNotesDatabase.eatingLogDao().getEatingLogsFlowable()
     }
 
-    fun updateEatingLog(eatingLog: EatingLog):
+    open fun updateEatingLog(eatingLog: EatingLog):
             Deferred<EatingLogValidator.EatingLogValidationStatus> {
         return async(CommonPool) {
             val status = validateUpdate(eatingLog)
@@ -42,7 +42,7 @@ class Repository @Inject constructor(
         return eatingLogValidator.validateNewEatingLog(eatingLog, mutableLogs)
     }
 
-    fun insertEatingLog(eatingLog: EatingLog): Job {
+    open fun insertEatingLog(eatingLog: EatingLog): Job {
         return async(CommonPool) {
             iFNotesDatabase.eatingLogDao().insert(eatingLog)
         }
@@ -52,7 +52,7 @@ class Repository @Inject constructor(
         return iFNotesDatabase.eatingLogDao().getEatingLog(id)
     }
 
-    fun getMostRecentEatingLog(): Flowable<Optional<EatingLog>> {
+    open fun getMostRecentEatingLog(): Flowable<Optional<EatingLog>> {
         return iFNotesDatabase.eatingLogDao().getMostRecentEatingLog().map { list ->
             if (list.isNotEmpty()) {
                 Optional.of(list[0])

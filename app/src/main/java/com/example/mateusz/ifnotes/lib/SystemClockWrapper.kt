@@ -5,8 +5,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class SystemClockWrapper @Inject constructor() {
-    fun elapsedRealtime(): Long {
+open class SystemClockWrapper @Inject constructor() {
+    open fun elapsedRealtime(): Long {
         return SystemClock.elapsedRealtime()
     }
 }

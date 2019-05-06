@@ -3,7 +3,6 @@ package com.example.mateusz.ifnotes.ifnotes
 import android.app.Application
 import android.content.Intent
 import android.graphics.Color
-import android.os.SystemClock
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -16,14 +15,20 @@ import com.example.mateusz.ifnotes.lib.Event
 import com.example.mateusz.ifnotes.lib.SystemClockWrapper
 import com.example.mateusz.ifnotes.model.data.EatingLog
 import com.example.mateusz.ifnotes.model.Repository
+import com.google.common.base.Optional
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.channels.Channel
 import java.lang.IllegalStateException
-import java.security.PrivateKey
 import java.text.SimpleDateFormat
 import java.time.Clock
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class IFNotesViewModel @Inject constructor(
@@ -33,9 +38,8 @@ class IFNotesViewModel @Inject constructor(
     private val systemClock: SystemClockWrapper
 ) : AndroidViewModel(application) {
     companion object {
-        private val DARK_GREEN = Color.parseColor("#a4c639")
-        private val DARK_RED = Color.parseColor("#8b0000")
-        private val BLACK = Color.BLACK
+        val DARK_GREEN = Color.parseColor("#a4c639")
+        val DARK_RED = Color.parseColor("#8b0000")
 
         const val SHORT_TIME_MS = 900_000L
         const val MID_TIME_MS = 1_800_000L
@@ -57,6 +61,9 @@ class IFNotesViewModel @Inject constructor(
     private val currentEatingLogLiveData = MutableLiveData<EatingLog>()
     private val logTimeValidationMessageLiveData =
             MutableLiveData<LogTimeValidationMessage>()
+    private lateinit var initEatingLogDisposable: Disposable
+
+    private val currentEatingLogInitChannel: Channel<Unit> = Channel()
 
     val startActivityData: LiveData<Event<Intent>>
         get() = _startActivityLiveData
@@ -101,18 +108,21 @@ class IFNotesViewModel @Inject constructor(
     }
 
     init {
-        async(UI) {
-            val mostRecentEatingLogDeferred = async { repository.getMostRecentEatingLog() }
-            val mostRecentEatingLogFlowable = mostRecentEatingLogDeferred.await()
-            mostRecentEatingLogFlowable
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe {
-                        val eatingLog = it.orNull()
-                        if (currentEatingLogLiveData.value != eatingLog) {
-                            currentEatingLogLiveData.value = eatingLog
-                        }
-                    }
-        }
+        repository.getMostRecentEatingLog()
+            .timeout(6, TimeUnit.SECONDS)
+            .onErrorReturn { Optional.absent() }
+            .observeOn(AndroidSchedulers.mainThread())
+            .take(1)
+            .subscribe {
+                val eatingLog = it.orNull()
+                if (currentEatingLogLiveData.value != eatingLog) {
+                    currentEatingLogLiveData.value = eatingLog
+                }
+                async(CommonPool) {
+                    currentEatingLogInitChannel.send(Unit)
+                    currentEatingLogInitChannel.close()
+                }
+            }
     }
 
     fun getLogTimeValidationMessageLiveData(): LiveData<LogTimeValidationMessage> {
@@ -123,8 +133,8 @@ class IFNotesViewModel @Inject constructor(
         maybeUpdateCurrentEatingLog(DateTimeUtils.timeToMillis(hour, minute))
     }
 
-    fun onLogButtonClicked() {
-        updateCurrentEatingLog(getCurrentCalendarTime())
+    fun onLogButtonClicked(): Job {
+        return updateCurrentEatingLog(getCurrentCalendarTime())
     }
 
     fun onLogShortTimeAgoClicked() {
@@ -177,24 +187,29 @@ class IFNotesViewModel @Inject constructor(
         return true
     }
 
-    private fun updateCurrentEatingLog(logTime: Long) {
-        val currentEatingLog = currentEatingLogLiveData.value
-        val logTimeValidationStatus =
+    private fun updateCurrentEatingLog(logTime: Long): Job {
+        return async (CommonPool) {
+            if (!currentEatingLogInitChannel.isClosedForReceive) {
+                currentEatingLogInitChannel.receive()
+            }
+            val currentEatingLog = currentEatingLogLiveData.value
+            val logTimeValidationStatus =
                 eatingLogValidator.validateNewLogTime(logTime, currentEatingLog)
-        if (logTimeValidationStatus != EatingLogValidator.NewLogTimeValidationStatus.SUCCESS) {
-            throw IllegalStateException(
+            if (logTimeValidationStatus != EatingLogValidator.NewLogTimeValidationStatus.SUCCESS) {
+                throw IllegalStateException(
                     "Attempt to update most recent eating log with an invalid logTime:" +
-                            " $logTimeValidationStatus")
+                        " $logTimeValidationStatus")
+            }
+            val newEatingLog: EatingLog
+            if (currentEatingLog == null || eatingLogValidator.isEatingLogFinished(currentEatingLog)) {
+                newEatingLog = EatingLog(startTime = logTime)
+                repository.insertEatingLog(newEatingLog)
+            } else {
+                newEatingLog = currentEatingLog.copy(endTime = logTime)
+                repository.updateEatingLog(newEatingLog)
+            }
+            currentEatingLogLiveData.postValue(newEatingLog)
         }
-        val newEatingLog: EatingLog
-        if (currentEatingLog == null || eatingLogValidator.isEatingLogFinished(currentEatingLog)) {
-            newEatingLog = EatingLog(startTime = logTime)
-            repository.insertEatingLog(newEatingLog)
-        } else {
-            newEatingLog = currentEatingLog.copy(endTime = logTime)
-            repository.updateEatingLog(newEatingLog)
-        }
-        currentEatingLogLiveData.value = newEatingLog
     }
 
     /**
