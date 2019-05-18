@@ -7,8 +7,6 @@ import com.example.mateusz.ifnotes.lib.EatingLogValidator
 import com.example.mateusz.ifnotes.model.Repository
 import com.google.common.base.Optional
 import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.isNotNull
-import com.nhaarman.mockitokotlin2.isNull
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import dagger.BindsInstance

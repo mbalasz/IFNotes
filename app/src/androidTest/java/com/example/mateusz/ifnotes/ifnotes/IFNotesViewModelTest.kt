@@ -98,7 +98,7 @@ class IFNotesViewModelTest {
 
         var expectedTimeSinceLastActivityChronometerData: TimeSinceLastActivityChronometerData? = null
         runBlocking {
-            async (UI) {
+            async(UI) {
                 ifNotesViewModel.timeSinceLastActivity.observeForever {
                     expectedTimeSinceLastActivityChronometerData = it
                 }

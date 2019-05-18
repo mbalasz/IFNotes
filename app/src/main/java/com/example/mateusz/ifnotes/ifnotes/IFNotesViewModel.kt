@@ -17,11 +17,8 @@ import com.example.mateusz.ifnotes.model.data.EatingLog
 import com.example.mateusz.ifnotes.model.Repository
 import com.google.common.base.Optional
 import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
 import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.channels.Channel
 import java.lang.IllegalStateException
@@ -61,7 +58,6 @@ class IFNotesViewModel @Inject constructor(
     private val currentEatingLogLiveData = MutableLiveData<EatingLog>()
     private val logTimeValidationMessageLiveData =
             MutableLiveData<LogTimeValidationMessage>()
-    private lateinit var initEatingLogDisposable: Disposable
 
     private val currentEatingLogInitChannel: Channel<Unit> = Channel()
 
@@ -189,7 +185,7 @@ class IFNotesViewModel @Inject constructor(
     }
 
     private fun updateCurrentEatingLog(logTime: Long): Job {
-        return async (CommonPool) {
+        return async(CommonPool) {
             if (!currentEatingLogInitChannel.isClosedForReceive) {
                 currentEatingLogInitChannel.receive()
             }
