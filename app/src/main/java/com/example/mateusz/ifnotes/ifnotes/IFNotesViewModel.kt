@@ -130,6 +130,7 @@ class IFNotesViewModel @Inject constructor(
     }
 
     // TODO: Add logic for disabling the log button until the job is finished.
+    // Also post updateCurrentEatingLog on a single threaded executor.
     fun onLogButtonClicked(): Job {
         return updateCurrentEatingLog(getCurrentCalendarTime())
     }
