@@ -23,7 +23,7 @@ class DateDialogFragment() : DialogFragment(), DatePickerDialog.OnDateSetListene
         fun onDateSaved(day: Int, month: Int, year: Int)
     }
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
 
         try {

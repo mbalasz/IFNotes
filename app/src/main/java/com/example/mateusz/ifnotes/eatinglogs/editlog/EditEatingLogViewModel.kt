@@ -6,21 +6,22 @@ import android.os.Bundle
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.example.mateusz.ifnotes.time.DateDialogFragment
+import com.example.mateusz.ifnotes.component.AppModule.Companion.MainScope
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.lib.Event
-import com.example.mateusz.ifnotes.model.data.EatingLog
 import com.example.mateusz.ifnotes.model.Repository
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import java.lang.RuntimeException
+import com.example.mateusz.ifnotes.model.data.EatingLog
+import com.example.mateusz.ifnotes.time.DateDialogFragment
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import java.util.Calendar
 import javax.inject.Inject
 
 class EditEatingLogViewModel @Inject constructor(
     application: Application,
-    private val repository: Repository
-) : AndroidViewModel(application) {
+    private val repository: Repository,
+    @MainScope mainScope: CoroutineScope
+) : AndroidViewModel(application), CoroutineScope by mainScope {
     companion object {
         const val EXTRA_LOG_TIME_ID = "LOG_TIME_ID"
     }
@@ -112,12 +113,10 @@ class EditEatingLogViewModel @Inject constructor(
 
     fun onActivityCreated(intent: Intent?) {
         intent?.extras?.let {
-            async(UI) {
-                val eatingLogDeferred = async {
-                    repository.getEatingLog(it[EXTRA_LOG_TIME_ID] as Int)
-                }
-                val eatingLogNullable = eatingLogDeferred.await() ?: throw RuntimeException(
-                    "Attempted to obtain a non-existent log with id $EXTRA_LOG_TIME_ID")
+            launch {
+                val eatingLogNullable =
+                    repository.getEatingLog(it[EXTRA_LOG_TIME_ID] as Int) ?: throw RuntimeException(
+                        "Attempted to obtain a non-existent log with id $EXTRA_LOG_TIME_ID")
                 eatingLog = eatingLogNullable
                 if (eatingLog.startTime > 0L) {
                     _firstMealLogTimeObservable.value = eatingLog.startTime
@@ -153,7 +152,9 @@ class EditEatingLogViewModel @Inject constructor(
         val startTime = _firstMealLogTimeObservable.value?.let { it } ?: run { eatingLog.startTime }
         val endTime = _lastMealLogTimeObservable.value?.let { it } ?: run { eatingLog.endTime }
         val updatedEatingLog = eatingLog.copy(startTime = startTime, endTime = endTime)
-        repository.updateEatingLog(updatedEatingLog)
+        launch {
+            repository.updateEatingLogAsync(updatedEatingLog)
+        }
     }
 
     fun onDiscardButtonClicked() {

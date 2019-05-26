@@ -23,7 +23,7 @@ class TimeDialogFragment : DialogFragment() {
         fun onTimeSaved(hour: Int, minute: Int)
     }
 
-    override fun onAttach(context: Context?) {
+    override fun onAttach(context: Context) {
         super.onAttach(context)
 
         try {

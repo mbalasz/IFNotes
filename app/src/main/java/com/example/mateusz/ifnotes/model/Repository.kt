@@ -5,10 +5,11 @@ import com.example.mateusz.ifnotes.model.data.EatingLog
 import com.example.mateusz.ifnotes.model.data.IFNotesDatabase
 import com.google.common.base.Optional
 import io.reactivex.Flowable
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.Deferred
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,9 +23,8 @@ open class Repository @Inject constructor(
         return iFNotesDatabase.eatingLogDao().getEatingLogsFlowable()
     }
 
-    open fun updateEatingLog(eatingLog: EatingLog):
-            Deferred<EatingLogValidator.EatingLogValidationStatus> {
-        return async(CommonPool) {
+    open suspend fun updateEatingLogAsync(eatingLog: EatingLog) = coroutineScope {
+        async(Dispatchers.Default) {
             val status = validateUpdate(eatingLog)
             if (status == EatingLogValidator.EatingLogValidationStatus.SUCCESS) {
                 iFNotesDatabase.eatingLogDao().update(eatingLog)
@@ -42,14 +42,16 @@ open class Repository @Inject constructor(
         return eatingLogValidator.validateNewEatingLog(eatingLog, mutableLogs)
     }
 
-    open fun insertEatingLog(eatingLog: EatingLog): Job {
-        return async(CommonPool) {
+    open suspend fun insertEatingLog(eatingLog: EatingLog) = coroutineScope {
+        launch(Dispatchers.Default) {
             iFNotesDatabase.eatingLogDao().insert(eatingLog)
         }
     }
 
-    fun getEatingLog(id: Int): EatingLog? {
-        return iFNotesDatabase.eatingLogDao().getEatingLog(id)
+    suspend fun getEatingLog(id: Int): EatingLog? = coroutineScope {
+        withContext(Dispatchers.Default) {
+            iFNotesDatabase.eatingLogDao().getEatingLog(id)
+        }
     }
 
     open fun getMostRecentEatingLog(): Flowable<Optional<EatingLog>> {
@@ -62,14 +64,14 @@ open class Repository @Inject constructor(
         }
     }
 
-    fun deleteEatingLog(eatingLog: EatingLog) {
-        async(CommonPool) {
+    suspend fun deleteEatingLog(eatingLog: EatingLog) = coroutineScope {
+        async(Dispatchers.Default) {
             iFNotesDatabase.eatingLogDao().delete(eatingLog)
         }
     }
 
-    fun deleteAll(): Deferred<Unit> {
-        return async(CommonPool) {
+    suspend fun deleteAll() = coroutineScope {
+        async(Dispatchers.Default) {
             iFNotesDatabase.eatingLogDao().deleteAll()
         }
     }

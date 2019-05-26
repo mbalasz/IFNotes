@@ -6,20 +6,23 @@ import android.content.Intent
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.example.mateusz.ifnotes.component.AppModule.Companion.MainScope
+import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogViewModel
 import com.example.mateusz.ifnotes.eatinglogs.editlog.ui.EditEatingLogActivity
 import com.example.mateusz.ifnotes.lib.BackupManager
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.lib.Event
-import com.example.mateusz.ifnotes.model.data.EatingLog
 import com.example.mateusz.ifnotes.model.Repository
-import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogViewModel
-import kotlinx.coroutines.experimental.async
+import com.example.mateusz.ifnotes.model.data.EatingLog
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class EatingLogsViewModel @Inject constructor (
     application: Application,
-    private val repository: Repository
-) : AndroidViewModel(application) {
+    private val repository: Repository,
+    @MainScope mainScope: CoroutineScope
+) : AndroidViewModel(application), CoroutineScope by mainScope {
     companion object {
         const val CHOOSE_CSV_LOGS_REQUEST_CODE = 1
         const val EDIT_EATING_LOG_REQUEST_CODE = 2
@@ -71,7 +74,9 @@ class EatingLogsViewModel @Inject constructor (
             return
         }
         eatingLogItemRemovedFlag = true
-        repository.deleteEatingLog(eatingLogs[position])
+        launch {
+            repository.deleteEatingLog(eatingLogs[position])
+        }
     }
 
     fun getEatingLogsCount(): Int {
@@ -114,7 +119,7 @@ class EatingLogsViewModel @Inject constructor (
         if (requestCode == CHOOSE_CSV_LOGS_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 data?.let {
-                    async {
+                    launch {
                         val eatingLogs = csvLogsManager.getEatingLogsFromCsv(it.data)
                         if (!eatingLogs.isEmpty()) {
                             repository.deleteAll().await()
@@ -128,8 +133,10 @@ class EatingLogsViewModel @Inject constructor (
         } else if (requestCode == CHOOSE_DIR_TO_EXPORT_CSV_CODE) {
             if (resultCode == RESULT_OK) {
                 data?.let {
-                    backupManager.backupLogsToFile(
+                    launch {
+                        backupManager.backupLogsToFile(
                             it.data, csvLogsManager.getCsvFromEatingLogs(eatingLogs))
+                    }
                 }
             }
         }

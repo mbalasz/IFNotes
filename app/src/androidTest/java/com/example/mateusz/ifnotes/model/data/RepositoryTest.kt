@@ -11,7 +11,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import dagger.BindsInstance
 import dagger.Component
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.runBlocking
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.equalTo
@@ -49,7 +49,7 @@ class RepositoryTest {
         runBlocking {
             repository.insertEatingLog(eatingLog).join()
             val updatedEatingLog = eatingLog.copy(endTime = 200L)
-            repository.updateEatingLog(updatedEatingLog).await()
+            repository.updateEatingLogAsync(updatedEatingLog).await()
             repository.getEatingLogsObservable().test().awaitCount(1).assertValue(listOf(updatedEatingLog))
         }
     }
@@ -63,7 +63,7 @@ class RepositoryTest {
         runBlocking {
             repository.insertEatingLog(oldEatingLog).join()
             val updatedEatingLog = oldEatingLog.copy(endTime = 200L)
-            repository.updateEatingLog(updatedEatingLog).await()
+            repository.updateEatingLogAsync(updatedEatingLog).await()
             repository.getEatingLogsObservable().test().awaitCount(1).assertValue(listOf(oldEatingLog))
         }
     }
@@ -72,7 +72,7 @@ class RepositoryTest {
     fun updateEatingLog_noPreviousLogToUpdate() {
         val eatingLog = EatingLog(id = 1, startTime = 100L)
         runBlocking {
-            repository.updateEatingLog(eatingLog).await()
+            repository.updateEatingLogAsync(eatingLog).await()
             repository.getEatingLogsObservable().test().awaitCount(1).assertValue(emptyList())
         }
     }
@@ -140,9 +140,9 @@ class RepositoryTest {
         runBlocking {
             repository.insertEatingLog(eatingLog)
             repository.deleteEatingLog(eatingLog)
-        }
 
-        assertThat(repository.getEatingLog(0), `is`(nullValue()))
+            assertThat(repository.getEatingLog(0), `is`(nullValue()))
+        }
     }
 
     @Test

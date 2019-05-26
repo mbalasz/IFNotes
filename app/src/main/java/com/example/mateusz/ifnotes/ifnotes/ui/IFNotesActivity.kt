@@ -8,14 +8,22 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.example.mateusz.ifnotes.R
 import com.example.mateusz.ifnotes.component.ViewModelFactory
-import com.example.mateusz.ifnotes.time.TimeDialogFragment
 import com.example.mateusz.ifnotes.ifnotes.IFNotesViewModel
 import com.example.mateusz.ifnotes.ifnotes.IFNotesViewModel.Companion.LONG_TIME_MS
 import com.example.mateusz.ifnotes.ifnotes.IFNotesViewModel.Companion.MID_TIME_MS
 import com.example.mateusz.ifnotes.ifnotes.IFNotesViewModel.Companion.SHORT_TIME_MS
+import com.example.mateusz.ifnotes.time.TimeDialogFragment
 import dagger.android.AndroidInjection
-import kotlinx.android.synthetic.main.activity_ifnotes.*
-import java.lang.IllegalStateException
+import kotlinx.android.synthetic.main.activity_ifnotes.chart
+import kotlinx.android.synthetic.main.activity_ifnotes.history
+import kotlinx.android.synthetic.main.activity_ifnotes.lastActivityLog
+import kotlinx.android.synthetic.main.activity_ifnotes.logActivityButton
+import kotlinx.android.synthetic.main.activity_ifnotes.logLongTimeAgo
+import kotlinx.android.synthetic.main.activity_ifnotes.logMidTimeAgo
+import kotlinx.android.synthetic.main.activity_ifnotes.logShortTimeAgo
+import kotlinx.android.synthetic.main.activity_ifnotes.manualLogButton
+import kotlinx.android.synthetic.main.activity_ifnotes.timeSinceLastActivityChronometer
+import kotlinx.android.synthetic.main.activity_ifnotes.timeSinceLastActivityLabel
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 

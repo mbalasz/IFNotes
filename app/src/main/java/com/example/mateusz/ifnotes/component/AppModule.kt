@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModelProvider
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.CoroutineScope
 import java.time.Clock
 import java.time.ZoneId
 import javax.inject.Singleton
@@ -23,6 +24,15 @@ abstract class AppModule {
         @Singleton
         fun clock(): Clock {
             return Clock.system(ZoneId.systemDefault())
+        }
+
+        internal annotation class MainScope
+
+        @JvmStatic
+        @Provides
+        @MainScope
+        fun mainScope(): CoroutineScope {
+            return kotlinx.coroutines.MainScope()
         }
     }
 }
