@@ -43,7 +43,7 @@ class IFNotesViewModelTest {
     private val testScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     @get:Rule
-    val mockitoRule = MockitoJUnit.rule().silent()
+    val mockitoRule = MockitoJUnit.rule()
 
     @get:Rule
     var instantTaskExecutorRule = InstantTaskExecutorRule()
@@ -94,7 +94,9 @@ class IFNotesViewModelTest {
 
         runBlocking {
             ifNotesViewModel.onLogButtonClicked()
+        }
 
+        runBlocking {
             argumentCaptor<EatingLog>().apply {
                 verify(repository).insertEatingLog(capture())
                 assertThat(firstValue.startTime, `is`(equalTo(1200L)))

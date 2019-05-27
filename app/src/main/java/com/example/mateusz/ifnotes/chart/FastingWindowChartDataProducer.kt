@@ -12,7 +12,7 @@ class FastingWindowChartDataProducer(windowValidator: WindowValidator)
         checkEatingLogValid(eatingLogs[0])
         val dataPoints = arrayListOf<DataPoint>()
         for (i in eatingLogs.indices) {
-            if (i == 0 || i == eatingLogs.size - 1) {
+            if (i == 0) {
                 continue
             }
             val currEatingLog = eatingLogs[i]

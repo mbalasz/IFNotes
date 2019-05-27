@@ -1,6 +1,7 @@
 package com.example.mateusz.ifnotes.component
 
 import android.app.Application
+import com.example.mateusz.ifnotes.chart.EatingLogsChartModule
 import com.example.mateusz.ifnotes.eatinglogs.EatingLogsModule
 import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogModule
 import com.example.mateusz.ifnotes.ifnotes.IFNotesModule
@@ -15,6 +16,7 @@ import javax.inject.Singleton
     AndroidInjectionModule::class,
     AppModule::class,
     IFNotesModule::class,
+    EatingLogsChartModule::class,
     EatingLogsModule::class,
     EditEatingLogModule::class,
     IFNotesDatabaseModule::class])

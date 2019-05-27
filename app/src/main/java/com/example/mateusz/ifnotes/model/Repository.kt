@@ -19,7 +19,7 @@ open class Repository @Inject constructor(
     private val eatingLogValidator: EatingLogValidator
 ) {
 
-    fun getEatingLogsObservable(): Flowable<List<EatingLog>> {
+    open fun getEatingLogsObservable(): Flowable<List<EatingLog>> {
         return iFNotesDatabase.eatingLogDao().getEatingLogsFlowable()
     }
 

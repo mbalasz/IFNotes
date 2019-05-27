@@ -6,10 +6,13 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.example.mateusz.ifnotes.R
 import com.example.mateusz.ifnotes.chart.EatingLogsChartViewModel
+import com.example.mateusz.ifnotes.component.ViewModelFactory
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
+import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.content_chart.eatingLogsChart
+import javax.inject.Inject
 
 class EatingLogsChartActivity : AppCompatActivity() {
 
@@ -19,13 +22,17 @@ class EatingLogsChartActivity : AppCompatActivity() {
         private const val VALUE_TEXT_SIZE = 10f
     }
 
+    @Inject lateinit var viewModelFactory: ViewModelFactory
+
     private val eatingLogsChartViewModel: EatingLogsChartViewModel by lazy {
-        ViewModelProviders.of(this).get(EatingLogsChartViewModel::class.java)
+        ViewModelProviders.of(this, viewModelFactory).get(EatingLogsChartViewModel::class.java)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_eating_logs_chart)
+
+        AndroidInjection.inject(this)
 
         eatingLogsChartViewModel.eatingLogsChartDataLiveData.observe(this, Observer {
             val entryPoints = it.entryPoints
@@ -54,10 +61,5 @@ class EatingLogsChartActivity : AppCompatActivity() {
             eatingLogsChart.setVisibleXRangeMaximum(eatingLogsChart.xAxis.mAxisRange)
             eatingLogsChart.invalidate()
         })
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        eatingLogsChartViewModel.onDestroy()
     }
 }

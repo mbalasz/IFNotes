@@ -1,6 +1,7 @@
 package com.example.mateusz.ifnotes.chart
 
 import android.app.Application
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -33,13 +34,14 @@ class EatingLogsChartViewModel @Inject constructor(
             val eatingLogs = it.sortedWith(
                     Comparator { a, b -> compareValuesBy(a, b, { it.startTime }, { it.endTime }) })
             val dataPoints = FastingWindowChartDataProducer(windowValidator).getDataPoints(eatingLogs)
-            var chartData =
+            val chartData =
                     ChartData(getEntriesFromDataPoints(dataPoints), getLabelsFromDataPoints(dataPoints))
             _eatingLogsChartDataLiveData.postValue(chartData)
         }
     }
 
-    fun onDestroy() {
+    override fun onCleared() {
+        super.onCleared()
         eatingLogsSubscription?.dispose()
     }
 
