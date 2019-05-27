@@ -57,7 +57,7 @@ class EatingLogsViewModel @Inject constructor (
         eatingLogsItemView.clearView()
     }
 
-    fun onEditEatingLogItemClicked(eatingLogsItemView: EatingLogsItemView, position: Int) {
+    fun onEditEatingLogItemClicked(position: Int) {
         if (position < 0 || eatingLogs.size - 1 < position) {
             return
         }
@@ -69,7 +69,7 @@ class EatingLogsViewModel @Inject constructor (
                 Event(ActivityForResultsData(intent, EDIT_EATING_LOG_REQUEST_CODE))
     }
 
-    fun onRemoveEatingLogItemClicked(eatingLogsItemView: EatingLogsItemView, position: Int) {
+    fun onRemoveEatingLogItemClicked(position: Int) {
         if (position < 0 || eatingLogs.size - 1 < position) {
             return
         }
@@ -118,10 +118,10 @@ class EatingLogsViewModel @Inject constructor (
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == CHOOSE_CSV_LOGS_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                data?.let {
+                data?.data?.let {
                     launch {
-                        val eatingLogs = csvLogsManager.getEatingLogsFromCsv(it.data)
-                        if (!eatingLogs.isEmpty()) {
+                        val eatingLogs = csvLogsManager.getEatingLogsFromCsv(it)
+                        if (eatingLogs.isNotEmpty()) {
                             repository.deleteAll().await()
                             for (eatingLog in eatingLogs) {
                                 repository.insertEatingLog(eatingLog)

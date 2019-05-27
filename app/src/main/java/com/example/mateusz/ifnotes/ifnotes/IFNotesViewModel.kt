@@ -66,7 +66,6 @@ class IFNotesViewModel @Inject constructor(
     private val currentEatingLogDisposable: Disposable
     private var isFirstLogLoaded = false
 
-
     val startActivityData: LiveData<Event<Intent>>
         get() = _startActivityLiveData
     private val _startActivityLiveData = MutableLiveData<Event<Intent>>()
@@ -125,7 +124,7 @@ class IFNotesViewModel @Inject constructor(
         launch {
             delay(TimeUnit.SECONDS.toMillis(6))
             if (!isFirstLogLoaded) {
-//                throw RuntimeException("Couldn't load logs from database")
+                throw RuntimeException("Couldn't load logs from database")
             }
         }
     }
@@ -201,7 +200,7 @@ class IFNotesViewModel @Inject constructor(
     }
 
     private fun updateCurrentEatingLog(logTime: Long) {
-        val job = launch {
+        launch {
             currentEatingLogUpdatedChannel.receive()
             val currentEatingLog = currentEatingLogLiveData.value
             val logTimeValidationStatus =

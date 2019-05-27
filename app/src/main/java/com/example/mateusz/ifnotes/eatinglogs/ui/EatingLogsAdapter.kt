@@ -23,10 +23,10 @@ class EatingLogsAdapter(val context: Context, private val eatingLogsViewModel: E
 
         init {
             removeButton.setOnClickListener {
-                eatingLogsViewModel.onRemoveEatingLogItemClicked(this, adapterPosition)
+                eatingLogsViewModel.onRemoveEatingLogItemClicked(adapterPosition)
             }
             editButton.setOnClickListener {
-                eatingLogsViewModel.onEditEatingLogItemClicked(this, adapterPosition)
+                eatingLogsViewModel.onEditEatingLogItemClicked(adapterPosition)
             }
         }
 

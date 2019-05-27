@@ -17,7 +17,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
-import java.util.Observable
 import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)

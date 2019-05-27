@@ -42,7 +42,7 @@ class TimeDialogFragment : DialogFragment() {
             alertDialogBuilder
                     .setMessage("Manual log")
                     .setView(dialogView)
-                    .setPositiveButton(BUTTON_SAVE_STRING) { dialog, id ->
+                    .setPositiveButton(BUTTON_SAVE_STRING) { _, _ ->
                         val timePicker = dialogView.timePicker
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                             timeDialogListener.onTimeSaved(timePicker.hour, timePicker.minute)
@@ -51,7 +51,7 @@ class TimeDialogFragment : DialogFragment() {
                                     timePicker.currentHour, timePicker.currentMinute)
                         }
                     }
-                    .setNegativeButton(BUTTON_CANCEL_STRING) { dialog, id ->
+                    .setNegativeButton(BUTTON_CANCEL_STRING) { _, _ ->
                     }
             alertDialogBuilder.create()
         } ?: throw IllegalStateException("Acitivity cannot be null")
