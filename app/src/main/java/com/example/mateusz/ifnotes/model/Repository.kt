@@ -64,7 +64,7 @@ open class Repository @Inject constructor(
         }
     }
 
-    suspend fun deleteEatingLog(eatingLog: EatingLog) = coroutineScope {
+    open suspend fun deleteEatingLog(eatingLog: EatingLog) = coroutineScope {
         async(Dispatchers.Default) {
             iFNotesDatabase.eatingLogDao().delete(eatingLog)
         }

@@ -16,12 +16,16 @@ import com.example.mateusz.ifnotes.model.Repository
 import com.example.mateusz.ifnotes.model.data.EatingLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.time.Clock
 import javax.inject.Inject
 
 class EatingLogsViewModel @Inject constructor (
     application: Application,
     private val repository: Repository,
-    @MainScope mainScope: CoroutineScope
+    @MainScope mainScope: CoroutineScope,
+    private val csvLogsManager: CSVLogsManager,
+    private val backupManager: BackupManager,
+    private val clock: Clock
 ) : AndroidViewModel(application), CoroutineScope by mainScope {
     companion object {
         const val CHOOSE_CSV_LOGS_REQUEST_CODE = 1
@@ -33,9 +37,7 @@ class EatingLogsViewModel @Inject constructor (
 
     data class ActivityForResultsData(val intent: Intent, val requestCode: Int)
 
-    private val csvLogsManager = CSVLogsManager(application)
-    private val backupManager = BackupManager(application)
-    var eatingLogs: List<EatingLog> = emptyList()
+    private var eatingLogs: List<EatingLog> = emptyList()
     private val _startActivityForResult = MutableLiveData<Event<ActivityForResultsData>>()
     private val _refreshData = MutableLiveData<Event<Unit>>()
     private var eatingLogItemRemovedFlag = false
@@ -63,7 +65,7 @@ class EatingLogsViewModel @Inject constructor (
         }
         val eatingLog = eatingLogs[position]
         val intent = Intent(getApplication(), EditEatingLogActivity::class.java).apply {
-            putExtra(EditEatingLogViewModel.EXTRA_LOG_TIME_ID, eatingLog.id)
+            putExtra(EditEatingLogViewModel.EXTRA_EATING_LOG_ID, eatingLog.id)
         }
         _startActivityForResult.value =
                 Event(ActivityForResultsData(intent, EDIT_EATING_LOG_REQUEST_CODE))
@@ -109,12 +111,13 @@ class EatingLogsViewModel @Inject constructor (
             type = "text/*"
             putExtra(
                     Intent.EXTRA_TITLE,
-                    "${CSV_FILE_DEFAULT_NAME}_${DateTimeUtils.toDateString(System.currentTimeMillis())}.csv")
+                    "${CSV_FILE_DEFAULT_NAME}_${DateTimeUtils.toDateString(clock.millis())}.csv")
         }
         _startActivityForResult.value =
                 Event(ActivityForResultsData(intent, CHOOSE_DIR_TO_EXPORT_CSV_CODE))
     }
 
+    // TODO: add test for this method.
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == CHOOSE_CSV_LOGS_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {

@@ -11,8 +11,11 @@ import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class CSVLogsManager(private val context: Context) {
+@Singleton
+open class CSVLogsManager @Inject constructor(private val context: Context) {
     companion object {
         private const val FIRST_MEAL_DATE_IDX = 0
         private const val FIRST_MEAL_TIME_IDX = 1

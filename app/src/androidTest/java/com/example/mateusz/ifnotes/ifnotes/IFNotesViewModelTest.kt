@@ -1,6 +1,6 @@
 package com.example.mateusz.ifnotes.ifnotes
 
-import android.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiThread
@@ -22,6 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineScope
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.nullValue
@@ -32,6 +33,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
+import org.mockito.junit.MockitoRule
 import java.time.Clock
 
 @RunWith(AndroidJUnit4::class)
@@ -42,7 +44,7 @@ class IFNotesViewModelTest {
     private val testScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     @get:Rule
-    val mockitoRule = MockitoJUnit.rule()
+    val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
     @get:Rule
     var instantTaskExecutorRule = InstantTaskExecutorRule()
@@ -71,7 +73,8 @@ class IFNotesViewModelTest {
 
         ifNotesViewModel = createIfNotesViewModel()
 
-        // TODO replace with runBlockingTest and TestCoroutineScope once they're stable.
+        // TODO replace with runBlockingTest and TestCoroutineScope. Test coroutines should now
+        // compile.
         runBlocking(testScope.coroutineContext) {
             ifNotesViewModel.onLogButtonClicked()
             verify(repository, never()).insertEatingLog(any())

@@ -23,7 +23,7 @@ class EditEatingLogViewModel @Inject constructor(
     @MainScope mainScope: CoroutineScope
 ) : AndroidViewModel(application), CoroutineScope by mainScope {
     companion object {
-        const val EXTRA_LOG_TIME_ID = "LOG_TIME_ID"
+        const val EXTRA_EATING_LOG_ID = "EXTRA_EATING_LOG_ID"
     }
 
     enum class EditMode {
@@ -115,8 +115,8 @@ class EditEatingLogViewModel @Inject constructor(
         intent?.extras?.let {
             launch {
                 val eatingLogNullable =
-                    repository.getEatingLog(it[EXTRA_LOG_TIME_ID] as Int) ?: throw RuntimeException(
-                        "Attempted to obtain a non-existent log with id $EXTRA_LOG_TIME_ID")
+                    repository.getEatingLog(it[EXTRA_EATING_LOG_ID] as Int) ?: throw RuntimeException(
+                        "Attempted to obtain a non-existent log with id $EXTRA_EATING_LOG_ID")
                 eatingLog = eatingLogNullable
                 if (eatingLog.startTime > 0L) {
                     _firstMealLogTimeObservable.value = eatingLog.startTime

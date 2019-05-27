@@ -13,13 +13,13 @@ import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel
 class EatingLogsAdapter(val context: Context, private val eatingLogsViewModel: EatingLogsViewModel)
     : RecyclerView.Adapter<EatingLogsAdapter.EatingLogViewHolder>() {
 
-    inner class EatingLogViewHolder(val view: ViewGroup) :
+    inner class EatingLogViewHolder(view: ViewGroup) :
             RecyclerView.ViewHolder(view), EatingLogsViewModel.EatingLogsItemView {
 
-        val startTimeTextView = view.findViewById(R.id.eating_log_start_time) as TextView
-        val endTimeTextView = view.findViewById(R.id.eating_log_end_time) as TextView
-        val removeButton = view.findViewById(R.id.item_row_remove_button) as ImageButton
-        val editButton = view.findViewById(R.id.item_row_edit_button) as ImageButton
+        private val startTimeTextView = view.findViewById(R.id.eating_log_start_time) as TextView
+        private val endTimeTextView = view.findViewById(R.id.eating_log_end_time) as TextView
+        private val removeButton = view.findViewById(R.id.item_row_remove_button) as ImageButton
+        private val editButton = view.findViewById(R.id.item_row_edit_button) as ImageButton
 
         init {
             removeButton.setOnClickListener {
