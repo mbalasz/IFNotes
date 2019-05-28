@@ -6,9 +6,9 @@ import androidx.lifecycle.Observer
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel.ActivityForResultsData
-import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel.Companion.EDIT_EATING_LOG_REQUEST_CODE
 import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel.Companion.CHOOSE_CSV_LOGS_REQUEST_CODE
 import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel.Companion.CHOOSE_DIR_TO_EXPORT_CSV_CODE
+import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel.Companion.EDIT_EATING_LOG_REQUEST_CODE
 import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel.EatingLogsItemView
 import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogViewModel
 import com.example.mateusz.ifnotes.eatinglogs.editlog.ui.EditEatingLogActivity
@@ -23,8 +23,9 @@ import com.nhaarman.mockitokotlin2.eq
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Flowable
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.runBlockingTest
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.hasItem
@@ -37,7 +38,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
-import java.lang.AssertionError
 import java.time.Clock
 
 @RunWith(AndroidJUnit4::class)
@@ -50,7 +50,7 @@ class EatingLogsViewModelTest {
     @Mock private lateinit var backupManager: BackupManager
     @Mock private lateinit var clock: Clock
 
-    private val testScope = MainScope()
+    private val testScope = TestCoroutineScope()
 
     lateinit var eatingLogsViewModel: EatingLogsViewModel
 
@@ -98,16 +98,15 @@ class EatingLogsViewModelTest {
     }
 
     @Test
-    fun onRemoveEatingLogItemClicked() {
+    fun onRemoveEatingLogItemClicked() = runBlocking<Unit> {
         whenever(repository.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
         eatingLogsViewModel = createEatingLogsViewModel()
 
-        runBlocking {
+        testScope.runBlockingTest {
             eatingLogsViewModel.onRemoveEatingLogItemClicked(2)
         }
-        runBlocking {
-            verify(repository).deleteEatingLog(eq(EatingLog(id = 3, startTime = 320, endTime = 400)))
-        }
+
+        verify(repository).deleteEatingLog(eq(EatingLog(id = 3, startTime = 320, endTime = 400)))
     }
 
     @Test
