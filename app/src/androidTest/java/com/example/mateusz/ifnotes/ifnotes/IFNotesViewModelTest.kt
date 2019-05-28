@@ -16,17 +16,16 @@ import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
+import io.reactivex.schedulers.TestScheduler
 import io.reactivex.subjects.PublishSubject
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScope
+import kotlinx.coroutines.test.runBlockingTest
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -41,7 +40,8 @@ class IFNotesViewModelTest {
     @Mock private lateinit var repository: Repository
     @Mock private lateinit var clock: Clock
     @Mock private lateinit var systemClock: SystemClockWrapper
-    private val testScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val testScope = TestCoroutineScope()
+    private val testScheduler = TestScheduler()
 
     @get:Rule
     val mockitoRule: MockitoRule = MockitoJUnit.rule()
@@ -56,16 +56,22 @@ class IFNotesViewModelTest {
         whenever(repository.getMostRecentEatingLog())
             .thenReturn(Flowable.fromArray(Optional.absent()))
         ifNotesViewModel = createIfNotesViewModel()
+        testScheduler.triggerActions()
+    }
+
+    @After
+    fun cleanUp() {
+        testScope.cleanupTestCoroutines()
     }
 
     @Test
-    fun timeSinceLastActivity_initValueIsNull() {
+    fun timeSinceLastActivity_initValueIsNull() = testScope.runBlockingTest {
         assertThat(ifNotesViewModel.timeSinceLastActivity.value, `is`(nullValue()))
     }
 
     @Suppress("DeferredResultUnused")
     @Test
-    fun onLogButtonClicked_initEatingLogStillBeingLoaded_noop() {
+    fun onLogButtonClicked_initEatingLogStillBeingLoaded_noop() = runBlocking<Unit> {
         val initEatingLogPublisher = PublishSubject.create<Optional<EatingLog>>()
         whenever(repository.getMostRecentEatingLog())
             .thenReturn(initEatingLogPublisher.toFlowable(BackpressureStrategy.BUFFER))
@@ -73,61 +79,53 @@ class IFNotesViewModelTest {
 
         ifNotesViewModel = createIfNotesViewModel()
 
-        // TODO replace with runBlockingTest and TestCoroutineScope. Test coroutines should now
-        // compile.
-        runBlocking(testScope.coroutineContext) {
+        testScope.runBlockingTest {
             ifNotesViewModel.onLogButtonClicked()
             verify(repository, never()).insertEatingLog(any())
             verify(repository, never()).updateEatingLogAsync(any())
 
             initEatingLogPublisher.onNext(Optional.of(EatingLog(startTime = 100L)))
-            // TODO: Remove this delay when switching to runBlockingTest
-            delay(200L)
+            testScheduler.triggerActions()
         }
 
-        runBlocking {
-            verify(repository).updateEatingLogAsync(any())
-        }
+        verify(repository).updateEatingLogAsync(any())
     }
 
     @Test
-    fun onLogButtonClicked_noEatingLogInProgress_createsNewEatingLog() {
+    fun onLogButtonClicked_noEatingLogInProgress_createsNewEatingLog() = runBlocking<Unit> {
         whenever(clock.millis()).thenReturn(1200L)
 
-        runBlocking {
+        testScope.runBlockingTest {
             ifNotesViewModel.onLogButtonClicked()
         }
 
-        runBlocking {
-            argumentCaptor<EatingLog>().apply {
-                verify(repository).insertEatingLog(capture())
-                assertThat(firstValue.startTime, `is`(equalTo(1200L)))
-            }
+        argumentCaptor<EatingLog>().apply {
+            verify(repository).insertEatingLog(capture())
+            assertThat(firstValue.startTime, `is`(equalTo(1200L)))
         }
     }
 
     @Test
-    fun onLogButtonClicked_eatingLogInProgress_updatesCurrentEatingLog() {
+    fun onLogButtonClicked_eatingLogInProgress_updatesCurrentEatingLog() = runBlocking<Unit> {
         val eatingLogInProgress = EatingLog(id = 1, startTime = 300L)
         whenever(repository.getMostRecentEatingLog())
             .thenReturn(Flowable.fromArray(Optional.of(eatingLogInProgress)))
         ifNotesViewModel = createIfNotesViewModel()
+        testScheduler.triggerActions()
         whenever(clock.millis()).thenReturn(1200L)
 
-        runBlocking(testScope.coroutineContext) {
+        testScope.runBlockingTest {
             ifNotesViewModel.onLogButtonClicked()
         }
 
-        runBlocking {
-            argumentCaptor<EatingLog>().apply {
-                verify(repository).updateEatingLogAsync(capture())
-                assertThat(firstValue.endTime, `is`(equalTo(1200L)))
-            }
+        argumentCaptor<EatingLog>().apply {
+            verify(repository).updateEatingLogAsync(capture())
+            assertThat(firstValue.endTime, `is`(equalTo(1200L)))
         }
     }
 
     @Test
-    fun mostRecentLogUpdated_timeSinceLastActivityIsUpdated() {
+    fun mostRecentLogUpdated_timeSinceLastActivityIsUpdated() = testScope.runBlockingTest {
         val initEatingLogPublisher = PublishSubject.create<Optional<EatingLog>>()
         whenever(repository.getMostRecentEatingLog())
             .thenReturn(initEatingLogPublisher.toFlowable(BackpressureStrategy.BUFFER))
@@ -136,6 +134,7 @@ class IFNotesViewModelTest {
         whenever(systemClock.elapsedRealtime()).thenReturn(500L)
 
         initEatingLogPublisher.onNext(Optional.of(EatingLog(startTime = 100L)))
+        testScheduler.triggerActions()
 
         var expectedTimeSinceLastActivityChronometerData: TimeSinceLastActivityChronometerData? = null
         runOnUiThread {
@@ -150,6 +149,12 @@ class IFNotesViewModelTest {
     }
 
     private fun createIfNotesViewModel(): IFNotesViewModel {
-        return IFNotesViewModel(ApplicationProvider.getApplicationContext(), repository, clock, systemClock, testScope)
+        return IFNotesViewModel(
+            ApplicationProvider.getApplicationContext(),
+            repository,
+            clock,
+            systemClock,
+            testScope,
+            testScheduler)
     }
 }

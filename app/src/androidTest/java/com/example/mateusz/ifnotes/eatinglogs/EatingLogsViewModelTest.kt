@@ -102,7 +102,9 @@ class EatingLogsViewModelTest {
         whenever(repository.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
         eatingLogsViewModel = createEatingLogsViewModel()
 
-        eatingLogsViewModel.onRemoveEatingLogItemClicked(2)
+        runBlocking {
+            eatingLogsViewModel.onRemoveEatingLogItemClicked(2)
+        }
         runBlocking {
             verify(repository).deleteEatingLog(eq(EatingLog(id = 3, startTime = 320, endTime = 400)))
         }

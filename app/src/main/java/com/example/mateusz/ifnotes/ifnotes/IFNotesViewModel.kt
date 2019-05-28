@@ -8,6 +8,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import com.example.mateusz.ifnotes.chart.ui.EatingLogsChartActivity
+import com.example.mateusz.ifnotes.component.AppModule
+import com.example.mateusz.ifnotes.component.AppModule.Companion.MainScheduler
 import com.example.mateusz.ifnotes.component.AppModule.Companion.MainScope
 import com.example.mateusz.ifnotes.eatinglogs.ui.EatingLogsActivity
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
@@ -16,6 +18,7 @@ import com.example.mateusz.ifnotes.lib.Event
 import com.example.mateusz.ifnotes.lib.SystemClockWrapper
 import com.example.mateusz.ifnotes.model.Repository
 import com.example.mateusz.ifnotes.model.data.EatingLog
+import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import kotlinx.coroutines.CoroutineScope
@@ -34,7 +37,8 @@ class IFNotesViewModel @Inject constructor(
     private val repository: Repository,
     private val clock: Clock,
     private val systemClock: SystemClockWrapper,
-    @MainScope mainScope: CoroutineScope
+    @MainScope mainScope: CoroutineScope,
+    @MainScheduler mainScheduler: Scheduler
 ) : AndroidViewModel(application), CoroutineScope by mainScope {
     companion object {
         val DARK_GREEN = Color.parseColor("#a4c639")
@@ -110,7 +114,7 @@ class IFNotesViewModel @Inject constructor(
 
     init {
         currentEatingLogDisposable = repository.getMostRecentEatingLog()
-            .observeOn(AndroidSchedulers.mainThread())
+            .observeOn(mainScheduler)
             .subscribe {
                 if (!isFirstLogLoaded) {
                     isFirstLogLoaded = true

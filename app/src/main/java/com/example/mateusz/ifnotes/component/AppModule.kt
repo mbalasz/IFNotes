@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModelProvider
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import io.reactivex.Scheduler
+import io.reactivex.android.schedulers.AndroidSchedulers
 import kotlinx.coroutines.CoroutineScope
 import java.time.Clock
 import java.time.ZoneId
@@ -39,6 +41,16 @@ abstract class AppModule {
         @MainScope
         fun mainScope(): CoroutineScope {
             return kotlinx.coroutines.MainScope()
+        }
+
+
+        internal annotation class MainScheduler
+
+        @JvmStatic
+        @Provides
+        @MainScheduler
+        fun mainScheduler(): Scheduler {
+            return AndroidSchedulers.mainThread()
         }
     }
 }
