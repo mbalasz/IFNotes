@@ -28,9 +28,9 @@ class EatingLogsViewModel @Inject constructor (
     private val clock: Clock
 ) : AndroidViewModel(application), CoroutineScope by mainScope {
     companion object {
-        const val CHOOSE_CSV_LOGS_REQUEST_CODE = 1
+        const val CHOOSE_CSV_LOGS_TO_IMPORT_REQUEST_CODE = 1
         const val EDIT_EATING_LOG_REQUEST_CODE = 2
-        const val CHOOSE_DIR_TO_EXPORT_CSV_CODE = 3
+        const val CHOOSE_CSV_FILE_TO_EXPORT_LOGS_CODE = 3
 
         private const val CSV_FILE_DEFAULT_NAME = "eating_logs"
     }
@@ -102,7 +102,7 @@ class EatingLogsViewModel @Inject constructor (
             type = "text/*"
         }
         _startActivityForResult.value =
-                Event(ActivityForResultsData(intent, CHOOSE_CSV_LOGS_REQUEST_CODE))
+                Event(ActivityForResultsData(intent, CHOOSE_CSV_LOGS_TO_IMPORT_REQUEST_CODE))
     }
 
     fun onExportLogs() {
@@ -114,12 +114,12 @@ class EatingLogsViewModel @Inject constructor (
                     "${CSV_FILE_DEFAULT_NAME}_${DateTimeUtils.toDateString(clock.millis())}.csv")
         }
         _startActivityForResult.value =
-                Event(ActivityForResultsData(intent, CHOOSE_DIR_TO_EXPORT_CSV_CODE))
+                Event(ActivityForResultsData(intent, CHOOSE_CSV_FILE_TO_EXPORT_LOGS_CODE))
     }
 
     // TODO: add test for this method.
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == CHOOSE_CSV_LOGS_REQUEST_CODE) {
+        if (requestCode == CHOOSE_CSV_LOGS_TO_IMPORT_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 data?.data?.let {
                     launch {
@@ -133,12 +133,12 @@ class EatingLogsViewModel @Inject constructor (
                     }
                 }
             }
-        } else if (requestCode == CHOOSE_DIR_TO_EXPORT_CSV_CODE) {
+        } else if (requestCode == CHOOSE_CSV_FILE_TO_EXPORT_LOGS_CODE) {
             if (resultCode == RESULT_OK) {
-                data?.let {
+                data?.data?.let {
                     launch {
                         backupManager.backupLogsToFile(
-                            it.data, csvLogsManager.getCsvFromEatingLogs(eatingLogs))
+                            it, csvLogsManager.createCsvFromEatingLogs(eatingLogs))
                     }
                 }
             }

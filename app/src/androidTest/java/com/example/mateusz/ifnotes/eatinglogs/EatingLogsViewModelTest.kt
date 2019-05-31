@@ -1,13 +1,15 @@
 package com.example.mateusz.ifnotes.eatinglogs
 
+import android.app.Activity.RESULT_OK
 import android.content.Intent
+import android.net.Uri
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel.ActivityForResultsData
-import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel.Companion.CHOOSE_CSV_LOGS_REQUEST_CODE
-import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel.Companion.CHOOSE_DIR_TO_EXPORT_CSV_CODE
+import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel.Companion.CHOOSE_CSV_LOGS_TO_IMPORT_REQUEST_CODE
+import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel.Companion.CHOOSE_CSV_FILE_TO_EXPORT_LOGS_CODE
 import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel.Companion.EDIT_EATING_LOG_REQUEST_CODE
 import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel.EatingLogsItemView
 import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogViewModel
@@ -17,11 +19,8 @@ import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.lib.Event
 import com.example.mateusz.ifnotes.model.Repository
 import com.example.mateusz.ifnotes.model.data.EatingLog
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.eq
+import com.nhaarman.mockitokotlin2.*
 import com.nhaarman.mockitokotlin2.verify
-import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Flowable
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScope
@@ -155,7 +154,7 @@ class EatingLogsViewModelTest {
             verify(startActivityForResultObserver).onChanged(capture())
             val activityForResultsData = firstValue.getContentIfNotHandled()
             assertThat(activityForResultsData, notNullValue())
-            assertRequestCode(activityForResultsData, CHOOSE_CSV_LOGS_REQUEST_CODE)
+            assertRequestCode(activityForResultsData, CHOOSE_CSV_LOGS_TO_IMPORT_REQUEST_CODE)
             activityForResultsData?.intent?.let { intent ->
                 assertThat(intent.action, equalTo(Intent.ACTION_GET_CONTENT))
                 assertThat(intent.categories, hasItem(Intent.CATEGORY_OPENABLE))
@@ -176,7 +175,7 @@ class EatingLogsViewModelTest {
             verify(startActivityForResultObserver).onChanged(capture())
             val activityForResultsData = firstValue.getContentIfNotHandled()
             assertThat(activityForResultsData, notNullValue())
-            assertRequestCode(activityForResultsData, CHOOSE_DIR_TO_EXPORT_CSV_CODE)
+            assertRequestCode(activityForResultsData, CHOOSE_CSV_FILE_TO_EXPORT_LOGS_CODE)
             activityForResultsData?.intent?.let { intent ->
                 assertThat(intent.action, equalTo(Intent.ACTION_CREATE_DOCUMENT))
                 assertThat(intent.categories, hasItem(Intent.CATEGORY_OPENABLE))
@@ -186,6 +185,49 @@ class EatingLogsViewModelTest {
                     equalTo("eating_logs_25/05/1993.csv"))
             }
         }
+    }
+
+    @Test
+    fun onActivityResult_chooseCsvLogsToImport() = runBlocking<Unit> {
+        val uriString = "file:///mnt/sdcard/logs.csv"
+        val resultIntent = Intent.parseUri(uriString, 0)
+        whenever(csvLogsManager.getEatingLogsFromCsv(Uri.parse(uriString))).thenReturn(eatingLogs)
+
+        eatingLogsViewModel.onActivityResult(
+            CHOOSE_CSV_LOGS_TO_IMPORT_REQUEST_CODE, RESULT_OK, resultIntent)
+
+        inOrder(repository) {
+            verify(repository).deleteAll()
+            for (eatingLog in eatingLogs) {
+                verify(repository).insertEatingLog(eatingLog)
+            }
+        }
+    }
+
+    @Test
+    fun onActivityResult_chooseCsvFileToExportLogs() = runBlocking<Unit> {
+        whenever(repository.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
+        val eatingLogsCsv =
+            """Start date,Start time,End date, End time
+                2019-01-01,11:00,2019-01-01,23:00
+                2019-01-02,11:00,2019-01-02,23:00
+            """.trimMargin()
+        whenever(csvLogsManager.createCsvFromEatingLogs(sortDescendingByStartTime(eatingLogs)))
+            .thenReturn(eatingLogsCsv)
+        eatingLogsViewModel = createEatingLogsViewModel()
+        val uriString = "file:///mnt/sdcard/logs.csv"
+        val resultIntent = Intent.parseUri(uriString, 0)
+
+        eatingLogsViewModel.onActivityResult(
+            CHOOSE_CSV_FILE_TO_EXPORT_LOGS_CODE, RESULT_OK, resultIntent)
+
+        verify(backupManager).backupLogsToFile(Uri.parse(uriString), eatingLogsCsv)
+
+    }
+
+    private fun sortDescendingByStartTime(eatingLogs: List<EatingLog>) : List<EatingLog> {
+        return eatingLogs.sortedWith(
+            Comparator { a, b -> compareValuesBy(b, a, { it.startTime }, { it.endTime }) })
     }
 
     private fun assertActivityComponent(activityForResultsData: ActivityForResultsData?, className: String) {

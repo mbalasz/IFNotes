@@ -4,6 +4,8 @@ import android.content.Context
 import android.net.Uri
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.model.data.EatingLog
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.lang.StringBuilder
@@ -23,7 +25,7 @@ open class CSVLogsManager @Inject constructor(private val context: Context) {
         private const val LAST_MEAL_TIME_IDX = 3
     }
 
-    fun getEatingLogsFromCsv(uri: Uri): List<EatingLog> {
+    open suspend fun getEatingLogsFromCsv(uri: Uri): List<EatingLog> = withContext(Dispatchers.IO) {
         val inputStream = context.contentResolver.openInputStream(uri)
         val bufferedReader = BufferedReader(InputStreamReader(inputStream))
 
@@ -37,10 +39,10 @@ open class CSVLogsManager @Inject constructor(private val context: Context) {
             eatingLog?.let { eatingLogs.add(it) }
             line = bufferedReader.readLine()
         }
-        return eatingLogs
+        eatingLogs
     }
 
-    fun getCsvFromEatingLogs(eatingLogs: List<EatingLog>): String {
+    open fun createCsvFromEatingLogs(eatingLogs: List<EatingLog>): String {
         val csvLogsBuilder = StringBuilder()
         val csvDateTimeFormat = SimpleDateFormat("${getDateFormat()},${getTimeFormat()}", Locale.ENGLISH)
         csvLogsBuilder.append("Start date,Start time,End date, End time")

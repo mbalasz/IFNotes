@@ -13,6 +13,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
+// TODO: switch Default Dispatchers to IO
 @Singleton
 open class Repository @Inject constructor(
     private val iFNotesDatabase: IFNotesDatabase,
@@ -53,7 +54,7 @@ open class Repository @Inject constructor(
         iFNotesDatabase.eatingLogDao().delete(eatingLog)
     }
 
-    suspend fun deleteAll() = withContext(Dispatchers.Default) {
+    open suspend fun deleteAll() = withContext(Dispatchers.Default) {
         iFNotesDatabase.eatingLogDao().deleteAll()
     }
 
