@@ -125,7 +125,7 @@ class EatingLogsViewModel @Inject constructor (
                     launch {
                         val eatingLogs = csvLogsManager.getEatingLogsFromCsv(it)
                         if (eatingLogs.isNotEmpty()) {
-                            repository.deleteAll().await()
+                            repository.deleteAll()
                             for (eatingLog in eatingLogs) {
                                 repository.insertEatingLog(eatingLog)
                             }

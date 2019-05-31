@@ -23,35 +23,20 @@ open class Repository @Inject constructor(
         return iFNotesDatabase.eatingLogDao().getEatingLogsFlowable()
     }
 
-    open suspend fun updateEatingLogAsync(eatingLog: EatingLog) = coroutineScope {
-        async(Dispatchers.Default) {
-            val status = validateUpdate(eatingLog)
-            if (status == EatingLogValidator.EatingLogValidationStatus.SUCCESS) {
-                iFNotesDatabase.eatingLogDao().update(eatingLog)
-            }
-            status
+    open suspend fun updateEatingLogAsync(eatingLog: EatingLog) = withContext(Dispatchers.Default) {
+        val status = validateUpdate(eatingLog)
+        if (status == EatingLogValidator.EatingLogValidationStatus.SUCCESS) {
+            iFNotesDatabase.eatingLogDao().update(eatingLog)
         }
+        status
     }
 
-    private fun validateUpdate(eatingLog: EatingLog): EatingLogValidator.EatingLogValidationStatus {
-        val mutableLogs = iFNotesDatabase.eatingLogDao().getEatingLogs().toMutableList()
-        val oldLog = mutableLogs.find { it.id == eatingLog.id }
-        oldLog?.let {
-            mutableLogs.remove(it)
-        }
-        return eatingLogValidator.validateNewEatingLog(eatingLog, mutableLogs)
+    open suspend fun insertEatingLog(eatingLog: EatingLog) = withContext(Dispatchers.Default) {
+        iFNotesDatabase.eatingLogDao().insert(eatingLog)
     }
 
-    open suspend fun insertEatingLog(eatingLog: EatingLog) = coroutineScope {
-        launch(Dispatchers.Default) {
-            iFNotesDatabase.eatingLogDao().insert(eatingLog)
-        }
-    }
-
-    suspend fun getEatingLog(id: Int): EatingLog? = coroutineScope {
-        withContext(Dispatchers.Default) {
-            iFNotesDatabase.eatingLogDao().getEatingLog(id)
-        }
+    suspend fun getEatingLog(id: Int): EatingLog? = withContext(Dispatchers.Default) {
+        iFNotesDatabase.eatingLogDao().getEatingLog(id)
     }
 
     open fun getMostRecentEatingLog(): Flowable<Optional<EatingLog>> {
@@ -64,15 +49,20 @@ open class Repository @Inject constructor(
         }
     }
 
-    open suspend fun deleteEatingLog(eatingLog: EatingLog) = coroutineScope {
-        async(Dispatchers.Default) {
-            iFNotesDatabase.eatingLogDao().delete(eatingLog)
-        }
+    open suspend fun deleteEatingLog(eatingLog: EatingLog) = withContext(Dispatchers.Default) {
+        iFNotesDatabase.eatingLogDao().delete(eatingLog)
     }
 
-    suspend fun deleteAll() = coroutineScope {
-        async(Dispatchers.Default) {
-            iFNotesDatabase.eatingLogDao().deleteAll()
+    suspend fun deleteAll() = withContext(Dispatchers.Default) {
+        iFNotesDatabase.eatingLogDao().deleteAll()
+    }
+
+    private fun validateUpdate(eatingLog: EatingLog): EatingLogValidator.EatingLogValidationStatus {
+        val mutableLogs = iFNotesDatabase.eatingLogDao().getEatingLogs().toMutableList()
+        val oldLog = mutableLogs.find { it.id == eatingLog.id }
+        oldLog?.let {
+            mutableLogs.remove(it)
         }
+        return eatingLogValidator.validateNewEatingLog(eatingLog, mutableLogs)
     }
 }

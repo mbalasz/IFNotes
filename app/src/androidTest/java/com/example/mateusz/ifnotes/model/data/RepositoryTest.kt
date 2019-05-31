@@ -47,9 +47,9 @@ class RepositoryTest {
     fun updateEatingLog() {
         val eatingLog = EatingLog(id = 1, startTime = 100L)
         runBlocking {
-            repository.insertEatingLog(eatingLog).join()
+            repository.insertEatingLog(eatingLog)
             val updatedEatingLog = eatingLog.copy(endTime = 200L)
-            repository.updateEatingLogAsync(updatedEatingLog).await()
+            repository.updateEatingLogAsync(updatedEatingLog)
             repository.getEatingLogsObservable().test().awaitCount(1).assertValue(listOf(updatedEatingLog))
         }
     }
@@ -61,9 +61,9 @@ class RepositoryTest {
                         EatingLogValidator.EatingLogValidationStatus.START_TIME_LATER_THAN_END_TIME)
         val oldEatingLog = EatingLog(id = 1, startTime = 100L)
         runBlocking {
-            repository.insertEatingLog(oldEatingLog).join()
+            repository.insertEatingLog(oldEatingLog)
             val updatedEatingLog = oldEatingLog.copy(endTime = 200L)
-            repository.updateEatingLogAsync(updatedEatingLog).await()
+            repository.updateEatingLogAsync(updatedEatingLog)
             repository.getEatingLogsObservable().test().awaitCount(1).assertValue(listOf(oldEatingLog))
         }
     }
@@ -72,7 +72,7 @@ class RepositoryTest {
     fun updateEatingLog_noPreviousLogToUpdate() {
         val eatingLog = EatingLog(id = 1, startTime = 100L)
         runBlocking {
-            repository.updateEatingLogAsync(eatingLog).await()
+            repository.updateEatingLogAsync(eatingLog)
             repository.getEatingLogsObservable().test().awaitCount(1).assertValue(emptyList())
         }
     }
@@ -89,7 +89,7 @@ class RepositoryTest {
                 EatingLog(id = 6, startTime = 50))
         runBlocking {
             eatingLogs.forEach {
-                repository.insertEatingLog(it).join()
+                repository.insertEatingLog(it)
             }
             repository.getEatingLogsObservable().test().awaitCount(1).assertValue(eatingLogs)
         }
@@ -100,8 +100,8 @@ class RepositoryTest {
         val eatingLog = EatingLog(id = 1, startTime = 100L)
         val eatingLogTwo = EatingLog(id = 2, startTime = 200L)
         runBlocking {
-            repository.insertEatingLog(eatingLog).join()
-            repository.insertEatingLog(eatingLogTwo).join()
+            repository.insertEatingLog(eatingLog)
+            repository.insertEatingLog(eatingLogTwo)
             assertThat(repository.getEatingLog(2), equalTo(eatingLogTwo))
         }
     }
@@ -122,7 +122,7 @@ class RepositoryTest {
                 EatingLog(id = 5, startTime = 250),
                 EatingLog(id = 6, startTime = 50))
         runBlocking {
-            eatingLogs.forEach { repository.insertEatingLog(it).join() }
+            eatingLogs.forEach { repository.insertEatingLog(it) }
         }
         repository.getMostRecentEatingLog()
             .map {
@@ -157,9 +157,9 @@ class RepositoryTest {
 
         runBlocking {
             eatingLogs.forEach {
-                repository.insertEatingLog(it).join()
+                repository.insertEatingLog(it)
             }
-            repository.deleteAll().join()
+            repository.deleteAll()
         }
 
         repository.getEatingLogsObservable().test().awaitCount(1).assertValue(emptyList())

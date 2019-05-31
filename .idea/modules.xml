@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/IFNotes.iml" filepath="$PROJECT_DIR$/IFNotes.iml" />
+      <module fileurl="file://$PROJECT_DIR$/IFNotes.iml" filepath="$PROJECT_DIR$/IFNotes.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/ifnotes.iml" filepath="$PROJECT_DIR$/ifnotes.iml" />
     </modules>
