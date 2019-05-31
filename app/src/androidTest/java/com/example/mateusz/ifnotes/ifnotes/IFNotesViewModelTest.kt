@@ -82,13 +82,13 @@ class IFNotesViewModelTest {
         testScope.runBlockingTest {
             ifNotesViewModel.onLogButtonClicked()
             verify(repository, never()).insertEatingLog(any())
-            verify(repository, never()).updateEatingLogAsync(any())
+            verify(repository, never()).updateEatingLog(any())
 
             initEatingLogPublisher.onNext(Optional.of(EatingLog(startTime = 100L)))
             testScheduler.triggerActions()
         }
 
-        verify(repository).updateEatingLogAsync(any())
+        verify(repository).updateEatingLog(any())
     }
 
     @Test
@@ -119,7 +119,7 @@ class IFNotesViewModelTest {
         }
 
         argumentCaptor<EatingLog>().apply {
-            verify(repository).updateEatingLogAsync(capture())
+            verify(repository).updateEatingLog(capture())
             assertThat(firstValue.endTime, `is`(equalTo(1200L)))
         }
     }

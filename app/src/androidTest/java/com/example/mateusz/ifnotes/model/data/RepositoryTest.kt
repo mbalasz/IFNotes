@@ -13,15 +13,15 @@ import dagger.BindsInstance
 import dagger.Component
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.`is`
-import org.hamcrest.Matchers.equalTo
-import org.hamcrest.Matchers.nullValue
+import org.hamcrest.Matchers.*
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import javax.inject.Inject
 import javax.inject.Singleton
 
+// TODO: replace runBlocking with runBlockingTest once
+// https://github.com/Kotlin/kotlinx.coroutines/pull/1206 is merged.
 @RunWith(AndroidJUnit4::class)
 class RepositoryTest {
     @Inject lateinit var repository: Repository
@@ -49,7 +49,7 @@ class RepositoryTest {
         runBlocking {
             repository.insertEatingLog(eatingLog)
             val updatedEatingLog = eatingLog.copy(endTime = 200L)
-            repository.updateEatingLogAsync(updatedEatingLog)
+            repository.updateEatingLog(updatedEatingLog)
             repository.getEatingLogsObservable().test().awaitCount(1).assertValue(listOf(updatedEatingLog))
         }
     }
@@ -63,7 +63,7 @@ class RepositoryTest {
         runBlocking {
             repository.insertEatingLog(oldEatingLog)
             val updatedEatingLog = oldEatingLog.copy(endTime = 200L)
-            repository.updateEatingLogAsync(updatedEatingLog)
+            repository.updateEatingLog(updatedEatingLog)
             repository.getEatingLogsObservable().test().awaitCount(1).assertValue(listOf(oldEatingLog))
         }
     }
@@ -72,7 +72,7 @@ class RepositoryTest {
     fun updateEatingLog_noPreviousLogToUpdate() {
         val eatingLog = EatingLog(id = 1, startTime = 100L)
         runBlocking {
-            repository.updateEatingLogAsync(eatingLog)
+            repository.updateEatingLog(eatingLog)
             repository.getEatingLogsObservable().test().awaitCount(1).assertValue(emptyList())
         }
     }

@@ -8,7 +8,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import com.example.mateusz.ifnotes.chart.ui.EatingLogsChartActivity
-import com.example.mateusz.ifnotes.component.AppModule
 import com.example.mateusz.ifnotes.component.AppModule.Companion.MainScheduler
 import com.example.mateusz.ifnotes.component.AppModule.Companion.MainScope
 import com.example.mateusz.ifnotes.eatinglogs.ui.EatingLogsActivity
@@ -19,7 +18,6 @@ import com.example.mateusz.ifnotes.lib.SystemClockWrapper
 import com.example.mateusz.ifnotes.model.Repository
 import com.example.mateusz.ifnotes.model.data.EatingLog
 import io.reactivex.Scheduler
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -220,7 +218,7 @@ class IFNotesViewModel @Inject constructor(
                 repository.insertEatingLog(newEatingLog)
             } else {
                 newEatingLog = currentEatingLog.copy(endTime = logTime)
-                repository.updateEatingLogAsync(newEatingLog)
+                repository.updateEatingLog(newEatingLog)
             }
         }
     }

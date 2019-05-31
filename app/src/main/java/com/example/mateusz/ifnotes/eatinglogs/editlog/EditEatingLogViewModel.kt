@@ -153,7 +153,7 @@ class EditEatingLogViewModel @Inject constructor(
         val endTime = _lastMealLogTimeObservable.value?.let { it } ?: run { eatingLog.endTime }
         val updatedEatingLog = eatingLog.copy(startTime = startTime, endTime = endTime)
         launch {
-            repository.updateEatingLogAsync(updatedEatingLog)
+            repository.updateEatingLog(updatedEatingLog)
         }
     }
 

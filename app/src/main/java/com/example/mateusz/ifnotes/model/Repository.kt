@@ -23,7 +23,7 @@ open class Repository @Inject constructor(
         return iFNotesDatabase.eatingLogDao().getEatingLogsFlowable()
     }
 
-    open suspend fun updateEatingLogAsync(eatingLog: EatingLog) = withContext(Dispatchers.Default) {
+    open suspend fun updateEatingLog(eatingLog: EatingLog) = withContext(Dispatchers.Default) {
         val status = validateUpdate(eatingLog)
         if (status == EatingLogValidator.EatingLogValidationStatus.SUCCESS) {
             iFNotesDatabase.eatingLogDao().update(eatingLog)
