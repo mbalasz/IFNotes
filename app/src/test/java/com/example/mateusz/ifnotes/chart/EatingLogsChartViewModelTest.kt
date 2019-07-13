@@ -1,6 +1,7 @@
 package com.example.mateusz.ifnotes.chart
 
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.mateusz.ifnotes.model.Repository
 import com.example.mateusz.ifnotes.model.data.EatingLog
 import com.nhaarman.mockitokotlin2.whenever
@@ -15,10 +16,9 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
-import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.TimeUnit
 
-@RunWith(RobolectricTestRunner::class)
+@RunWith(AndroidJUnit4::class)
 class EatingLogsChartViewModelTest {
     @Mock private lateinit var repository: Repository
     private lateinit var eatingLogsChartViewModel: EatingLogsChartViewModel
@@ -28,20 +28,20 @@ class EatingLogsChartViewModelTest {
 
     @Before
     fun setUp() {
+        whenever(repository.getEatingLogsObservable()).thenReturn(Flowable.empty())
     }
 
     @Test
-    fun init() {
+    fun init_createsDataPointsFromEatingLogs() {
         val fastingWindowsHours = listOf(
             16L,
             13L,
             18L,
             10L
         )
-
         val eatingLogs = createEatingLogsWithFastingWindows(fastingWindowsHours)
-
         whenever(repository.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
+
         eatingLogsChartViewModel =
             EatingLogsChartViewModel(ApplicationProvider.getApplicationContext(), repository)
 
