@@ -3,7 +3,7 @@ package com.example.mateusz.ifnotes.chart
 import com.example.mateusz.ifnotes.model.data.EatingLog
 import java.lang.IllegalArgumentException
 
-abstract class EatingLogsChartDataProducer(protected val windowValidator: WindowValidator) {
+abstract class EatingLogsChartDataProducer(protected val timeWindowValidator: TimeWindowValidator) {
 
     abstract fun getDataPoints(eatingLogs: List<EatingLog>): List<DataPoint>
 

@@ -26,7 +26,7 @@ class EatingLogsChartViewModel @Inject constructor(
         get() = _eatingLogsChartDataLiveData
     private val _eatingLogsChartDataLiveData = MutableLiveData<ChartData>()
     private var eatingLogsSubscription: Disposable? = null
-    private val windowValidator = WindowValidator(MAX_WINDOW_HOURS)
+    private val windowValidator = TimeWindowValidator(MAX_WINDOW_HOURS)
 
     init {
         eatingLogsSubscription = repository.getEatingLogsObservable().subscribe {

@@ -1,9 +1,6 @@
 package com.example.mateusz.ifnotes.chart
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.internal.runner.junit4.statement.UiThreadStatement.runOnUiThread
 import com.example.mateusz.ifnotes.model.Repository
 import com.example.mateusz.ifnotes.model.data.EatingLog
 import com.nhaarman.mockitokotlin2.whenever
@@ -17,18 +14,17 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
+import org.mockito.junit.MockitoRule
+import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.TimeUnit
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
 class EatingLogsChartViewModelTest {
     @Mock private lateinit var repository: Repository
     private lateinit var eatingLogsChartViewModel: EatingLogsChartViewModel
 
     @get:Rule
-    val mockitoRule = MockitoJUnit.rule()
-
-    @get:Rule
-    var instantTaskExecutorRule = InstantTaskExecutorRule()
+    val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
     @Before
     fun setUp() {
@@ -49,15 +45,13 @@ class EatingLogsChartViewModelTest {
         eatingLogsChartViewModel =
             EatingLogsChartViewModel(ApplicationProvider.getApplicationContext(), repository)
 
-        runOnUiThread {
-            eatingLogsChartViewModel.eatingLogsChartDataLiveData.observeForever {
-                val entryPoints = it.entryPoints
-                assertThat(entryPoints.size, `is`(equalTo(fastingWindowsHours.size)))
-                for (i in entryPoints.indices) {
-                    assertThat(
-                        entryPoints[i].y,
-                        `is`(equalTo(TimeUnit.HOURS.toMinutes(fastingWindowsHours[i]) / 60f)))
-                }
+        eatingLogsChartViewModel.eatingLogsChartDataLiveData.observeForever {
+            val entryPoints = it.entryPoints
+            assertThat(entryPoints.size, `is`(equalTo(fastingWindowsHours.size)))
+            for (i in entryPoints.indices) {
+                assertThat(
+                    entryPoints[i].y,
+                    `is`(equalTo(TimeUnit.HOURS.toMinutes(fastingWindowsHours[i]) / 60f)))
             }
         }
     }
