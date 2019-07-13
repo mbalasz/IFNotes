@@ -3,7 +3,6 @@ package com.example.mateusz.ifnotes.eatinglogs
 import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.net.Uri
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.lifecycle.Observer
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -55,9 +54,6 @@ class EatingLogsViewModelTest {
 
     @get:Rule
     val mockitoRule: MockitoRule = MockitoJUnit.rule()
-
-    @get:Rule
-    var instantTaskExecutorRule = InstantTaskExecutorRule()
 
     private val eatingLogs = listOf(
         EatingLog(id = 1, startTime = 100, endTime = 300),

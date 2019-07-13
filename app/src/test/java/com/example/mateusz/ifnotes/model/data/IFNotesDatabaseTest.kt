@@ -1,7 +1,6 @@
 package com.example.mateusz.ifnotes.model.data
 
 import android.app.Application
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import dagger.BindsInstance
@@ -20,9 +19,6 @@ import javax.inject.Singleton
 class IFNotesDatabaseTest {
     lateinit var eatingLogDao: EatingLogDao
     @Inject lateinit var ifNotesDatabase: IFNotesDatabase
-
-    @get:Rule
-    val instantTaskExecutorRule = InstantTaskExecutorRule()
 
     @Before
     fun setUp() {
