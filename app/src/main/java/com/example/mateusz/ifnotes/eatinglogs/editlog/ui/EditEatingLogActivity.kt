@@ -1,17 +1,21 @@
 package com.example.mateusz.ifnotes.eatinglogs.editlog.ui
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.example.mateusz.ifnotes.R
 import com.example.mateusz.ifnotes.component.ViewModelFactory
-import com.example.mateusz.ifnotes.time.TimeDialogFragment
-import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogViewModel
 import com.example.mateusz.ifnotes.time.DateDialogFragment
+import com.example.mateusz.ifnotes.time.TimeDialogFragment
 import dagger.android.AndroidInjection
-import kotlinx.android.synthetic.main.activity_edit_eating_log.*
+import kotlinx.android.synthetic.main.activity_edit_eating_log.discardButton
+import kotlinx.android.synthetic.main.activity_edit_eating_log.editFirstMealButton
+import kotlinx.android.synthetic.main.activity_edit_eating_log.editLastMealButton
+import kotlinx.android.synthetic.main.activity_edit_eating_log.saveButton
+import kotlinx.android.synthetic.main.activity_edit_eating_log.timeOfFirstMealTextView
+import kotlinx.android.synthetic.main.activity_edit_eating_log.timeOfLastMealTextView
 import javax.inject.Inject
 
 class EditEatingLogActivity :
@@ -33,38 +37,24 @@ class EditEatingLogActivity :
 
         editEatingLogViewModel.onActivityCreated(intent)
 
-        editFirstMealDateButton.setOnClickListener {
-            editEatingLogViewModel.onEditFirstMealDateButtonClicked()
+        editFirstMealButton.setOnClickListener {
+            editEatingLogViewModel.onEditFirstMeal()
         }
 
-        editFirstMealTimeButton.setOnClickListener {
-            editEatingLogViewModel.onEditFirstMealTimeButtonClicked()
-        }
-
-        editLastMealDateButton.setOnClickListener {
-            editEatingLogViewModel.onEditLastMealDateButtonClicked()
-        }
-
-        editLastMealTimeButton.setOnClickListener {
-            editEatingLogViewModel.onEditLastMealTimeButtonClicked()
+        editLastMealButton.setOnClickListener {
+            editEatingLogViewModel.onEditLastMeal()
         }
 
         editEatingLogViewModel.firstMealLogTimeObservable.observe(this, Observer {
-            timeOfFirstMealTextView.text = DateTimeUtils.toDateTimeString(it)
+            timeOfFirstMealTextView.text = it
         })
         editEatingLogViewModel.lastMealLogTimeObservable.observe(this, Observer {
-            timeOfLastMealTextView.text = DateTimeUtils.toDateTimeString(it)
+            timeOfLastMealTextView.text = it
         })
 
-        editEatingLogViewModel.showTimeDialogFragment.observe(this, Observer {
+        editEatingLogViewModel.showDialogFragment.observe(this, Observer {
             it.getContentIfNotHandled()?.let {
-                showTimeDialogFragment()
-            }
-        })
-
-        editEatingLogViewModel.showDateDialogFragment.observe(this, Observer {
-            if (!it.hasBeenHandled) {
-                showDateDialogFragment(it.getContentIfNotHandled())
+                it.show(supportFragmentManager, "manualLog")
             }
         })
 
@@ -79,22 +69,19 @@ class EditEatingLogActivity :
         }
     }
 
-    private fun showDateDialogFragment(initDate: Bundle?) {
-        val manualLogDialogFragment = DateDialogFragment()
-        manualLogDialogFragment.arguments = initDate
-        manualLogDialogFragment.show(supportFragmentManager, "manualLog")
+    override fun onTimeEditCancelled() {
+        editEatingLogViewModel.onTimeEditCancelled()
     }
 
-    fun showTimeDialogFragment() {
-        val manualLogDialogFragment = TimeDialogFragment()
-        manualLogDialogFragment.show(supportFragmentManager, "manualLog")
+    override fun onDateEditCancelled() {
+        editEatingLogViewModel.onDateEditCancelled()
     }
 
     override fun onTimeSaved(hour: Int, minute: Int) {
-        editEatingLogViewModel.onEatingLogEdited(hour, minute)
+        editEatingLogViewModel.onTimeSaved(hour, minute)
     }
 
     override fun onDateSaved(day: Int, month: Int, year: Int) {
-        editEatingLogViewModel.onEatingLogEdited(day, month, year)
+        editEatingLogViewModel.onDateSaved(day, month, year)
     }
 }

@@ -21,6 +21,47 @@ class DateTimeUtils {
             return defaultDateFormat.format(timeInMillis)
         }
 
+        fun getMinuteFromMillis(timeInMillis: Long): Int {
+            val cal = Calendar.getInstance()
+            cal.timeInMillis = timeInMillis
+            return cal.get(Calendar.MINUTE)
+        }
+
+        fun getHourFromMillis(timeInMillis: Long): Int {
+            val cal = Calendar.getInstance()
+            cal.timeInMillis = timeInMillis
+            return cal.get(Calendar.HOUR)
+        }
+
+        fun getYearFromMillis(timeInMillis: Long): Int {
+            val cal = Calendar.getInstance()
+            cal.timeInMillis = timeInMillis
+            return cal.get(Calendar.YEAR)
+        }
+
+        fun getMonthFromMillis(timeInMillis: Long): Int {
+            val cal = Calendar.getInstance()
+            cal.timeInMillis = timeInMillis
+            return cal.get(Calendar.MONTH)
+        }
+
+        fun getDayOfMonthFromMillis(timeInMillis: Long): Int {
+            val cal = Calendar.getInstance()
+            cal.timeInMillis = timeInMillis
+            return cal.get(Calendar.DAY_OF_MONTH)
+        }
+
+        fun dateTimeToMillis(day: Int, month: Int, year: Int, hour: Int, minute: Int): Long {
+            val calendar = Calendar.getInstance()
+            calendar.set(
+                year,
+                month,
+                day,
+                hour,
+                minute)
+            return calendar.timeInMillis
+        }
+
         /**
          * Converts given time to milliseconds. It uses the current date.
          */

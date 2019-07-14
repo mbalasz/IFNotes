@@ -3,11 +3,11 @@ package com.example.mateusz.ifnotes.time
 import android.app.DatePickerDialog
 import android.app.Dialog
 import android.content.Context
+import android.content.DialogInterface.BUTTON_NEGATIVE
 import android.os.Bundle
 import android.widget.DatePicker
 import androidx.fragment.app.DialogFragment
-import java.lang.ClassCastException
-import java.lang.IllegalStateException
+import android.R.string
 import java.util.Calendar
 
 class DateDialogFragment() : DialogFragment(), DatePickerDialog.OnDateSetListener {
@@ -21,6 +21,8 @@ class DateDialogFragment() : DialogFragment(), DatePickerDialog.OnDateSetListene
 
     interface DateDialogListener {
         fun onDateSaved(day: Int, month: Int, year: Int)
+
+        fun onDateEditCancelled()
     }
 
     override fun onAttach(context: Context) {
@@ -49,7 +51,14 @@ class DateDialogFragment() : DialogFragment(), DatePickerDialog.OnDateSetListene
                 month = it.getInt(DATE_INIT_MONTH)
                 year = it.getInt(DATE_INIT_YEAR)
             }
-            DatePickerDialog(it, this, year, month, day)
+            val datePickerDialog = DatePickerDialog(it, this, year, month, day)
+            datePickerDialog.setButton(BUTTON_NEGATIVE, context?.getString(string.cancel)) {
+                _, which ->
+                    if (which == BUTTON_NEGATIVE) {
+                        dateDialogListener.onDateEditCancelled()
+                    }
+            }
+            datePickerDialog
         } ?: throw IllegalStateException("Acitivity cannot be null")
     }
 }

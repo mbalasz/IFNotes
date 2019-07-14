@@ -49,64 +49,30 @@
         app:layout_constraintTop_toBottomOf="@+id/timeOfLastMealLabel"/>
 
     <Button
-        android:id="@+id/editFirstMealDateButton"
+        android:id="@+id/editFirstMealButton"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:text="Edit Date"
+        android:text="Edit"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.1"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="@+id/timeOfLastMealLabel"
-        app:layout_constraintTop_toBottomOf="@+id/timeOfFirstMealTextView" />
+        app:layout_constraintTop_toBottomOf="@+id/timeOfFirstMealTextView"/>
 
     <Button
-        android:id="@+id/editFirstMealTimeButton"
+        android:id="@+id/editLastMealButton"
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:text="Edit Time"
+        android:text="Edit"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.576"
-        app:layout_constraintStart_toEndOf="@+id/editFirstMealDateButton"
-        app:layout_constraintTop_toBottomOf="@+id/timeOfFirstMealTextView" />
-
-    <Button
-        android:id="@+id/editLastMealDateButton"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:text="Edit Date"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.1"
+        app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/timeOfLastMealTextView" />
-
-    <Button
-        android:id="@+id/editLastMealTimeButton"
-        android:layout_width="150dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:text="Edit Time"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.421"
-        app:layout_constraintStart_toEndOf="@+id/editLastMealDateButton"
-        app:layout_constraintTop_toBottomOf="@+id/timeOfLastMealTextView" />
+        app:layout_constraintTop_toBottomOf="@+id/timeOfLastMealTextView"/>
 
     <LinearLayout
         android:layout_width="match_parent"

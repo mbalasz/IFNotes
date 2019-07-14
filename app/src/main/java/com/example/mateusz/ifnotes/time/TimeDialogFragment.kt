@@ -15,12 +15,18 @@ class TimeDialogFragment : DialogFragment() {
     companion object {
         const val BUTTON_SAVE_STRING = "Save"
         const val BUTTON_CANCEL_STRING = "Cancel"
+
+        const val EXTRA_DAY = "day"
+        const val EXTRA_MONTH = "month"
+        const val EXTRA_YEAR = "year"
     }
 
     private lateinit var timeDialogListener: TimeDialogListener
 
     interface TimeDialogListener {
         fun onTimeSaved(hour: Int, minute: Int)
+
+        fun onTimeEditCancelled()
     }
 
     override fun onAttach(context: Context) {
@@ -52,6 +58,7 @@ class TimeDialogFragment : DialogFragment() {
                         }
                     }
                     .setNegativeButton(BUTTON_CANCEL_STRING) { _, _ ->
+                        timeDialogListener.onTimeEditCancelled()
                     }
             alertDialogBuilder.create()
         } ?: throw IllegalStateException("Acitivity cannot be null")

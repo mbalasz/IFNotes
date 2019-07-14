@@ -160,6 +160,9 @@ class IFNotesActivity : AppCompatActivity(), TimeDialogFragment.TimeDialogListen
         lastActivityChronometerWrapper.setColor(Color.BLACK)
     }
 
+    override fun onTimeEditCancelled() {
+    }
+
     override fun onTimeSaved(hour: Int, minute: Int) {
         ifNotesViewModel.onNewManualLog(hour, minute)
     }

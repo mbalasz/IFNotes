@@ -3,18 +3,21 @@ package com.example.mateusz.ifnotes.eatinglogs.editlog
 import android.app.Application
 import android.content.Intent
 import android.os.Bundle
+import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Transformations
 import com.example.mateusz.ifnotes.component.AppModule.Companion.MainScope
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.lib.Event
 import com.example.mateusz.ifnotes.model.Repository
 import com.example.mateusz.ifnotes.model.data.EatingLog
 import com.example.mateusz.ifnotes.time.DateDialogFragment
+import com.example.mateusz.ifnotes.time.TimeDialogFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.util.Calendar
+import java.lang.IllegalStateException
 import javax.inject.Inject
 
 class EditEatingLogViewModel @Inject constructor(
@@ -26,89 +29,102 @@ class EditEatingLogViewModel @Inject constructor(
         const val EXTRA_EATING_LOG_ID = "EXTRA_EATING_LOG_ID"
     }
 
-    enum class EditMode {
+    enum class MealType {
         FIRST_MEAL,
         LAST_MEAL,
         NONE
     }
 
     // TODO: Implement validation logic in the repository.
-    private var editMode = EditMode.NONE
-    private lateinit var eatingLog: EatingLog
-    private val _firstMealLogTimeObservable = MutableLiveData<Long>()
-    private val _lastMealLogTimeObservable = MutableLiveData<Long>()
-    private val _showTimeDialogFragment = MutableLiveData<Event<Unit>>()
-    private val _showDateDialogFragment = MutableLiveData<Event<Bundle?>>()
+    private var editMode = MealType.NONE
+    private lateinit var originalEatingLog: EatingLog
 
-    val firstMealLogTimeObservable: LiveData<Long>
-        get() = _firstMealLogTimeObservable
-    val lastMealLogTimeObservable: LiveData<Long>
-        get() = _lastMealLogTimeObservable
-    val showTimeDialogFragment: LiveData<Event<Unit>>
-        get() = _showTimeDialogFragment
-    val showDateDialogFragment: LiveData<Event<Bundle?>>
-        get() = _showDateDialogFragment
+    private val _showDialogFragment = MutableLiveData<Event<DialogFragment>>()
+    val showDialogFragment: LiveData<Event<DialogFragment>>
+        get() = _showDialogFragment
 
-    fun onEditFirstMealTimeButtonClicked() {
-        editMode = EditMode.FIRST_MEAL
-        _showTimeDialogFragment.value = Event(Unit)
+    private val _logTimeObservables: Map<MealType, MutableLiveData<Long>>
+    private val logTimeToDateStringTransformation = {
+        logTimeObservable: LiveData<Long> -> Transformations.map(logTimeObservable) {
+            DateTimeUtils.toDateTimeString(it)
+        }
+    }
+    val firstMealLogTimeObservable: LiveData<String>
+        get() = logTimeToDateStringTransformation.invoke(
+            _logTimeObservables[MealType.FIRST_MEAL] ?:
+            error("No log time for MealType.FIRST_MEAL"))
+    val lastMealLogTimeObservable: LiveData<String>
+        get() = logTimeToDateStringTransformation.invoke(
+            _logTimeObservables[MealType.LAST_MEAL] ?:
+            error("No log time for MealType.LAST_MEAL"))
+
+
+    private data class EatingLogDateTime(
+        val year: Int, val month: Int, val day: Int, val hour: Int = -1, val minute: Int = -1)
+    private var pendingDateTimeEdit: EatingLogDateTime? = null
+
+    init {
+        _logTimeObservables =
+            enumValues<MealType>()
+                .asSequence()
+                .map { it to MutableLiveData<Long>() }
+                .toMap()
     }
 
-    fun onEditLastMealTimeButtonClicked() {
-        editMode = EditMode.LAST_MEAL
-        _showTimeDialogFragment.value = Event(Unit)
+    fun onEditFirstMeal() {
+        showDateChooser(MealType.FIRST_MEAL)
     }
 
-    fun onEditFirstMealDateButtonClicked() {
-        editMode = EditMode.FIRST_MEAL
-        var firstMealDateBundle: Bundle? = null
-        _firstMealLogTimeObservable.value?.let {
-            firstMealDateBundle = Bundle().apply {
-                val cal = Calendar.getInstance()
-                cal.timeInMillis = it
-                putInt(DateDialogFragment.DATE_INIT_YEAR, cal.get(Calendar.YEAR))
-                putInt(DateDialogFragment.DATE_INIT_MONTH, cal.get(Calendar.MONTH))
-                putInt(DateDialogFragment.DATE_INIT_DAY, cal.get(Calendar.DAY_OF_MONTH))
+    fun onEditLastMeal() {
+        showDateChooser(MealType.LAST_MEAL)
+    }
+
+    private fun showDateChooser(mealType: MealType) {
+        editMode = mealType
+        val dateDialogFragment = DateDialogFragment()
+        _logTimeObservables[editMode]?.value?.let {
+            dateDialogFragment.arguments = Bundle().apply {
+                putInt(DateDialogFragment.DATE_INIT_YEAR, DateTimeUtils.getYearFromMillis(it))
+                putInt(DateDialogFragment.DATE_INIT_MONTH, DateTimeUtils.getMonthFromMillis(it))
+                putInt(DateDialogFragment.DATE_INIT_DAY, DateTimeUtils.getDayOfMonthFromMillis(it))
             }
         }
-        _showDateDialogFragment.value = Event(firstMealDateBundle)
+        _showDialogFragment.value = Event(dateDialogFragment)
     }
 
-    fun onEditLastMealDateButtonClicked() {
-        editMode = EditMode.LAST_MEAL
-        var lastMealDateBundle: Bundle? = null
-        _lastMealLogTimeObservable.value?.let {
-            lastMealDateBundle = Bundle().apply {
-                val cal = Calendar.getInstance()
-                cal.timeInMillis = it
-                putInt(DateDialogFragment.DATE_INIT_YEAR, cal.get(Calendar.YEAR))
-                putInt(DateDialogFragment.DATE_INIT_MONTH, cal.get(Calendar.MONTH))
-                putInt(DateDialogFragment.DATE_INIT_DAY, cal.get(Calendar.DAY_OF_MONTH))
-            }
+    fun onDateSaved(day: Int, month: Int, year: Int) {
+        if (pendingDateTimeEdit != null) {
+            throw IllegalStateException("Attempt to set date on existing pending log edit")
         }
-        _showDateDialogFragment.value = Event(lastMealDateBundle)
+        pendingDateTimeEdit = EatingLogDateTime(year, month, day)
+        _showDialogFragment.value = Event(TimeDialogFragment())
     }
 
-    fun onEatingLogEdited(hour: Int, minute: Int) {
-        if (editMode == EditMode.FIRST_MEAL) {
-            _firstMealLogTimeObservable.value =
-                    timeInMillis(hour, minute, _firstMealLogTimeObservable.value)
-        } else if (editMode == EditMode.LAST_MEAL) {
-            _lastMealLogTimeObservable.value =
-                    timeInMillis(hour, minute, _lastMealLogTimeObservable.value)
-        }
-        editMode = EditMode.NONE
+    fun onTimeSaved(hour: Int, minute: Int) {
+        pendingDateTimeEdit?.let {
+            onDateTimeSaved(it.copy(hour = hour, minute = minute))
+        } ?: throw IllegalStateException("Attempt to set time on a null eatingLogDateTime")
     }
 
-    fun onEatingLogEdited(day: Int, month: Int, year: Int) {
-        if (editMode == EditMode.FIRST_MEAL) {
-            _firstMealLogTimeObservable.value =
-                    timeInMillis(day, month, year, _firstMealLogTimeObservable.value)
-        } else if (editMode == EditMode.LAST_MEAL) {
-            _lastMealLogTimeObservable.value =
-                    timeInMillis(day, month, year, _lastMealLogTimeObservable.value)
+    private fun onDateTimeSaved(eatingLogDateTime: EatingLogDateTime) {
+        eatingLogDateTime.apply {
+            _logTimeObservables[editMode]?.value =
+                DateTimeUtils.dateTimeToMillis(day, month, year, hour, minute)
         }
-        editMode = EditMode.NONE
+        resetEditMode()
+    }
+
+    private fun resetEditMode() {
+        editMode = MealType.NONE
+        pendingDateTimeEdit = null
+    }
+
+    fun onTimeEditCancelled() {
+        resetEditMode()
+    }
+
+    fun onDateEditCancelled() {
+        resetEditMode()
     }
 
     fun onActivityCreated(intent: Intent?) {
@@ -117,41 +133,21 @@ class EditEatingLogViewModel @Inject constructor(
                 val eatingLogNullable =
                     repository.getEatingLog(it[EXTRA_EATING_LOG_ID] as Int) ?: throw RuntimeException(
                         "Attempted to obtain a non-existent log with id $EXTRA_EATING_LOG_ID")
-                eatingLog = eatingLogNullable
-                if (eatingLog.startTime > 0L) {
-                    _firstMealLogTimeObservable.value = eatingLog.startTime
+                originalEatingLog = eatingLogNullable
+                if (originalEatingLog.startTime > 0L) {
+                    _logTimeObservables[MealType.FIRST_MEAL]?.value = originalEatingLog.startTime
                 }
-                if (eatingLog.endTime > 0L) {
-                    _lastMealLogTimeObservable.value = eatingLog.endTime
+                if (originalEatingLog.endTime > 0L) {
+                    _logTimeObservables[MealType.LAST_MEAL]?.value = originalEatingLog.endTime
                 }
             }
         }
     }
 
-    private fun timeInMillis(hour: Int, minute: Int, originalTimeMillis: Long?): Long {
-        originalTimeMillis?.let {
-            val cal = Calendar.getInstance()
-            cal.timeInMillis = it
-            return DateTimeUtils.timeToMillis(cal, hour, minute)
-        } ?: run {
-            return DateTimeUtils.timeToMillis(hour, minute)
-        }
-    }
-
-    private fun timeInMillis(day: Int, month: Int, year: Int, originalTimeMillis: Long?): Long {
-        originalTimeMillis?.let {
-            val cal = Calendar.getInstance()
-            cal.timeInMillis = it
-            return DateTimeUtils.timeToMillis(day, month, year, cal)
-        } ?: run {
-            return DateTimeUtils.timeToMillis(day, month, year)
-        }
-    }
-
     fun onSaveButtonClicked() {
-        val startTime = _firstMealLogTimeObservable.value?.let { it } ?: run { eatingLog.startTime }
-        val endTime = _lastMealLogTimeObservable.value?.let { it } ?: run { eatingLog.endTime }
-        val updatedEatingLog = eatingLog.copy(startTime = startTime, endTime = endTime)
+        val startTime = _logTimeObservables[MealType.FIRST_MEAL]?.value?.let { it } ?: originalEatingLog.startTime
+        val endTime = _logTimeObservables[MealType.LAST_MEAL]?.value?.let { it } ?: originalEatingLog.endTime
+        val updatedEatingLog = originalEatingLog.copy(startTime = startTime, endTime = endTime)
         launch {
             repository.updateEatingLog(updatedEatingLog)
         }
