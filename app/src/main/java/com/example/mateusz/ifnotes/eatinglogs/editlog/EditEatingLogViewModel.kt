@@ -96,6 +96,9 @@ class EditEatingLogViewModel @Inject constructor(
         if (pendingDateTimeEdit != null) {
             throw IllegalStateException("Attempt to set date on existing pending log edit")
         }
+        if (editMode == MealType.NONE) {
+            throw IllegalStateException("Attempt to set date on an unknown meal type")
+        }
         pendingDateTimeEdit = EatingLogDateTime(year, month, day)
         _showDialogFragment.value = Event(TimeDialogFragment())
     }

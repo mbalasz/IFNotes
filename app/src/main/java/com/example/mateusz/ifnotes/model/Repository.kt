@@ -36,7 +36,7 @@ open class Repository @Inject constructor(
         iFNotesDatabase.eatingLogDao().insert(eatingLog)
     }
 
-    suspend fun getEatingLog(id: Int): EatingLog? = withContext(Dispatchers.Default) {
+    open suspend fun getEatingLog(id: Int): EatingLog? = withContext(Dispatchers.Default) {
         iFNotesDatabase.eatingLogDao().getEatingLog(id)
     }
 

@@ -1,5 +1,6 @@
 package com.example.mateusz.ifnotes.ifnotes
 
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.mateusz.ifnotes.ifnotes.IFNotesViewModel.TimeSinceLastActivityChronometerData
@@ -31,6 +32,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
+import java.lang.AssertionError
 import java.time.Clock
 
 @RunWith(AndroidJUnit4::class)
@@ -43,6 +45,9 @@ class IFNotesViewModelTest {
 
     @get:Rule
     val mockitoRule: MockitoRule = MockitoJUnit.rule()
+
+    @get:Rule
+    val rule = InstantTaskExecutorRule()
 
     private lateinit var ifNotesViewModel: IFNotesViewModel
 
