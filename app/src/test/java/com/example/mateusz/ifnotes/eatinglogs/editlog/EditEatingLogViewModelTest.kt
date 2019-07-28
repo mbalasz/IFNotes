@@ -10,7 +10,9 @@ import com.example.mateusz.ifnotes.model.data.EatingLog
 import com.example.mateusz.ifnotes.time.DateDialogFragment
 import com.example.mateusz.ifnotes.time.TimeDialogFragment
 import com.nhaarman.mockitokotlin2.argumentCaptor
+import com.nhaarman.mockitokotlin2.reset
 import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.verifyZeroInteractions
 import com.nhaarman.mockitokotlin2.whenever
 import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.runBlockingTest
@@ -133,6 +135,16 @@ class EditEatingLogViewModelTest {
     }
 
     @Test
+    fun onDateSaved_alreadyInEditMode_throwError() {
+        editEatingLogViewModel.onEditFirstMeal()
+        editEatingLogViewModel.onDateSaved(10, 5, 2019)
+
+        assertFailsWith(IllegalStateException::class) {
+            editEatingLogViewModel.onDateSaved(10, 5, 2019)
+        }
+    }
+
+    @Test
     fun onTimeSaved_calledBeforeEditingDate_throwError() {
         assertFailsWith(IllegalStateException::class) {
             editEatingLogViewModel.onTimeSaved(10, 5)
@@ -163,7 +175,89 @@ class EditEatingLogViewModelTest {
     }
 
     @Test
+    fun onTimeEditCancelled_resetsEditMode() {
+        editEatingLogViewModel.onEditFirstMeal()
+        editEatingLogViewModel.onDateSaved(10, 5, 2019)
+
+        editEatingLogViewModel.onTimeEditCancelled()
+
+        assertFailsWith(IllegalStateException::class) {
+            editEatingLogViewModel.onTimeSaved(10, 5)
+        }
+    }
+
+    @Test
+    fun onDateEditCancelled_resetsEditMode() {
+        editEatingLogViewModel.onEditFirstMeal()
+
+        editEatingLogViewModel.onDateEditCancelled()
+
+        assertFailsWith(IllegalStateException::class) {
+            editEatingLogViewModel.onDateSaved(10, 5, 2019)
+        }
+    }
+
+    @Test
+    fun onDiscardButtonClicked_noop() = testScope.runBlockingTest {
+        val firstMealOriginalDateTime =
+            DateTimeUtils.dateTimeToMillis(13, 3, 2019, 10, 20)
+        val lastMealOriginalDateTime =
+            DateTimeUtils.dateTimeToMillis(13, 3, 2019, 15, 20)
+        whenever(repository.getEatingLog(13)).
+            thenReturn(EatingLog(startTime = firstMealOriginalDateTime, endTime = lastMealOriginalDateTime))
+        val intent = Intent().apply {
+            putExtra(EditEatingLogViewModel.EXTRA_EATING_LOG_ID, 13)
+        }
+        editEatingLogViewModel.onActivityCreated(intent)
+        reset(repository)
+        editEatingLogViewModel.onEditLastMeal()
+        editEatingLogViewModel.onDateSaved(13, 3, 2019)
+        editEatingLogViewModel.onTimeSaved(18, 21)
+
+        editEatingLogViewModel.onEditFirstMeal()
+        editEatingLogViewModel.onDateSaved(13, 3, 2019)
+        editEatingLogViewModel.onTimeSaved(11, 17)
+
+        editEatingLogViewModel.onDiscardButtonClicked()
+
+        verifyZeroInteractions(repository)
+    }
+
+    @Test
     fun onSaveButtonClicked_commitsUpdatesToRepository() = testScope.runBlockingTest {
+        val firstMealOriginalDateTime =
+            DateTimeUtils.dateTimeToMillis(13, 3, 2019, 10, 20)
+        val lastMealOriginalDateTime =
+            DateTimeUtils.dateTimeToMillis(13, 3, 2019, 15, 20)
+        whenever(repository.getEatingLog(13)).
+            thenReturn(EatingLog(startTime = firstMealOriginalDateTime, endTime = lastMealOriginalDateTime))
+        val intent = Intent().apply {
+            putExtra(EditEatingLogViewModel.EXTRA_EATING_LOG_ID, 13)
+        }
+        editEatingLogViewModel.onActivityCreated(intent)
+        editEatingLogViewModel.onEditLastMeal()
+        editEatingLogViewModel.onDateSaved(13, 3, 2019)
+        editEatingLogViewModel.onTimeSaved(18, 21)
+
+        editEatingLogViewModel.onEditFirstMeal()
+        editEatingLogViewModel.onDateSaved(13, 3, 2019)
+        editEatingLogViewModel.onTimeSaved(11, 17)
+
+        editEatingLogViewModel.onSaveButtonClicked()
+
+        argumentCaptor<EatingLog>().apply {
+            verify(repository).updateEatingLog(capture())
+            firstValue.startTime.apply {
+                assertThatMsAreEqualToDateTime(this, 2019, 3, 13, 11, 17)
+            }
+            firstValue.endTime.apply {
+                assertThatMsAreEqualToDateTime(this, 2019, 3, 13, 18, 21)
+            }
+        }
+    }
+
+    @Test
+    fun onSaveButtonClicked_firstMealNotEdited_saveFirstMealOriginalDateTime() = testScope.runBlockingTest {
         val firstMealOriginalDateTime =
             DateTimeUtils.dateTimeToMillis(13, 3, 2019, 10, 20)
         val lastMealOriginalDateTime =
@@ -183,19 +277,49 @@ class EditEatingLogViewModelTest {
         argumentCaptor<EatingLog>().apply {
             verify(repository).updateEatingLog(capture())
             firstValue.startTime.apply {
-                assertThat(DateTimeUtils.getDayOfMonthFromMillis(this), equalTo(13))
-                assertThat(DateTimeUtils.getMonthFromMillis(this), equalTo(3))
-                assertThat(DateTimeUtils.getYearFromMillis(this), equalTo(2019))
-                assertThat(DateTimeUtils.getHourFromMillis(this), equalTo(10))
-                assertThat(DateTimeUtils.getMinuteFromMillis(this), equalTo(20))
+                assertThatMsAreEqualToDateTime(this, 2019, 3, 13, 10, 20)
             }
             firstValue.endTime.apply {
-                assertThat(DateTimeUtils.getDayOfMonthFromMillis(this), equalTo(13))
-                assertThat(DateTimeUtils.getMonthFromMillis(this), equalTo(3))
-                assertThat(DateTimeUtils.getYearFromMillis(this), equalTo(2019))
-                assertThat(DateTimeUtils.getHourFromMillis(this), equalTo(18))
-                assertThat(DateTimeUtils.getMinuteFromMillis(this), equalTo(21))
+                assertThatMsAreEqualToDateTime(this, 2019, 3, 13, 18, 21)
             }
         }
+    }
+
+    @Test
+    fun onSaveButtonClicked_lastMealNotEdited_saveLastMealOriginalDateTime() = testScope.runBlockingTest {
+        val firstMealOriginalDateTime =
+            DateTimeUtils.dateTimeToMillis(13, 3, 2019, 10, 20)
+        val lastMealOriginalDateTime =
+            DateTimeUtils.dateTimeToMillis(13, 3, 2019, 15, 20)
+        whenever(repository.getEatingLog(13)).
+            thenReturn(EatingLog(startTime = firstMealOriginalDateTime, endTime = lastMealOriginalDateTime))
+        val intent = Intent().apply {
+            putExtra(EditEatingLogViewModel.EXTRA_EATING_LOG_ID, 13)
+        }
+        editEatingLogViewModel.onActivityCreated(intent)
+        editEatingLogViewModel.onEditFirstMeal()
+        editEatingLogViewModel.onDateSaved(13, 3, 2019)
+        editEatingLogViewModel.onTimeSaved(13, 54)
+
+        editEatingLogViewModel.onSaveButtonClicked()
+
+        argumentCaptor<EatingLog>().apply {
+            verify(repository).updateEatingLog(capture())
+            firstValue.startTime.apply {
+                assertThatMsAreEqualToDateTime(this, 2019, 3, 13, 13, 54)
+            }
+            firstValue.endTime.apply {
+                assertThatMsAreEqualToDateTime(this, 2019, 3, 13, 15, 20)
+            }
+        }
+    }
+
+    private fun assertThatMsAreEqualToDateTime(
+        millis: Long, year: Int, month: Int, day: Int, hour: Int, minute: Int) {
+        assertThat(DateTimeUtils.getYearFromMillis(millis), equalTo(year))
+        assertThat(DateTimeUtils.getMonthFromMillis(millis), equalTo(month))
+        assertThat(DateTimeUtils.getDayOfMonthFromMillis(millis), equalTo(day))
+        assertThat(DateTimeUtils.getHourFromMillis(millis), equalTo(hour))
+        assertThat(DateTimeUtils.getMinuteFromMillis(millis), equalTo(minute))
     }
 }
