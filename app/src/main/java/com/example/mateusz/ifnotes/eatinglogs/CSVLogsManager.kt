@@ -2,13 +2,13 @@ package com.example.mateusz.ifnotes.eatinglogs
 
 import android.content.Context
 import android.net.Uri
+import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.IODispatcher
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.model.data.EatingLog
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.lang.StringBuilder
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -17,7 +17,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-open class CSVLogsManager @Inject constructor(private val context: Context) {
+open class CSVLogsManager @Inject constructor(
+    private val context: Context,
+    @IODispatcher private val ioDispatcher: CoroutineDispatcher
+) {
     companion object {
         private const val FIRST_MEAL_DATE_IDX = 0
         private const val FIRST_MEAL_TIME_IDX = 1
@@ -25,7 +28,7 @@ open class CSVLogsManager @Inject constructor(private val context: Context) {
         private const val LAST_MEAL_TIME_IDX = 3
     }
 
-    open suspend fun getEatingLogsFromCsv(uri: Uri): List<EatingLog> = withContext(Dispatchers.IO) {
+    open suspend fun getEatingLogsFromCsv(uri: Uri): List<EatingLog> = withContext(ioDispatcher) {
         val inputStream = context.contentResolver.openInputStream(uri)
         val bufferedReader = BufferedReader(InputStreamReader(inputStream))
 

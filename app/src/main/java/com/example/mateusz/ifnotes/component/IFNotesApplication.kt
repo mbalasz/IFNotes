@@ -1,21 +1,18 @@
 package com.example.mateusz.ifnotes.component
 
-import android.app.Activity
-import android.app.Application
 import dagger.android.AndroidInjector
-import dagger.android.DispatchingAndroidInjector
-import dagger.android.HasActivityInjector
-import javax.inject.Inject
+import dagger.android.DaggerApplication
 
-class IFNotesApplication : Application(), HasActivityInjector {
-    @Inject lateinit var dispatchingActivityInjector: DispatchingAndroidInjector<Activity>
+class IFNotesApplication : DaggerApplication() {
+
+    lateinit var component: AndroidInjector<out DaggerApplication>
 
     override fun onCreate() {
+        component = DaggerIFNotesComponent.factory().create(this)
         super.onCreate()
-        DaggerIFNotesComponent.builder().application(this).build().inject(this)
     }
 
-    override fun activityInjector(): AndroidInjector<Activity> {
-        return dispatchingActivityInjector
+    override fun applicationInjector(): AndroidInjector<out DaggerApplication> {
+        return component
     }
 }

@@ -3,6 +3,9 @@ package com.example.mateusz.ifnotes.model.data
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.example.mateusz.ifnotes.component.ConcurrencyModule
+import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.IODispatcher
+import com.example.mateusz.ifnotes.component.IFNotesApplication
 import com.example.mateusz.ifnotes.lib.EatingLogValidator
 import com.example.mateusz.ifnotes.model.Repository
 import com.google.common.base.Optional
@@ -11,7 +14,9 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import dagger.BindsInstance
 import dagger.Component
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineDispatcher
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.*
 import org.junit.Before
@@ -27,13 +32,16 @@ class RepositoryTest {
     @Inject lateinit var repository: Repository
     private val eatingLogValidator = mock<EatingLogValidator>()
 
+    private val testDispatcher = TestCoroutineDispatcher()
+
     @Before
     fun setUp() {
         whenever(eatingLogValidator.validateNewEatingLog(any(), any()))
                 .thenReturn(EatingLogValidator.EatingLogValidationStatus.SUCCESS)
         DaggerRepositoryTest_TestComponent.builder()
-                .application(ApplicationProvider.getApplicationContext())
+                .application(ApplicationProvider.getApplicationContext<IFNotesApplication>())
                 .eatingLogValidator(eatingLogValidator)
+                .ioDispatcher(testDispatcher)
                 .build()
                 .inject(this)
     }
@@ -180,6 +188,9 @@ class RepositoryTest {
 
             @BindsInstance
             fun eatingLogValidator(eatingLogValidator: EatingLogValidator): Builder
+
+            @BindsInstance
+            fun ioDispatcher(@IODispatcher ioDispatcher: CoroutineDispatcher): Builder
         }
     }
 }

@@ -54,18 +54,22 @@ class EditEatingLogActivity :
 
         editEatingLogViewModel.showDialogFragment.observe(this, Observer {
             it.getContentIfNotHandled()?.let {
-                it.show(supportFragmentManager, "manualLog")
+                it.show(supportFragmentManager, "manualLogDialog")
+            }
+        })
+
+        editEatingLogViewModel.finishActivity.observe(this, Observer {
+            it.getContentIfNotHandled()?.let {
+                finish()
             }
         })
 
         saveButton.setOnClickListener {
             editEatingLogViewModel.onSaveButtonClicked()
-            finish()
         }
 
         discardButton.setOnClickListener {
             editEatingLogViewModel.onDiscardButtonClicked()
-            finish()
         }
     }
 

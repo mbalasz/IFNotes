@@ -1,0 +1,33 @@
+package com.example.mateusz.ifnotes.component
+
+import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.IODispatcher
+import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScope
+import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogModule
+import com.example.mateusz.ifnotes.model.Repository
+import dagger.BindsInstance
+import dagger.Component
+import dagger.android.AndroidInjectionModule
+import dagger.android.AndroidInjector
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import javax.inject.Singleton
+
+@Singleton
+@Component(modules = [
+    AndroidInjectionModule::class,
+    IFNotesDatabaseTestModule::class,
+    EditEatingLogModule::class,
+    AppModule::class
+])
+interface TestComponent : AndroidInjector<IFNotesApplication> {
+    @Component.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance ifNotesApplication: IFNotesApplication,
+            @BindsInstance @MainScope coroutineScope: CoroutineScope,
+            @BindsInstance @IODispatcher ioDispatcher: CoroutineDispatcher): TestComponent
+    }
+
+    fun repository(): Repository
+}
+

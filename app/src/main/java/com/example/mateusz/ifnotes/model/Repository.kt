@@ -1,30 +1,28 @@
 package com.example.mateusz.ifnotes.model
 
+import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.IODispatcher
 import com.example.mateusz.ifnotes.lib.EatingLogValidator
 import com.example.mateusz.ifnotes.model.data.EatingLog
 import com.example.mateusz.ifnotes.model.data.IFNotesDatabase
 import com.google.common.base.Optional
 import io.reactivex.Flowable
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
-// TODO: switch Default Dispatchers to IO
 @Singleton
 open class Repository @Inject constructor(
     private val iFNotesDatabase: IFNotesDatabase,
-    private val eatingLogValidator: EatingLogValidator
+    private val eatingLogValidator: EatingLogValidator,
+    @IODispatcher private val ioDispatcher: CoroutineDispatcher
 ) {
 
     open fun getEatingLogsObservable(): Flowable<List<EatingLog>> {
         return iFNotesDatabase.eatingLogDao().getEatingLogsFlowable()
     }
 
-    open suspend fun updateEatingLog(eatingLog: EatingLog) = withContext(Dispatchers.Default) {
+    open suspend fun updateEatingLog(eatingLog: EatingLog) = withContext(ioDispatcher) {
         val status = validateUpdate(eatingLog)
         if (status == EatingLogValidator.EatingLogValidationStatus.SUCCESS) {
             iFNotesDatabase.eatingLogDao().update(eatingLog)
@@ -32,11 +30,11 @@ open class Repository @Inject constructor(
         status
     }
 
-    open suspend fun insertEatingLog(eatingLog: EatingLog) = withContext(Dispatchers.Default) {
+    open suspend fun insertEatingLog(eatingLog: EatingLog) = withContext(ioDispatcher) {
         iFNotesDatabase.eatingLogDao().insert(eatingLog)
     }
 
-    open suspend fun getEatingLog(id: Int): EatingLog? = withContext(Dispatchers.Default) {
+    open suspend fun getEatingLog(id: Int): EatingLog? = withContext(ioDispatcher) {
         iFNotesDatabase.eatingLogDao().getEatingLog(id)
     }
 
@@ -50,11 +48,11 @@ open class Repository @Inject constructor(
         }
     }
 
-    open suspend fun deleteEatingLog(eatingLog: EatingLog) = withContext(Dispatchers.Default) {
+    open suspend fun deleteEatingLog(eatingLog: EatingLog) = withContext(ioDispatcher) {
         iFNotesDatabase.eatingLogDao().delete(eatingLog)
     }
 
-    open suspend fun deleteAll() = withContext(Dispatchers.Default) {
+    open suspend fun deleteAll() = withContext(ioDispatcher) {
         iFNotesDatabase.eatingLogDao().deleteAll()
     }
 

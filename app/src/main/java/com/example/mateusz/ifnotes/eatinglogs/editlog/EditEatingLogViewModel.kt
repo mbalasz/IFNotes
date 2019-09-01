@@ -8,7 +8,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
-import com.example.mateusz.ifnotes.component.AppModule.Companion.MainScope
+import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScope
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.lib.Event
 import com.example.mateusz.ifnotes.model.Repository
@@ -42,6 +42,11 @@ class EditEatingLogViewModel @Inject constructor(
     private val _showDialogFragment = MutableLiveData<Event<DialogFragment>>()
     val showDialogFragment: LiveData<Event<DialogFragment>>
         get() = _showDialogFragment
+
+    private val _finishActivity = MutableLiveData<Event<Unit>>()
+    val finishActivity: LiveData<Event<Unit>>
+        get() = _finishActivity
+
 
     private val _logTimeObservables: Map<MealType, MutableLiveData<Long>>
     private val logTimeToDateStringTransformation = {
@@ -153,9 +158,11 @@ class EditEatingLogViewModel @Inject constructor(
         val updatedEatingLog = originalEatingLog.copy(startTime = startTime, endTime = endTime)
         launch {
             repository.updateEatingLog(updatedEatingLog)
+            _finishActivity.value = Event(Unit)
         }
     }
 
     fun onDiscardButtonClicked() {
+        _finishActivity.value = Event(Unit)
     }
 }

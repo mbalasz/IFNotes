@@ -8,8 +8,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import com.example.mateusz.ifnotes.chart.ui.EatingLogsChartActivity
-import com.example.mateusz.ifnotes.component.AppModule.Companion.MainScheduler
-import com.example.mateusz.ifnotes.component.AppModule.Companion.MainScope
+import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScheduler
+import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScope
 import com.example.mateusz.ifnotes.eatinglogs.ui.EatingLogsActivity
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.lib.EatingLogValidator
