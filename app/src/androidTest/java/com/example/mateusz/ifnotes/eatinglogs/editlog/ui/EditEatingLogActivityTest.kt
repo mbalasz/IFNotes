@@ -22,6 +22,8 @@ import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogViewModel
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.model.Repository
 import com.example.mateusz.ifnotes.model.data.EatingLog
+import com.example.mateusz.ifnotes.util.DateTimeTestUtils.Companion.assertThatMsAreEqualToDateTime
+import io.reactivex.schedulers.TestScheduler
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.runBlockingTest
@@ -33,6 +35,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.time.Clock
+import java.time.ZoneId
 
 @RunWith(AndroidJUnit4::class)
 class EditEatingLogActivityTest {
@@ -50,7 +54,6 @@ class EditEatingLogActivityTest {
     private lateinit var intent: Intent
 
     private val testScope = TestCoroutineScope()
-    private val testDispatcher = TestCoroutineDispatcher()
 
     @get:Rule
     var injectionActivityTestRule = InjectionActivityTestRule(
@@ -58,7 +61,9 @@ class EditEatingLogActivityTest {
         DaggerTestComponent.factory().create(
             ApplicationProvider.getApplicationContext(),
             testScope,
-            testDispatcher))
+            TestCoroutineDispatcher(),
+            TestScheduler(),
+            Clock.system(ZoneId.systemDefault())))
 
     @Before
     fun setUp() {
@@ -70,11 +75,10 @@ class EditEatingLogActivityTest {
     @After
     fun cleanUp() {
         testScope.cleanupTestCoroutines()
-        testDispatcher.cleanupTestCoroutines()
     }
 
     @Test
-    fun editFirstMeal() = runBlockingTest {
+    fun editFirstMeal() = testScope.runBlockingTest {
         val originalEatingLog =
             EatingLog(id = 3, startTime = DEFAULT_START_TIME, endTime = DEFAULT_END_TIME)
         repository.insertEatingLog(originalEatingLog)
@@ -85,11 +89,11 @@ class EditEatingLogActivityTest {
 
         val eatingLogs = repository.getEatingLogsObservable().test().awaitCount(1).values()[0]
         assertThat(eatingLogs.size, `is`(1))
-        assertThatMsAreEqualToDateTime(eatingLogs[0].startTime, 2019, 0, 4, 18, 50)
+        assertThatMsAreEqualToDateTime(eatingLogs[0].startTime, 4, 0, 2019, 18, 50)
     }
 
     @Test
-    fun editLastMeal() = runBlockingTest {
+    fun editLastMeal() = testScope.runBlockingTest {
         val originalEatingLog =
             EatingLog(id = 3, startTime = DEFAULT_START_TIME, endTime = DEFAULT_END_TIME)
         repository.insertEatingLog(originalEatingLog)
@@ -100,11 +104,11 @@ class EditEatingLogActivityTest {
 
         val eatingLogs = repository.getEatingLogsObservable().test().awaitCount(1).values()[0]
         assertThat(eatingLogs.size, `is`(1))
-        assertThatMsAreEqualToDateTime(eatingLogs[0].endTime, 2019, 0, 5, 21, 31)
+        assertThatMsAreEqualToDateTime(eatingLogs[0].endTime, 5, 0, 2019, 21, 31)
     }
 
     @Test
-    fun discard_doesNotSaveChanges() = runBlockingTest {
+    fun discard_doesNotSaveChanges() = testScope.runBlockingTest {
         val originalEatingLog =
             EatingLog(id = 3, startTime = DEFAULT_START_TIME, endTime = DEFAULT_END_TIME)
         repository.insertEatingLog(originalEatingLog)
@@ -116,8 +120,8 @@ class EditEatingLogActivityTest {
 
         val eatingLogs = repository.getEatingLogsObservable().test().awaitCount(1).values()[0]
         assertThat(eatingLogs.size, `is`(1))
-        assertThatMsAreEqualToDateTime(eatingLogs[0].startTime, 2019, 0, 5, 10, 50)
-        assertThatMsAreEqualToDateTime(eatingLogs[0].endTime, 2019, 0, 5, 19, 50)
+        assertThatMsAreEqualToDateTime(eatingLogs[0].startTime, 5, 0, 2019, 10, 50)
+        assertThatMsAreEqualToDateTime(eatingLogs[0].endTime, 5, 0, 2019, 19, 50)
     }
 
     private fun startActivity(eatingLogId: Int): ActivityScenario<EditEatingLogActivity> {
@@ -136,14 +140,5 @@ class EditEatingLogActivityTest {
         onView(withClassName(equalTo(TimePicker::class.java.name)))
             .perform(PickerActions.setTime(hour, minute))
         onView(withText("SAVE")).perform(click())
-    }
-
-    private fun assertThatMsAreEqualToDateTime(
-        millis: Long, year: Int, month: Int, day: Int, hour: Int, minute: Int) {
-        assertThat(DateTimeUtils.getYearFromMillis(millis), equalTo(year))
-        assertThat(DateTimeUtils.getMonthFromMillis(millis), equalTo(month))
-        assertThat(DateTimeUtils.getDayOfMonthFromMillis(millis), equalTo(day))
-        assertThat(DateTimeUtils.getHourFromMillis(millis), equalTo(hour))
-        assertThat(DateTimeUtils.getMinuteFromMillis(millis), equalTo(minute))
     }
 }

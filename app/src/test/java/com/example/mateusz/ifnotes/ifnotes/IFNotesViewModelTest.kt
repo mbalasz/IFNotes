@@ -32,7 +32,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
-import java.lang.AssertionError
 import java.time.Clock
 
 @RunWith(AndroidJUnit4::class)

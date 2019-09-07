@@ -24,15 +24,4 @@ abstract class AppModule {
     @Binds
     @Singleton
     abstract fun application(application: IFNotesApplication): Application
-
-    @Module
-    companion object {
-
-        @JvmStatic
-        @Provides
-        @Singleton
-        fun clock(): Clock {
-            return Clock.system(ZoneId.systemDefault())
-        }
-    }
 }

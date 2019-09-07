@@ -1,13 +1,10 @@
 package com.example.mateusz.ifnotes.component
 
-import android.app.Application
-import android.content.Context
 import com.example.mateusz.ifnotes.chart.EatingLogsChartModule
 import com.example.mateusz.ifnotes.eatinglogs.EatingLogsModule
 import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogModule
 import com.example.mateusz.ifnotes.ifnotes.IFNotesModule
 import com.example.mateusz.ifnotes.model.data.IFNotesDatabaseModule
-import dagger.BindsInstance
 import dagger.Component
 import dagger.android.AndroidInjectionModule
 import dagger.android.AndroidInjector
@@ -22,7 +19,8 @@ import javax.inject.Singleton
     EatingLogsChartModule::class,
     EatingLogsModule::class,
     EditEatingLogModule::class,
-    IFNotesDatabaseModule::class])
+    IFNotesDatabaseModule::class,
+    TimeModule::class])
 interface IFNotesComponent : AndroidInjector<IFNotesApplication> {
 
     @Component.Factory

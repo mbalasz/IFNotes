@@ -19,10 +19,12 @@ import com.example.mateusz.ifnotes.model.Repository
 import com.example.mateusz.ifnotes.model.data.EatingLog
 import io.reactivex.Scheduler
 import io.reactivex.disposables.Disposable
+import io.reactivex.functions.Consumer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.Clock
@@ -113,7 +115,7 @@ class IFNotesViewModel @Inject constructor(
     init {
         currentEatingLogDisposable = repository.getMostRecentEatingLog()
             .observeOn(mainScheduler)
-            .subscribe {
+            .subscribe ({
                 if (!isFirstLogLoaded) {
                     isFirstLogLoaded = true
                 }
@@ -121,12 +123,14 @@ class IFNotesViewModel @Inject constructor(
                 launch {
                     currentEatingLogUpdatedChannel.send(Unit)
                 }
-            }
+            }, {
+                throw RuntimeException("Error during loading logs from database", it)
+            })
 
         launch {
             delay(TimeUnit.SECONDS.toMillis(6))
             if (!isFirstLogLoaded) {
-                throw RuntimeException("Couldn't load logs from database")
+                throw RuntimeException("Loading logs from database timed out")
             }
         }
     }
@@ -136,7 +140,11 @@ class IFNotesViewModel @Inject constructor(
     }
 
     fun onNewManualLog(hour: Int, minute: Int) {
-        maybeUpdateCurrentEatingLog(DateTimeUtils.timeToMillis(hour, minute))
+        val currMillis = getCurrentCalendarTime()
+        val year = DateTimeUtils.getYearFromMillis(currMillis)
+        val month = DateTimeUtils.getMonthFromMillis(currMillis)
+        val day = DateTimeUtils.getDayOfMonthFromMillis(currMillis)
+        maybeUpdateCurrentEatingLog(DateTimeUtils.dateTimeToMillis(day, month, year, hour, minute))
     }
 
     fun onLogButtonClicked() {

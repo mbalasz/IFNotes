@@ -1,15 +1,19 @@
 package com.example.mateusz.ifnotes.component
 
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.IODispatcher
+import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScheduler
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScope
 import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogModule
+import com.example.mateusz.ifnotes.ifnotes.IFNotesModule
 import com.example.mateusz.ifnotes.model.Repository
 import dagger.BindsInstance
 import dagger.Component
 import dagger.android.AndroidInjectionModule
 import dagger.android.AndroidInjector
+import io.reactivex.Scheduler
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import java.time.Clock
 import javax.inject.Singleton
 
 @Singleton
@@ -17,6 +21,7 @@ import javax.inject.Singleton
     AndroidInjectionModule::class,
     IFNotesDatabaseTestModule::class,
     EditEatingLogModule::class,
+    IFNotesModule::class,
     AppModule::class
 ])
 interface TestComponent : AndroidInjector<IFNotesApplication> {
@@ -25,7 +30,9 @@ interface TestComponent : AndroidInjector<IFNotesApplication> {
         fun create(
             @BindsInstance ifNotesApplication: IFNotesApplication,
             @BindsInstance @MainScope coroutineScope: CoroutineScope,
-            @BindsInstance @IODispatcher ioDispatcher: CoroutineDispatcher): TestComponent
+            @BindsInstance @IODispatcher ioDispatcher: CoroutineDispatcher,
+            @BindsInstance @MainScheduler mainScheduler: Scheduler,
+            @BindsInstance clock: Clock): TestComponent
     }
 
     fun repository(): Repository
