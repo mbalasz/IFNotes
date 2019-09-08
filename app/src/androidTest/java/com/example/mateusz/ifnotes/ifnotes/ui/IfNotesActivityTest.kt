@@ -2,7 +2,6 @@ package com.example.mateusz.ifnotes.ifnotes.ui
 
 import android.widget.TimePicker
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -74,7 +73,6 @@ class IfNotesActivityTest {
 
     @Test
     fun logActivity_init() = testDispatcher.runBlockingTest {
-        ActivityScenario.launch(IFNotesActivity::class.java)
         whenever(clock.millis()).thenReturn(DateTimeUtils.timeToMillis(10, 50))
 
         onView(withId(R.id.logActivityButton)).perform(click())
@@ -91,7 +89,6 @@ class IfNotesActivityTest {
 
     @Test
     fun logActivity_lastMeal() = testDispatcher.runBlockingTest {
-        ActivityScenario.launch(IFNotesActivity::class.java)
         whenever(clock.millis()).thenReturn(DateTimeUtils.timeToMillis(10, 50))
         onView(withId(R.id.logActivityButton)).perform(click())
 
@@ -110,7 +107,6 @@ class IfNotesActivityTest {
 
     @Test
     fun logActivity_newFirstMeal() = testDispatcher.runBlockingTest {
-        ActivityScenario.launch(IFNotesActivity::class.java)
         whenever(clock.millis()).thenReturn(
             DateTimeUtils.dateTimeToMillis(1, 2, 2019,10, 50))
         onView(withId(R.id.logActivityButton)).perform(click())
@@ -138,7 +134,6 @@ class IfNotesActivityTest {
 
     @Test
     fun manualLog() = testDispatcher.runBlockingTest {
-        ActivityScenario.launch(IFNotesActivity::class.java)
         whenever(clock.millis()).thenReturn(DateTimeUtils.timeToMillis(10, 50))
 
         onView(withId(R.id.manualLogButton)).perform(click())
@@ -162,7 +157,6 @@ class IfNotesActivityTest {
 
     @Test
     fun logShortTimeAgo_firstMeal() = testDispatcher.runBlockingTest {
-        ActivityScenario.launch(IFNotesActivity::class.java)
         whenever(clock.millis()).thenReturn(DateTimeUtils.timeToMillis(10, 50))
 
         onView(withId(R.id.logShortTimeAgo)).perform(click())
@@ -180,7 +174,6 @@ class IfNotesActivityTest {
 
     @Test
     fun logMidTimeAgo_firstMeal() = testDispatcher.runBlockingTest {
-        ActivityScenario.launch(IFNotesActivity::class.java)
         whenever(clock.millis()).thenReturn(DateTimeUtils.timeToMillis(10, 50))
 
         onView(withId(R.id.logMidTimeAgo)).perform(click())
@@ -198,7 +191,6 @@ class IfNotesActivityTest {
 
     @Test
     fun logLongTimeAgo_firstMeal() = testDispatcher.runBlockingTest {
-        ActivityScenario.launch(IFNotesActivity::class.java)
         whenever(clock.millis()).thenReturn(DateTimeUtils.timeToMillis(10, 50))
 
         onView(withId(R.id.logLongTimeAgo)).perform(click())
@@ -216,8 +208,6 @@ class IfNotesActivityTest {
 
     @Test
     fun multipleLogs() = testDispatcher.runBlockingTest {
-        ActivityScenario.launch(IFNotesActivity::class.java)
-
         whenever(clock.millis()).thenReturn(
             DateTimeUtils.dateTimeToMillis(1, 2, 2019,10, 50))
         onView(withId(R.id.logActivityButton)).perform(click())

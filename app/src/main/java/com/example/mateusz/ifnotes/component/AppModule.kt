@@ -5,9 +5,6 @@ import android.content.Context
 import androidx.lifecycle.ViewModelProvider
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
-import java.time.Clock
-import java.time.ZoneId
 import javax.inject.Singleton
 
 @Module

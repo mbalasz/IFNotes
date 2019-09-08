@@ -7,7 +7,8 @@ import dagger.android.AndroidInjector
 
 class InjectionActivityTestRule<T: Activity>(
     activityClass: Class<T>,
-    private val component: AndroidInjector<IFNotesApplication>) : ActivityTestRule<T> (activityClass) {
+    private val component: AndroidInjector<IFNotesApplication>,
+    launchActivity: Boolean = true) : ActivityTestRule<T> (activityClass, false, launchActivity) {
     override fun beforeActivityLaunched() {
         super.beforeActivityLaunched()
         val app = ApplicationProvider.getApplicationContext<IFNotesApplication>()
