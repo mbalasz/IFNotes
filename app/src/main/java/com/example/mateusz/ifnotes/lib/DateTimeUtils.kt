@@ -89,5 +89,13 @@ class DateTimeUtils {
                     logTime.get(Calendar.MINUTE))
             return logTime.timeInMillis
         }
+
+        fun isEqualToDate(millis: Long, day: Int, month: Int, year: Int, hour: Int, minute: Int): Boolean {
+            return getYearFromMillis(millis) == year
+                && getMonthFromMillis(millis) == month
+                && getDayOfMonthFromMillis(millis) == day
+                && getHourFromMillis(millis) == hour
+                && getMinuteFromMillis(millis) == minute
+        }
     }
 }
