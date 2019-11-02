@@ -13,7 +13,6 @@ class InjectionActivityTestRule<T: Activity>(
         super.beforeActivityLaunched()
         val app = ApplicationProvider.getApplicationContext<IFNotesApplication>()
         app.setComponent(component)
-
     }
 }
 

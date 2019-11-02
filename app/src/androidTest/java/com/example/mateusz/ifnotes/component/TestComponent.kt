@@ -3,6 +3,7 @@ package com.example.mateusz.ifnotes.component
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.IODispatcher
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScheduler
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScope
+import com.example.mateusz.ifnotes.database.IFNotesDatabaseTestModule
 import com.example.mateusz.ifnotes.eatinglogs.EatingLogsModule
 import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogModule
 import com.example.mateusz.ifnotes.ifnotes.IFNotesModule

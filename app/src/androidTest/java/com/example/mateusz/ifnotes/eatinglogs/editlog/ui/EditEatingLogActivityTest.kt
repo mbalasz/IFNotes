@@ -22,7 +22,7 @@ import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogViewModel
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.model.Repository
 import com.example.mateusz.ifnotes.model.data.EatingLog
-import com.example.mateusz.ifnotes.util.DateTimeTestUtils.Companion.assertThatMsAreEqualToDateTime
+import com.example.mateusz.ifnotes.date.DateTimeTestUtils.Companion.assertThatMsAreEqualToDateTime
 import io.reactivex.schedulers.TestScheduler
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope

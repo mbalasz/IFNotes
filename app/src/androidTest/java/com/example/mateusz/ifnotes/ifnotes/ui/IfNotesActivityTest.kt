@@ -16,10 +16,10 @@ import com.example.mateusz.ifnotes.component.DaggerTestComponent
 import com.example.mateusz.ifnotes.component.IFNotesApplication
 import com.example.mateusz.ifnotes.component.InjectionActivityTestRule
 import com.example.mateusz.ifnotes.component.TestComponent
+import com.example.mateusz.ifnotes.date.DateTimeTestUtils.Companion.assertThatMsAreEqualToDateTime
+import com.example.mateusz.ifnotes.date.DateTimeTestUtils.Companion.assertThatMsAreEqualToTime
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.model.Repository
-import com.example.mateusz.ifnotes.util.DateTimeTestUtils.Companion.assertThatMsAreEqualToDateTime
-import com.example.mateusz.ifnotes.util.DateTimeTestUtils.Companion.assertThatMsAreEqualToTime
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.schedulers.Schedulers

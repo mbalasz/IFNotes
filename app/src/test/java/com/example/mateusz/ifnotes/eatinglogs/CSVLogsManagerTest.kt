@@ -19,6 +19,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.shadows.ShadowContentResolver
+import java.io.PipedInputStream
+import java.io.PipedOutputStream
+import java.io.PrintWriter
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -38,13 +41,24 @@ class CSVLogsManagerTest {
 
     @Test
     fun getEatingLogsFromCsv() = runBlocking<Unit> {
-        val csvLogsStream = javaClass.classLoader.getResourceAsStream("testLogs.txt")
+        val csvLogsPipedOutputStream = PipedOutputStream()
+        val csvLogsPipedInputStream = PipedInputStream(csvLogsPipedOutputStream)
+        PrintWriter(csvLogsPipedOutputStream.bufferedWriter()).apply {
+            println("Headers")
+            println("2019-05-10,10:24,2019-05-10,19:50")
+            println("2019-05-11,10:24,2019-05-11,19:50")
+            close()
+        }
         val csvLogsUri = Uri.parse("content://testLogs")
-        shadowContentResolver.registerInputStream(csvLogsUri, csvLogsStream)
+        shadowContentResolver.registerInputStream(csvLogsUri, csvLogsPipedInputStream)
 
         val eatingLogs = csvLogsManager.getEatingLogsFromCsv(csvLogsUri)
 
         assertThat(eatingLogs[0], startsOn(10, 4, 2019, 10, 24))
+        assertThat(eatingLogs[0], endsOn(10, 4, 2019, 19, 50))
+
+        assertThat(eatingLogs[1], startsOn(11, 4, 2019, 10, 24))
+        assertThat(eatingLogs[1], endsOn(11, 4, 2019, 19, 50))
     }
 
     companion object {
@@ -65,7 +79,11 @@ class CSVLogsManagerTest {
                        private val propertyName: String,
                        private val extractor: (EatingLog) -> Long) : BaseMatcher<EatingLog>() {
         override fun describeTo(description: Description?) {
-            description?.appendText("$propertyName of the EatingLog should be equal to $year/$month/$day $hour:$minute")
+            description?.appendText("$propertyName of the EatingLog should be equal to ${DateTimeUtils.toDateTimeString(day, month, year, hour, minute)}")
+        }
+
+        override fun describeMismatch(item: Any?, description: Description?) {
+            description?.appendText("was equal to ${DateTimeUtils.toDateTimeString(extractor(item as EatingLog))}")
         }
 
         override fun matches(item: Any?): Boolean {

@@ -3,9 +3,9 @@ package com.example.mateusz.ifnotes.model.data
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.example.mateusz.ifnotes.component.ConcurrencyModule
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.IODispatcher
 import com.example.mateusz.ifnotes.component.IFNotesApplication
+import com.example.mateusz.ifnotes.database.IFNotesDatabaseTestModule
 import com.example.mateusz.ifnotes.lib.EatingLogValidator
 import com.example.mateusz.ifnotes.model.Repository
 import com.google.common.base.Optional

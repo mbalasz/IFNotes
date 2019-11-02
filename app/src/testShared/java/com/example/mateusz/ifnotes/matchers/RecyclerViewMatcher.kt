@@ -1,4 +1,4 @@
-package com.example.mateusz.ifnotes.util
+package com.example.mateusz.ifnotes.matchers
 
 import android.content.res.Resources
 import androidx.recyclerview.widget.RecyclerView

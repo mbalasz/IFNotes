@@ -37,6 +37,7 @@ class IFNotesViewModel @Inject constructor(
     private val repository: Repository,
     private val clock: Clock,
     private val systemClock: SystemClockWrapper,
+    private val eatingLogValidator: EatingLogValidator,
     @MainScope mainScope: CoroutineScope,
     @MainScheduler mainScheduler: Scheduler
 ) : AndroidViewModel(application), CoroutineScope by mainScope {
@@ -61,7 +62,6 @@ class IFNotesViewModel @Inject constructor(
 
     data class EatingLogDisplay(val logState: LogState, val logTime: String)
 
-    private val eatingLogValidator = EatingLogValidator()
     private val currentEatingLogLiveData = MutableLiveData<EatingLog>()
     private val logTimeValidationMessageLiveData =
             MutableLiveData<LogTimeValidationMessage>()

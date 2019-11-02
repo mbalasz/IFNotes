@@ -1,4 +1,4 @@
-package com.example.mateusz.ifnotes.util
+package com.example.mateusz.ifnotes.date
 
 import com.example.mateusz.ifnotes.lib.DateTimeUtils.Companion.getDayOfMonthFromMillis
 import com.example.mateusz.ifnotes.lib.DateTimeUtils.Companion.getHourFromMillis

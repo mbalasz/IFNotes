@@ -1,8 +1,12 @@
 package com.example.mateusz.ifnotes.ifnotes
 
+import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScheduler
+import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScope
+import com.example.mateusz.ifnotes.database.IFNotesDatabaseTestModule
 import com.example.mateusz.ifnotes.ifnotes.IFNotesViewModel.TimeSinceLastActivityChronometerData
 import com.example.mateusz.ifnotes.lib.SystemClockWrapper
 import com.example.mateusz.ifnotes.model.Repository
@@ -13,10 +17,15 @@ import com.nhaarman.mockitokotlin2.argumentCaptor
 import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
+import dagger.BindsInstance
+import dagger.Component
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
+import io.reactivex.Scheduler
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.schedulers.TestScheduler
 import io.reactivex.subjects.PublishSubject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.runBlockingTest
@@ -33,6 +42,8 @@ import org.mockito.Mock
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 import java.time.Clock
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @RunWith(AndroidJUnit4::class)
 class IFNotesViewModelTest {
@@ -40,7 +51,7 @@ class IFNotesViewModelTest {
     @Mock private lateinit var clock: Clock
     @Mock private lateinit var systemClock: SystemClockWrapper
     private val testScope = TestCoroutineScope()
-    private val testScheduler = TestScheduler()
+    private val testScheduler = Schedulers.trampoline()
 
     @get:Rule
     val mockitoRule: MockitoRule = MockitoJUnit.rule()
@@ -48,14 +59,18 @@ class IFNotesViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    private lateinit var ifNotesViewModel: IFNotesViewModel
+    @Inject lateinit var ifNotesViewModel: IFNotesViewModel
+    private lateinit var component: TestComponent
 
     @Before
     fun setUp() {
         whenever(repository.getMostRecentEatingLog())
             .thenReturn(Flowable.fromArray(Optional.absent()))
-        ifNotesViewModel = createIfNotesViewModel()
-        testScheduler.triggerActions()
+        val application = ApplicationProvider.getApplicationContext<Application>()
+        component =
+            DaggerIFNotesViewModelTest_TestComponent
+                .factory()
+                .create(application, repository, clock, systemClock, testScope, testScheduler)
     }
 
     @After
@@ -65,6 +80,7 @@ class IFNotesViewModelTest {
 
     @Test
     fun timeSinceLastActivity_initValueIsNull() = testScope.runBlockingTest {
+        createIfNotesViewModel()
         assertThat(ifNotesViewModel.timeSinceLastActivity.value, `is`(nullValue()))
     }
 
@@ -76,7 +92,7 @@ class IFNotesViewModelTest {
             .thenReturn(initEatingLogPublisher.toFlowable(BackpressureStrategy.BUFFER))
         whenever(clock.millis()).thenReturn(1200L)
 
-        ifNotesViewModel = createIfNotesViewModel()
+        createIfNotesViewModel()
 
         testScope.runBlockingTest {
             ifNotesViewModel.onLogButtonClicked()
@@ -84,7 +100,6 @@ class IFNotesViewModelTest {
             verify(repository, never()).updateEatingLog(any())
 
             initEatingLogPublisher.onNext(Optional.of(EatingLog(startTime = 100L)))
-            testScheduler.triggerActions()
         }
 
         verify(repository).updateEatingLog(any())
@@ -92,6 +107,7 @@ class IFNotesViewModelTest {
 
     @Test
     fun onLogButtonClicked_noEatingLogInProgress_createsNewEatingLog() = runBlocking<Unit> {
+        createIfNotesViewModel()
         whenever(clock.millis()).thenReturn(1200L)
 
         testScope.runBlockingTest {
@@ -109,8 +125,7 @@ class IFNotesViewModelTest {
         val eatingLogInProgress = EatingLog(id = 1, startTime = 300L)
         whenever(repository.getMostRecentEatingLog())
             .thenReturn(Flowable.fromArray(Optional.of(eatingLogInProgress)))
-        ifNotesViewModel = createIfNotesViewModel()
-        testScheduler.triggerActions()
+        createIfNotesViewModel()
         whenever(clock.millis()).thenReturn(1200L)
 
         testScope.runBlockingTest {
@@ -128,12 +143,11 @@ class IFNotesViewModelTest {
         val initEatingLogPublisher = PublishSubject.create<Optional<EatingLog>>()
         whenever(repository.getMostRecentEatingLog())
             .thenReturn(initEatingLogPublisher.toFlowable(BackpressureStrategy.BUFFER))
-        ifNotesViewModel = createIfNotesViewModel()
+        createIfNotesViewModel()
         whenever(clock.millis()).thenReturn(200L)
         whenever(systemClock.elapsedRealtime()).thenReturn(500L)
 
         initEatingLogPublisher.onNext(Optional.of(EatingLog(startTime = 100L)))
-        testScheduler.triggerActions()
 
         var expectedTimeSinceLastActivityChronometerData: TimeSinceLastActivityChronometerData? = null
         ifNotesViewModel.timeSinceLastActivity.observeForever {
@@ -145,13 +159,24 @@ class IFNotesViewModelTest {
             `is`(equalTo(TimeSinceLastActivityChronometerData(400L, IFNotesViewModel.DARK_RED))))
     }
 
-    private fun createIfNotesViewModel(): IFNotesViewModel {
-        return IFNotesViewModel(
-            ApplicationProvider.getApplicationContext(),
-            repository,
-            clock,
-            systemClock,
-            testScope,
-            testScheduler)
+    private fun createIfNotesViewModel() {
+        component.inject(this@IFNotesViewModelTest)
+    }
+
+    @Singleton
+    @Component(modules = [IFNotesDatabaseTestModule::class])
+    interface TestComponent {
+        fun inject(ifNotesViewModelTest: IFNotesViewModelTest)
+
+        @Component.Factory
+        interface Factory {
+            fun create(@BindsInstance application: Application,
+                       @BindsInstance repository: Repository,
+                       @BindsInstance clock: Clock,
+                       @BindsInstance systemClock: SystemClockWrapper,
+                       @BindsInstance @MainScope testScope: CoroutineScope,
+                       @BindsInstance @MainScheduler testScheduler: Scheduler)
+                : TestComponent
+        }
     }
 }

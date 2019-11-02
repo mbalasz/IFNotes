@@ -3,10 +3,10 @@ package com.example.mateusz.ifnotes.model.data
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.example.mateusz.ifnotes.database.IFNotesDatabaseTestModule
 import dagger.BindsInstance
 import dagger.Component
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import javax.inject.Inject

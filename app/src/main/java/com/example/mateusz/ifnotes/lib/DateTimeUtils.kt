@@ -17,6 +17,10 @@ class DateTimeUtils {
             return dateTimeFormat.format(timeInMillis)
         }
 
+        fun toDateTimeString(day: Int, month: Int, year: Int, hour: Int, minute: Int): String {
+            return defaultDateTimeFormat.format(dateTimeToMillis(day, month, year, hour, minute))
+        }
+
         fun toDateString(timeInMillis: Long): String {
             return defaultDateFormat.format(timeInMillis)
         }

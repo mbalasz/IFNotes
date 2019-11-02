@@ -22,6 +22,16 @@ android {
             testCoverageEnabled true
         }
     }
+
+    sourceSets {
+        test {
+            java.srcDirs += "$projectDir/src/testShared/java"
+        }
+
+        androidTest {
+            java.srcDirs += "$projectDir/src/testShared/java"
+        }
+    }
     testOptions.unitTests.includeAndroidResources = true
 
     // Gradle automatically adds 'android.test.runner' as a dependency.
