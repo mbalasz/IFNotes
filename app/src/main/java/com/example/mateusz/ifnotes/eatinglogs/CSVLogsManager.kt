@@ -39,10 +39,12 @@ open class CSVLogsManager @Inject constructor(
         val eatingLogs = mutableListOf<EatingLog>()
         var line = bufferedReader.readLine()
         while (line != null) {
-            val eatingLog = maybeCreateEatingLogFromLine(line)
-            eatingLog?.let { eatingLogs.add(it) }
-                ?: throw IllegalStateException("Can't parse $line while importing csv file. " +
-                    "Invalid format for eating log")
+            if (line.isNotEmpty()) {
+                val eatingLog = maybeCreateEatingLogFromLine(line)
+                eatingLog?.let { eatingLogs.add(it) }
+                    ?: throw IllegalStateException("Can't parse $line while importing csv file. " +
+                        "Invalid format for eating log")
+            }
             line = bufferedReader.readLine()
         }
         eatingLogs
@@ -85,17 +87,13 @@ open class CSVLogsManager @Inject constructor(
         return null
     }
 
-    private fun parseDateTime(dateTime: String?): Date? {
-        return if (dateTime != null) {
-            val dateFormatter = SimpleDateFormat(
-                    "${getDateFormat()} ${getTimeFormat()}", Locale.ENGLISH)
-            dateFormatter.isLenient = false
-            return try {
-                dateFormatter.parse(dateTime)
-            } catch (exception: ParseException) {
-                null
-            }
-        } else {
+    private fun parseDateTime(dateTime: String): Date? {
+        val dateFormatter = SimpleDateFormat(
+                "${getDateFormat()} ${getTimeFormat()}", Locale.ENGLISH)
+        dateFormatter.isLenient = false
+        return try {
+            dateFormatter.parse(dateTime)
+        } catch (exception: ParseException) {
             null
         }
     }
