@@ -6,6 +6,8 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.mateusz.ifnotes.component.ConcurrencyModule
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
+import com.example.mateusz.ifnotes.matchers.EatingLogEqualsToDate.Companion.endsOn
+import com.example.mateusz.ifnotes.matchers.EatingLogEqualsToDate.Companion.startsOn
 import com.example.mateusz.ifnotes.model.data.EatingLog
 import dagger.BindsInstance
 import dagger.Component
@@ -61,35 +63,6 @@ class CSVLogsManagerTest {
         assertThat(eatingLogs[1], endsOn(11, 4, 2019, 19, 50))
     }
 
-    companion object {
-        fun startsOn(day: Int, month: Int, year: Int, hour: Int, minute: Int): Matcher<EatingLog> {
-            return EqualsToDate(day, month, year, hour, minute, "start time") { it.startTime }
-        }
-
-        fun endsOn(day: Int, month: Int, year: Int, hour: Int, minute: Int): Matcher<EatingLog> {
-            return EqualsToDate(day, month, year, hour, minute, "end time") { it.endTime }
-        }
-    }
-
-    class EqualsToDate(private val day: Int,
-                       private val month: Int,
-                       private val year: Int,
-                       private val hour: Int,
-                       private val minute: Int,
-                       private val propertyName: String,
-                       private val extractor: (EatingLog) -> Long) : BaseMatcher<EatingLog>() {
-        override fun describeTo(description: Description?) {
-            description?.appendText("$propertyName of the EatingLog should be equal to ${DateTimeUtils.toDateTimeString(day, month, year, hour, minute)}")
-        }
-
-        override fun describeMismatch(item: Any?, description: Description?) {
-            description?.appendText("was equal to ${DateTimeUtils.toDateTimeString(extractor(item as EatingLog))}")
-        }
-
-        override fun matches(item: Any?): Boolean {
-            return DateTimeUtils.isEqualToDate(extractor(item as EatingLog), day, month, year, hour, minute)
-        }
-    }
 
     @Singleton
     @Component(modules = [ConcurrencyModule::class])
