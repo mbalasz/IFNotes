@@ -155,6 +155,27 @@ class CSVLogsManagerTest {
     }
 
     @Test
+    fun getEatingLogsFromCsv_invalidStartTime_failsWithException() {
+        val csvLogsPipedOutputStream = PipedOutputStream()
+        val csvLogsPipedInputStream = PipedInputStream(csvLogsPipedOutputStream)
+        PrintWriter(csvLogsPipedOutputStream.bufferedWriter()).apply {
+            println("Headers")
+            println("2019/05/10,10:24,2019/05/10,19:50")
+            println("2019/05/10,1024,2019/05/10,19:50")
+            println("2019/05/11,10:24,2019/05/11,19:50")
+            close()
+        }
+        val csvLogsUri = Uri.parse("content://testLogs")
+        shadowContentResolver.registerInputStream(csvLogsUri, csvLogsPipedInputStream)
+
+        assertFailsWith(IllegalStateException::class) {
+            testDispatcher.runBlockingTest {
+                csvLogsManager.getEatingLogsFromCsv(csvLogsUri)
+            }
+        }
+    }
+
+    @Test
     fun getEatingLogsFromCsv_corruptedLine_failsWithException() {
         val csvLogsPipedOutputStream = PipedOutputStream()
         val csvLogsPipedInputStream = PipedInputStream(csvLogsPipedOutputStream)
