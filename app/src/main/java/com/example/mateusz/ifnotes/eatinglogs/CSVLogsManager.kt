@@ -9,6 +9,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.lang.IllegalStateException
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -19,8 +20,8 @@ import javax.inject.Singleton
 @Singleton
 open class CSVLogsManager @Inject constructor(
     private val context: Context,
-    @IODispatcher private val ioDispatcher: CoroutineDispatcher
-) {
+    @IODispatcher private val ioDispatcher: CoroutineDispatcher) {
+
     companion object {
         private const val FIRST_MEAL_DATE_IDX = 0
         private const val FIRST_MEAL_TIME_IDX = 1
@@ -40,6 +41,8 @@ open class CSVLogsManager @Inject constructor(
         while (line != null) {
             val eatingLog = maybeCreateEatingLogFromLine(line)
             eatingLog?.let { eatingLogs.add(it) }
+                ?: throw IllegalStateException("Can't parse $line while importing csv file. " +
+                    "Invalid format for eating log")
             line = bufferedReader.readLine()
         }
         eatingLogs
@@ -48,8 +51,7 @@ open class CSVLogsManager @Inject constructor(
     open fun createCsvFromEatingLogs(eatingLogs: List<EatingLog>): String {
         val csvLogsBuilder = StringBuilder()
         val csvDateTimeFormat = SimpleDateFormat("${getDateFormat()},${getTimeFormat()}", Locale.ENGLISH)
-        csvLogsBuilder.append("Start date,Start time,End date, End time")
-        csvLogsBuilder.appendln()
+        csvLogsBuilder.appendln("Start date,Start time,End date,End time")
         for (eatingLog in eatingLogs) {
             val startDateTime = DateTimeUtils.toDateTimeString(eatingLog.startTime, csvDateTimeFormat)
             csvLogsBuilder.append(startDateTime)
@@ -68,19 +70,17 @@ open class CSVLogsManager @Inject constructor(
         if (tokens.isNotEmpty() && tokens.size >= 2) {
             val firstMealDate = tokens[FIRST_MEAL_DATE_IDX].replace('/', '-')
             val firstMealTime = tokens[FIRST_MEAL_TIME_IDX]
-            val startTime = parseDateTime("$firstMealDate $firstMealTime")
+            val startTime = parseDateTime("$firstMealDate $firstMealTime") ?: return null
             var endTime: Date? = null
             if (tokens.size >= 4) {
                 val lastMealDate = tokens[LAST_MEAL_DATE_IDX].replace('/', '-')
                 val lastMealTime = tokens[LAST_MEAL_TIME_IDX]
-                endTime = parseDateTime("$lastMealDate $lastMealTime")
+                endTime = parseDateTime("$lastMealDate $lastMealTime") ?: return null
             }
-            if (startTime != null) {
-                if (endTime != null) {
-                    return EatingLog(startTime = startTime.time, endTime = endTime.time)
-                }
-                return EatingLog(startTime = startTime.time)
+            if (endTime != null) {
+                return EatingLog(startTime = startTime.time, endTime = endTime.time)
             }
+            return EatingLog(startTime = startTime.time)
         }
         return null
     }
