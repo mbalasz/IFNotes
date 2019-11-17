@@ -10,10 +10,8 @@ import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.lang.IllegalStateException
-import java.text.ParseException
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -73,29 +71,22 @@ open class CSVLogsManager @Inject constructor(
             val firstMealDate = tokens[FIRST_MEAL_DATE_IDX].replace('/', '-')
             val firstMealTime = tokens[FIRST_MEAL_TIME_IDX]
             val startTime = parseDateTime("$firstMealDate $firstMealTime") ?: return null
-            var endTime: Date? = null
+            var endTime: Long? = null
             if (tokens.size >= 4) {
                 val lastMealDate = tokens[LAST_MEAL_DATE_IDX].replace('/', '-')
                 val lastMealTime = tokens[LAST_MEAL_TIME_IDX]
                 endTime = parseDateTime("$lastMealDate $lastMealTime") ?: return null
             }
             if (endTime != null) {
-                return EatingLog(startTime = startTime.time, endTime = endTime.time)
+                return EatingLog(startTime = startTime, endTime = endTime)
             }
-            return EatingLog(startTime = startTime.time)
+            return EatingLog(startTime = startTime)
         }
         return null
     }
 
-    private fun parseDateTime(dateTime: String): Date? {
-        val dateFormatter = SimpleDateFormat(
-                "${getDateFormat()} ${getTimeFormat()}", Locale.ENGLISH)
-        dateFormatter.isLenient = false
-        return try {
-            dateFormatter.parse(dateTime)
-        } catch (exception: ParseException) {
-            null
-        }
+    private fun parseDateTime(dateTime: String): Long? {
+        return DateTimeUtils.parseDateTime(dateTime, "${getDateFormat()} ${getTimeFormat()}")
     }
 
     private fun getDateFormat(): String {

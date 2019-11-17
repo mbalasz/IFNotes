@@ -117,7 +117,6 @@ class EatingLogsViewModel @Inject constructor (
                 Event(ActivityForResultsData(intent, CHOOSE_CSV_FILE_TO_EXPORT_LOGS_CODE))
     }
 
-    // TODO: add test for this method.
     fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == CHOOSE_CSV_LOGS_TO_IMPORT_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
