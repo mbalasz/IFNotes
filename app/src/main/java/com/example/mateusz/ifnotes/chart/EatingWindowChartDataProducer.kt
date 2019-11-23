@@ -12,10 +12,10 @@ class EatingWindowChartDataProducer(timeWindowValidator: TimeWindowValidator)
         val dataPoints = arrayListOf<DataPoint>()
         for (eatingLog in eatingLogs) {
             checkEatingLogValid(eatingLog)
-            if (!eatingLog.hasEndTime()) {
+            if (eatingLog.endTime == null || eatingLog.startTime == null) {
                 continue
             }
-            val timeWindow = eatingLog.endTime - eatingLog.startTime
+            val timeWindow = eatingLog.endTime.dateTimeInMillis - eatingLog.startTime.dateTimeInMillis
             if (timeWindowValidator.isTimeWindowValid(timeWindow)) {
                 dataPoints.add(DataPoint(eatingLog, timeWindow))
             }

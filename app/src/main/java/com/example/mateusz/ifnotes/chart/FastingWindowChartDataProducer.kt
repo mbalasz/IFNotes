@@ -18,7 +18,10 @@ class FastingWindowChartDataProducer(timeWindowValidator: TimeWindowValidator)
             val currEatingLog = eatingLogs[i]
             checkEatingLogValid(currEatingLog)
             val prevEatingLog = eatingLogs[i - 1]
-            val timeWindow = currEatingLog.startTime - prevEatingLog.endTime
+            if (currEatingLog.startTime == null || prevEatingLog.endTime == null) {
+                continue
+            }
+            val timeWindow = currEatingLog.startTime.dateTimeInMillis - prevEatingLog.endTime.dateTimeInMillis
             if (timeWindowValidator.isTimeWindowValid(timeWindow)) {
                 dataPoints.add(DataPoint(currEatingLog, timeWindow))
             }

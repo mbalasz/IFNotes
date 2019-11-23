@@ -9,6 +9,7 @@ import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.model.Repository
 import com.github.mikephil.charting.data.Entry
 import io.reactivex.disposables.Disposable
+import java.lang.IllegalStateException
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -31,7 +32,7 @@ class EatingLogsChartViewModel @Inject constructor(
     init {
         eatingLogsSubscription = repository.getEatingLogsObservable().subscribe {
             val eatingLogs = it.sortedWith(
-                    Comparator { a, b -> compareValuesBy(a, b, { it.startTime }, { it.endTime }) })
+                    Comparator { a, b -> compareValuesBy(a, b, { it.startTime?.dateTimeInMillis }, { it.endTime?.dateTimeInMillis }) })
             val dataPoints = FastingWindowChartDataProducer(windowValidator).getDataPoints(eatingLogs)
             val chartData =
                     ChartData(getEntriesFromDataPoints(dataPoints), getLabelsFromDataPoints(dataPoints))
@@ -58,7 +59,9 @@ class EatingLogsChartViewModel @Inject constructor(
         val labels = arrayListOf<String>()
         for (dataPoint in dataPoints) {
             val eatingLog = dataPoint.eatingLog
-            labels.add(DateTimeUtils.toDateString(eatingLog.startTime))
+            eatingLog.startTime?.let {
+                labels.add(DateTimeUtils.toDateString(it.dateTimeInMillis))
+            } ?: throw IllegalStateException("DataPoint's EatingLog has no start time")
         }
         return labels
     }

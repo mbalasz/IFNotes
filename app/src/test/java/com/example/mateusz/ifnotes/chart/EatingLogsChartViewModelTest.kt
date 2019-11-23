@@ -4,6 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.mateusz.ifnotes.model.Repository
 import com.example.mateusz.ifnotes.model.data.EatingLog
+import com.example.mateusz.ifnotes.model.data.LogDate
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Flowable
 import org.hamcrest.CoreMatchers.`is`
@@ -57,12 +58,18 @@ class EatingLogsChartViewModelTest {
     }
 
     private fun createEatingLogsWithFastingWindows(fastingWindowsHours: List<Long>): List<EatingLog> {
-        var prevLog = EatingLog(startTime = 100L, endTime = 300L)
+        var prevLog = EatingLog(
+            startTime = LogDate(100L, ""),
+            endTime = LogDate(300L, ""))
         val eatingLogs = mutableListOf(prevLog)
-        fastingWindowsHours.forEach {
-            val newLogStartTime = prevLog.endTime + TimeUnit.HOURS.toMillis(it)
-            prevLog = EatingLog(startTime = newLogStartTime, endTime = newLogStartTime + 100L)
-            eatingLogs.add(prevLog)
+        fastingWindowsHours.forEach { fastingWindowHours ->
+            prevLog.endTime?.dateTimeInMillis?.let { prevLogEndTime ->
+                val newLogStartTime = prevLogEndTime + TimeUnit.HOURS.toMillis(fastingWindowHours)
+                prevLog = EatingLog(
+                    startTime = LogDate(newLogStartTime),
+                    endTime = LogDate(newLogStartTime + 100L))
+                eatingLogs.add(prevLog)
+            }
         }
         return eatingLogs
     }

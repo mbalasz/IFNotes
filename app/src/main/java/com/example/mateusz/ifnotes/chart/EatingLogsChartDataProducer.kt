@@ -10,7 +10,7 @@ abstract class EatingLogsChartDataProducer(protected val timeWindowValidator: Ti
     data class DataPoint(val eatingLog: EatingLog, val windowDurationMs: Long)
 
     protected fun checkEatingLogValid(eatingLog: EatingLog) {
-        if (!eatingLog.hasStartTime() && eatingLog.hasEndTime()) {
+        if (eatingLog.startTime == null && eatingLog.endTime != null) {
             throw IllegalArgumentException(
                     "Cannot chart eating window for eatingLog: ${eatingLog.id} since it has" +
                             " end time but no start time.")

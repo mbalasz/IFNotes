@@ -24,6 +24,7 @@ import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.lib.Event
 import com.example.mateusz.ifnotes.model.Repository
 import com.example.mateusz.ifnotes.model.data.EatingLog
+import com.example.mateusz.ifnotes.model.data.LogDate
 import com.nhaarman.mockitokotlin2.*
 import com.nhaarman.mockitokotlin2.verify
 import dagger.BindsInstance
@@ -77,25 +78,25 @@ class EatingLogsViewModelTest {
 
     private val eatingLogs = listOf(
         EatingLog(
-            startTime = DateTimeUtils.dateTimeToMillis(
-                20, 5, 2018, 10, 50),
-            endTime = DateTimeUtils.dateTimeToMillis(
-                20, 5, 2018, 18, 50)),
+            startTime = LogDate(DateTimeUtils.dateTimeToMillis(
+                20, 5, 2018, 10, 50)),
+            endTime = LogDate(DateTimeUtils.dateTimeToMillis(
+                20, 5, 2018, 18, 50))),
         EatingLog(
-            startTime = DateTimeUtils.dateTimeToMillis(
-                21, 5, 2018, 10, 50),
-            endTime = DateTimeUtils.dateTimeToMillis(
-                21, 5, 2018, 18, 50)),
+            startTime = LogDate(DateTimeUtils.dateTimeToMillis(
+                21, 5, 2018, 10, 50)),
+            endTime = LogDate(DateTimeUtils.dateTimeToMillis(
+                21, 5, 2018, 18, 50))),
         EatingLog(
-            startTime = DateTimeUtils.dateTimeToMillis(
-                25, 5, 2018, 11, 50),
-            endTime = DateTimeUtils.dateTimeToMillis(
-                25, 5, 2018, 18, 50)),
+            startTime = LogDate(DateTimeUtils.dateTimeToMillis(
+                25, 5, 2018, 11, 50)),
+            endTime = LogDate(DateTimeUtils.dateTimeToMillis(
+                25, 5, 2018, 18, 50))),
         EatingLog(
-            startTime = DateTimeUtils.dateTimeToMillis(
-                30, 5, 2019, 10, 50),
-            endTime = DateTimeUtils.dateTimeToMillis(
-                30, 5, 2019, 18, 50)))
+            startTime = LogDate(DateTimeUtils.dateTimeToMillis(
+                30, 5, 2019, 10, 50)),
+            endTime = LogDate(DateTimeUtils.dateTimeToMillis(
+                30, 5, 2019, 18, 50))))
 
     @Before
     fun setUp() {
@@ -117,13 +118,13 @@ class EatingLogsViewModelTest {
         createEatingLogsViewModel()
 
         eatingLogsViewModel.onBindEatingLogsItemView(eatingLogsItemView, 0)
-        verify(eatingLogsItemView).setStartTme(eatingLogs[3].startTime)
-        verify(eatingLogsItemView).setEndTime(eatingLogs[3].endTime)
+        verify(eatingLogsItemView).setStartTme(eatingLogs[3].startTime!!.dateTimeInMillis)
+        verify(eatingLogsItemView).setEndTime(eatingLogs[3].endTime!!.dateTimeInMillis)
 
 
         eatingLogsViewModel.onBindEatingLogsItemView(eatingLogsItemView, 3)
-        verify(eatingLogsItemView).setStartTme(eatingLogs[0].startTime)
-        verify(eatingLogsItemView).setEndTime(eatingLogs[0].endTime)
+        verify(eatingLogsItemView).setStartTme(eatingLogs[0].startTime!!.dateTimeInMillis)
+        verify(eatingLogsItemView).setEndTime(eatingLogs[0].endTime!!.dateTimeInMillis)
     }
 
     @Test
@@ -247,12 +248,12 @@ class EatingLogsViewModelTest {
                     val capturedLog = capturedLogsIterator.next()
                     // TODO: replace the String comparison after adopting ThreeTenABP
                     assertThat(
-                        DateTimeUtils.toDateTimeString(eatingLog.startTime),
-                        equalTo(DateTimeUtils.toDateTimeString(capturedLog.startTime)))
+                        DateTimeUtils.toDateTimeString(eatingLog.startTime!!.dateTimeInMillis),
+                        equalTo(DateTimeUtils.toDateTimeString(capturedLog.startTime!!.dateTimeInMillis)))
 
                     assertThat(
-                        DateTimeUtils.toDateTimeString(eatingLog.endTime),
-                        equalTo(DateTimeUtils.toDateTimeString(capturedLog.endTime)))
+                        DateTimeUtils.toDateTimeString(eatingLog.endTime!!.dateTimeInMillis),
+                        equalTo(DateTimeUtils.toDateTimeString(capturedLog.endTime!!.dateTimeInMillis)))
                 }
                 assertThat(capturedLogsIterator.hasNext(), `is`(false))
             }
@@ -299,7 +300,7 @@ class EatingLogsViewModelTest {
 
     private fun sortDescendingByStartTime(eatingLogs: List<EatingLog>) : List<EatingLog> {
         return eatingLogs.sortedWith(
-            Comparator { a, b -> compareValuesBy(b, a, { it.startTime }, { it.endTime }) })
+            Comparator { a, b -> compareValuesBy(b, a, { it.startTime?.dateTimeInMillis }, { it.endTime?.dateTimeInMillis }) })
     }
 
     private fun assertActivityComponent(activityForResultsData: ActivityForResultsData?, className: String) {

@@ -17,6 +17,7 @@ import com.example.mateusz.ifnotes.lib.Event
 import com.example.mateusz.ifnotes.lib.SystemClockWrapper
 import com.example.mateusz.ifnotes.model.Repository
 import com.example.mateusz.ifnotes.model.data.EatingLog
+import com.example.mateusz.ifnotes.model.data.LogDate
 import io.reactivex.Scheduler
 import io.reactivex.disposables.Disposable
 import io.reactivex.functions.Consumer
@@ -84,14 +85,14 @@ class IFNotesViewModel @Inject constructor(
         } ?: run { LogState.FIRST_MEAL }
     }
     val timeSinceLastActivity = Transformations.map(currentEatingLogLiveData) { eatingLog ->
-        eatingLog?.let {
-            if (eatingLogValidator.isEatingLogFinished(eatingLog)) {
+        eatingLog?.let { currEatingLog ->
+            currEatingLog.endTime?.dateTimeInMillis?.let {
                 TimeSinceLastActivityChronometerData(
-                        getElapsedRealTimeSinceBaseInMillis(eatingLog.endTime),
+                        getElapsedRealTimeSinceBaseInMillis(it),
                         DARK_GREEN)
-            } else {
+            } ?: currEatingLog.startTime?.dateTimeInMillis?.let {
                 TimeSinceLastActivityChronometerData(
-                        getElapsedRealTimeSinceBaseInMillis(eatingLog.startTime),
+                        getElapsedRealTimeSinceBaseInMillis(it),
                         DARK_RED)
             }
         } ?: run { null }
@@ -101,13 +102,13 @@ class IFNotesViewModel @Inject constructor(
                 eatingLog?.let {
                     val simpleDateFormat =
                             SimpleDateFormat("dd/M/yyyy HH:mm:ss", Locale.ENGLISH)
-                    if (eatingLogValidator.isEatingLogFinished(eatingLog)) {
+                    eatingLog.endTime?.dateTimeInMillis?.let {
                         EatingLogDisplay(
-                                LogState.LAST_MEAL, simpleDateFormat.format(eatingLog.endTime))
-                    } else {
+                                LogState.LAST_MEAL, simpleDateFormat.format(it))
+                    } ?: eatingLog.startTime?.dateTimeInMillis?.let {
                         EatingLogDisplay(
                                 LogState.FIRST_MEAL,
-                                simpleDateFormat.format(eatingLog.startTime))
+                                simpleDateFormat.format(it))
                     }
                 } ?: run { EatingLogDisplay(LogState.NO_CURRENT_LOG, "") }
     }
@@ -222,10 +223,10 @@ class IFNotesViewModel @Inject constructor(
             }
             val newEatingLog: EatingLog
             if (currentEatingLog == null || eatingLogValidator.isEatingLogFinished(currentEatingLog)) {
-                newEatingLog = EatingLog(startTime = logTime)
+                newEatingLog = EatingLog(startTime = LogDate(logTime, ""))
                 repository.insertEatingLog(newEatingLog)
             } else {
-                newEatingLog = currentEatingLog.copy(endTime = logTime)
+                newEatingLog = currentEatingLog.copy(endTime = LogDate(logTime, ""))
                 repository.updateEatingLog(newEatingLog)
             }
         }

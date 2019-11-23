@@ -9,6 +9,7 @@ import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.matchers.EatingLogEqualsToDate.Companion.endsOn
 import com.example.mateusz.ifnotes.matchers.EatingLogEqualsToDate.Companion.startsOn
 import com.example.mateusz.ifnotes.model.data.EatingLog
+import com.example.mateusz.ifnotes.model.data.LogDate
 import dagger.BindsInstance
 import dagger.Component
 import kotlinx.coroutines.CoroutineDispatcher
@@ -200,18 +201,18 @@ class CSVLogsManagerTest {
     fun createCsvFromEatingLogs() {
         val eatingLogs = listOf(
             EatingLog(
-                startTime = DateTimeUtils.dateTimeToMillis(
-                    10, 4, 2019, 10, 24),
-                endTime = DateTimeUtils.dateTimeToMillis(
-                    10, 4, 2019, 19, 24)),
+                startTime = LogDate(DateTimeUtils.dateTimeToMillis(
+                    10, 4, 2019, 10, 24)),
+                endTime = LogDate(DateTimeUtils.dateTimeToMillis(
+                    10, 4, 2019, 19, 24))),
             EatingLog(
-                startTime = DateTimeUtils.dateTimeToMillis(
-                    11, 4, 2019, 10, 24),
-                endTime = DateTimeUtils.dateTimeToMillis(
-                    11, 4, 2019, 19, 24)),
+                startTime = LogDate(DateTimeUtils.dateTimeToMillis(
+                    11, 4, 2019, 10, 24)),
+                endTime = LogDate(DateTimeUtils.dateTimeToMillis(
+                    11, 4, 2019, 19, 24))),
             EatingLog(
-                startTime = DateTimeUtils.dateTimeToMillis(
-                    12, 4, 2019, 10, 24)
+                startTime = LogDate(DateTimeUtils.dateTimeToMillis(
+                    12, 4, 2019, 10, 24))
             ))
 
         val csvString = csvLogsManager.createCsvFromEatingLogs(eatingLogs)

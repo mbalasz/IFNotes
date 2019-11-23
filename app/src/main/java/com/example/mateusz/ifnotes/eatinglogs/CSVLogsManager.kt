@@ -5,6 +5,7 @@ import android.net.Uri
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.IODispatcher
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.model.data.EatingLog
+import com.example.mateusz.ifnotes.model.data.LogDate
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
@@ -53,11 +54,15 @@ open class CSVLogsManager @Inject constructor(
         val csvDateTimeFormat = SimpleDateFormat("${getDateFormat()},${getTimeFormat()}", Locale.ENGLISH)
         csvLogsBuilder.appendln("Start date,Start time,End date,End time")
         for (eatingLog in eatingLogs) {
-            val startDateTime = DateTimeUtils.toDateTimeString(eatingLog.startTime, csvDateTimeFormat)
-            csvLogsBuilder.append(startDateTime)
-            csvLogsBuilder.append(",")
-            if (eatingLog.endTime != 0L) {
-                val endDateTime = DateTimeUtils.toDateTimeString(eatingLog.endTime, csvDateTimeFormat)
+            eatingLog.startTime?.let {
+                val startDateTime = DateTimeUtils.toDateTimeString(it.dateTimeInMillis, csvDateTimeFormat)
+                csvLogsBuilder.append(startDateTime)
+                csvLogsBuilder.append(",")
+            } ?: run {
+                csvLogsBuilder.append(",,")
+            }
+            eatingLog.endTime?.let {
+                val endDateTime = DateTimeUtils.toDateTimeString(it.dateTimeInMillis, csvDateTimeFormat)
                 csvLogsBuilder.append(endDateTime)
             }
             csvLogsBuilder.appendln()
@@ -78,9 +83,9 @@ open class CSVLogsManager @Inject constructor(
                 endTime = parseDateTime("$lastMealDate $lastMealTime") ?: return null
             }
             if (endTime != null) {
-                return EatingLog(startTime = startTime, endTime = endTime)
+                return EatingLog(startTime = LogDate(startTime, ""), endTime = LogDate(endTime, ""))
             }
-            return EatingLog(startTime = startTime)
+            return EatingLog(startTime = LogDate(startTime, ""))
         }
         return null
     }

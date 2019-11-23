@@ -53,10 +53,10 @@ class RepositoryTest {
 
     @Test
     fun updateEatingLog() {
-        val eatingLog = EatingLog(id = 1, startTime = 100L)
+        val eatingLog = EatingLog(id = 1, startTime = LogDate(100L))
         runBlocking {
             repository.insertEatingLog(eatingLog)
-            val updatedEatingLog = eatingLog.copy(endTime = 200L)
+            val updatedEatingLog = eatingLog.copy(endTime = LogDate(200L))
             repository.updateEatingLog(updatedEatingLog)
             repository.getEatingLogsObservable().test().awaitCount(1).assertValue(listOf(updatedEatingLog))
         }
@@ -67,10 +67,10 @@ class RepositoryTest {
         whenever(eatingLogValidator.validateNewEatingLog(any(), any()))
                 .thenReturn(
                         EatingLogValidator.EatingLogValidationStatus.START_TIME_LATER_THAN_END_TIME)
-        val oldEatingLog = EatingLog(id = 1, startTime = 100L)
+        val oldEatingLog = EatingLog(id = 1, startTime = LogDate(100L))
         runBlocking {
             repository.insertEatingLog(oldEatingLog)
-            val updatedEatingLog = oldEatingLog.copy(endTime = 200L)
+            val updatedEatingLog = oldEatingLog.copy(endTime = LogDate(200L))
             repository.updateEatingLog(updatedEatingLog)
             repository.getEatingLogsObservable().test().awaitCount(1).assertValue(listOf(oldEatingLog))
         }
@@ -78,7 +78,7 @@ class RepositoryTest {
 
     @Test
     fun updateEatingLog_noPreviousLogToUpdate() {
-        val eatingLog = EatingLog(id = 1, startTime = 100L)
+        val eatingLog = EatingLog(id = 1, startTime = LogDate(100L))
         runBlocking {
             repository.updateEatingLog(eatingLog)
             repository.getEatingLogsObservable().test().awaitCount(1).assertValue(emptyList())
@@ -89,12 +89,12 @@ class RepositoryTest {
     fun insertEatingLog() {
         val eatingLogs =
             listOf(
-                EatingLog(id = 1, startTime = 100),
-                EatingLog(id = 2, startTime = 50),
-                EatingLog(id = 3, startTime = 150),
-                EatingLog(id = 4, startTime = 350),
-                EatingLog(id = 5, startTime = 250),
-                EatingLog(id = 6, startTime = 50))
+                EatingLog(id = 1, startTime = LogDate(100)),
+                EatingLog(id = 2, startTime = LogDate(50)),
+                EatingLog(id = 3, startTime = LogDate(150)),
+                EatingLog(id = 4, startTime = LogDate(350)),
+                EatingLog(id = 5, startTime = LogDate(250)),
+                EatingLog(id = 6, startTime = LogDate(50)))
         runBlocking {
             eatingLogs.forEach {
                 repository.insertEatingLog(it)
@@ -105,8 +105,8 @@ class RepositoryTest {
 
     @Test
     fun getEatingLog() {
-        val eatingLog = EatingLog(id = 1, startTime = 100L)
-        val eatingLogTwo = EatingLog(id = 2, startTime = 200L)
+        val eatingLog = EatingLog(id = 1, startTime = LogDate(100L))
+        val eatingLogTwo = EatingLog(id = 2, startTime = LogDate(200L))
         runBlocking {
             repository.insertEatingLog(eatingLog)
             repository.insertEatingLog(eatingLogTwo)
@@ -123,19 +123,19 @@ class RepositoryTest {
     fun getMostRecentEatingLog() {
         val eatingLogs =
             listOf(
-                EatingLog(id = 1, startTime = 100),
-                EatingLog(id = 2, startTime = 50),
-                EatingLog(id = 3, startTime = 150),
-                EatingLog(id = 4, startTime = 350),
-                EatingLog(id = 5, startTime = 250),
-                EatingLog(id = 6, startTime = 50))
+                EatingLog(id = 1, startTime = LogDate(100)),
+                EatingLog(id = 2, startTime = LogDate(50)),
+                EatingLog(id = 3, startTime = LogDate(150)),
+                EatingLog(id = 4, startTime = LogDate(350)),
+                EatingLog(id = 5, startTime = LogDate(250)),
+                EatingLog(id = 6, startTime = LogDate(50)))
         runBlocking {
             eatingLogs.forEach { repository.insertEatingLog(it) }
         }
         repository.getMostRecentEatingLog()
             .map {
                 assertThat(it.isPresent, `is`(true))
-                it.get().startTime
+                it.get().startTime!!.dateTimeInMillis
             }.test()
             .awaitCount(1)
             .assertValue(350)
@@ -156,12 +156,12 @@ class RepositoryTest {
     @Test
     fun deleteAll() {
         val eatingLogs = listOf(
-            EatingLog(id = 1, startTime = 100),
-            EatingLog(id = 2, startTime = 50),
-            EatingLog(id = 3, startTime = 150),
-            EatingLog(id = 4, startTime = 350),
-            EatingLog(id = 5, startTime = 250),
-            EatingLog(id = 6, startTime = 50))
+            EatingLog(id = 1, startTime = LogDate(100)),
+            EatingLog(id = 2, startTime = LogDate(50)),
+            EatingLog(id = 3, startTime = LogDate(150)),
+            EatingLog(id = 4, startTime = LogDate(350)),
+            EatingLog(id = 5, startTime = LogDate(250)),
+            EatingLog(id = 6, startTime = LogDate(50)))
 
         runBlocking {
             eatingLogs.forEach {

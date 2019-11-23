@@ -25,6 +25,7 @@ import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.model.Repository
 import com.example.mateusz.ifnotes.model.data.EatingLog
 import com.example.mateusz.ifnotes.matchers.RecyclerViewMatcher
+import com.example.mateusz.ifnotes.model.data.LogDate
 import com.nhaarman.mockitokotlin2.mock
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.CoroutineScope
@@ -85,14 +86,14 @@ class EatingLogsActivityTest {
         activity.runOnUiThread {
             testDispatcher.runBlockingTest {
                 repository.insertEatingLog(EatingLog(
-                    startTime = DateTimeUtils.dateTimeToMillis(1, 2, 2019, 10, 50),
-                    endTime = DateTimeUtils.dateTimeToMillis(1, 2, 2019, 18, 50)))
+                    startTime = LogDate(DateTimeUtils.dateTimeToMillis(1, 2, 2019, 10, 50)),
+                    endTime = LogDate(DateTimeUtils.dateTimeToMillis(1, 2, 2019, 18, 50))))
                 repository.insertEatingLog(EatingLog(
-                    startTime = DateTimeUtils.dateTimeToMillis(2, 2, 2019, 10, 50),
-                    endTime = DateTimeUtils.dateTimeToMillis(2, 2, 2019, 18, 50)))
+                    startTime = LogDate(DateTimeUtils.dateTimeToMillis(2, 2, 2019, 10, 50)),
+                    endTime = LogDate(DateTimeUtils.dateTimeToMillis(2, 2, 2019, 18, 50))))
                 repository.insertEatingLog(EatingLog(
-                    startTime = DateTimeUtils.dateTimeToMillis(3, 2, 2019, 10, 50),
-                    endTime = DateTimeUtils.dateTimeToMillis(3, 2, 2019, 18, 50)))
+                    startTime = LogDate(DateTimeUtils.dateTimeToMillis(3, 2, 2019, 10, 50)),
+                    endTime = LogDate(DateTimeUtils.dateTimeToMillis(3, 2, 2019, 18, 50))))
             }
         }
         onView(withId(R.id.eatingLogsRecyclerView)).check(RecyclerViewCountAssertion(3))
@@ -119,11 +120,11 @@ class EatingLogsActivityTest {
         activity.runOnUiThread {
             testDispatcher.runBlockingTest {
                 repository.insertEatingLog(EatingLog(
-                    startTime = DateTimeUtils.dateTimeToMillis(1, 2, 2019, 10, 50),
-                    endTime = DateTimeUtils.dateTimeToMillis(1, 2, 2019, 18, 50)))
+                    startTime = LogDate(DateTimeUtils.dateTimeToMillis(1, 2, 2019, 10, 50)),
+                    endTime = LogDate(DateTimeUtils.dateTimeToMillis(1, 2, 2019, 18, 50))))
                 repository.insertEatingLog(EatingLog(
-                    startTime = DateTimeUtils.dateTimeToMillis(2, 2, 2019, 10, 50),
-                    endTime = DateTimeUtils.dateTimeToMillis(2, 2, 2019, 18, 50)))
+                    startTime = LogDate(DateTimeUtils.dateTimeToMillis(2, 2, 2019, 10, 50)),
+                    endTime = LogDate(DateTimeUtils.dateTimeToMillis(2, 2, 2019, 18, 50))))
             }
         }
 

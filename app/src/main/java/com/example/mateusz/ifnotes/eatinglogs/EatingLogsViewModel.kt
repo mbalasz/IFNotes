@@ -50,7 +50,7 @@ class EatingLogsViewModel @Inject constructor (
     init {
         repository.getEatingLogsObservable().subscribe {
             eatingLogs = it.sortedWith(
-                    Comparator { a, b -> compareValuesBy(b, a, { it.startTime }, { it.endTime }) })
+                    Comparator { a, b -> compareValuesBy(b, a, { it.startTime?.dateTimeInMillis }, { it.endTime?.dateTimeInMillis }) })
             _refreshData.postValue(Event(Unit))
         }
     }
@@ -90,9 +90,11 @@ class EatingLogsViewModel @Inject constructor (
             return
         }
         val eatingLog = eatingLogs[position]
-        eatingLogsItemView.setStartTme(eatingLog.startTime)
-        if (eatingLog.endTime > 0) {
-            eatingLogsItemView.setEndTime(eatingLog.endTime)
+        eatingLog.startTime?.let {startTime ->
+            eatingLogsItemView.setStartTme(startTime.dateTimeInMillis)
+            eatingLog.endTime?.let { endTime ->
+                eatingLogsItemView.setEndTime(endTime.dateTimeInMillis)
+            }
         }
     }
 

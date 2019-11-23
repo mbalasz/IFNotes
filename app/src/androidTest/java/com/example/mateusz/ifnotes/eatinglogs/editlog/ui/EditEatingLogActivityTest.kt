@@ -23,6 +23,7 @@ import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.model.Repository
 import com.example.mateusz.ifnotes.model.data.EatingLog
 import com.example.mateusz.ifnotes.date.DateTimeTestUtils.Companion.assertThatMsAreEqualToDateTime
+import com.example.mateusz.ifnotes.model.data.LogDate
 import io.reactivex.schedulers.TestScheduler
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
@@ -80,7 +81,7 @@ class EditEatingLogActivityTest {
     @Test
     fun editFirstMeal() = testScope.runBlockingTest {
         val originalEatingLog =
-            EatingLog(id = 3, startTime = DEFAULT_START_TIME, endTime = DEFAULT_END_TIME)
+            EatingLog(id = 3, startTime = LogDate(DEFAULT_START_TIME), endTime = LogDate(DEFAULT_END_TIME))
         repository.insertEatingLog(originalEatingLog)
         startActivity(3)
 
@@ -89,13 +90,13 @@ class EditEatingLogActivityTest {
 
         val eatingLogs = repository.getEatingLogsObservable().test().awaitCount(1).values()[0]
         assertThat(eatingLogs.size, `is`(1))
-        assertThatMsAreEqualToDateTime(eatingLogs[0].startTime, 4, 0, 2019, 18, 50)
+        assertThatMsAreEqualToDateTime(eatingLogs[0].startTime!!.dateTimeInMillis, 4, 0, 2019, 18, 50)
     }
 
     @Test
     fun editLastMeal() = testScope.runBlockingTest {
         val originalEatingLog =
-            EatingLog(id = 3, startTime = DEFAULT_START_TIME, endTime = DEFAULT_END_TIME)
+            EatingLog(id = 3, startTime = LogDate(DEFAULT_START_TIME), endTime = LogDate(DEFAULT_END_TIME))
         repository.insertEatingLog(originalEatingLog)
         startActivity(3)
 
@@ -104,13 +105,13 @@ class EditEatingLogActivityTest {
 
         val eatingLogs = repository.getEatingLogsObservable().test().awaitCount(1).values()[0]
         assertThat(eatingLogs.size, `is`(1))
-        assertThatMsAreEqualToDateTime(eatingLogs[0].endTime, 5, 0, 2019, 21, 31)
+        assertThatMsAreEqualToDateTime(eatingLogs[0].endTime!!.dateTimeInMillis, 5, 0, 2019, 21, 31)
     }
 
     @Test
     fun discard_doesNotSaveChanges() = testScope.runBlockingTest {
         val originalEatingLog =
-            EatingLog(id = 3, startTime = DEFAULT_START_TIME, endTime = DEFAULT_END_TIME)
+            EatingLog(id = 3, startTime = LogDate(DEFAULT_START_TIME), endTime = LogDate(DEFAULT_END_TIME))
         repository.insertEatingLog(originalEatingLog)
         startActivity(3)
 
@@ -120,8 +121,8 @@ class EditEatingLogActivityTest {
 
         val eatingLogs = repository.getEatingLogsObservable().test().awaitCount(1).values()[0]
         assertThat(eatingLogs.size, `is`(1))
-        assertThatMsAreEqualToDateTime(eatingLogs[0].startTime, 5, 0, 2019, 10, 50)
-        assertThatMsAreEqualToDateTime(eatingLogs[0].endTime, 5, 0, 2019, 19, 50)
+        assertThatMsAreEqualToDateTime(eatingLogs[0].startTime!!.dateTimeInMillis, 5, 0, 2019, 10, 50)
+        assertThatMsAreEqualToDateTime(eatingLogs[0].endTime!!.dateTimeInMillis, 5, 0, 2019, 19, 50)
     }
 
     private fun startActivity(eatingLogId: Int): ActivityScenario<EditEatingLogActivity> {

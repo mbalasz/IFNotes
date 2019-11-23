@@ -32,31 +32,31 @@ class IFNotesDatabaseTest {
 
     @Test
     fun getEatingLogs() {
-        val eatingLog1 = EatingLog(startTime = 10L)
-        val eatingLog2 = EatingLog(startTime = 11L)
+        val eatingLog1 = EatingLog(startTime = LogDate(10L))
+        val eatingLog2 = EatingLog(startTime = LogDate(11L))
 
         eatingLogDao.insert(eatingLog1)
         eatingLogDao.insert(eatingLog2)
 
         eatingLogDao.getEatingLogsFlowable().map { eatingLogs ->
             eatingLogs.map {
-                it.startTime
+                it.startTime!!.dateTimeInMillis
             }
         }.test().awaitCount(1).assertValue(listOf(10L, 11L))
     }
 
     @Test
     fun getMostRecentEatingLog() {
-        val eatingLog1 = EatingLog(startTime = 10L)
-        val eatingLog2 = EatingLog(startTime = 11L)
-        val eatingLog3 = EatingLog(startTime = 9L)
+        val eatingLog1 = EatingLog(startTime = LogDate(10L))
+        val eatingLog2 = EatingLog(startTime = LogDate(11L))
+        val eatingLog3 = EatingLog(startTime = LogDate(9L))
 
         eatingLogDao.insert(eatingLog1)
         eatingLogDao.insert(eatingLog2)
         eatingLogDao.insert(eatingLog3)
 
         eatingLogDao.getMostRecentEatingLog()
-                .map { it[0].startTime }
+                .map { it[0].startTime!!.dateTimeInMillis }
                 .test()
                 .awaitCount(1)
                 .assertValue(11L)

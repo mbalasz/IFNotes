@@ -18,8 +18,11 @@ open class EatingLogValidator @Inject constructor(private val clock: Clock) {
     enum class EatingLogValidationStatus {
         SUCCESS,
         START_TIME_TOO_EARLY,
+        ERROR_START_TIME_IN_THE_FUTURE,
+        ERROR_END_TIME_IN_THE_FUTURE,
         START_TIME_LATER_THAN_END_TIME,
         END_TIME_TOO_LATE,
+        NO_START_TIME,
     }
 
     fun validateNewLogTime(logTime: Long, currentEatingLog: EatingLog?): NewLogTimeValidationStatus {
@@ -29,12 +32,12 @@ open class EatingLogValidator @Inject constructor(private val clock: Clock) {
         if (currentEatingLog == null) {
             return NewLogTimeValidationStatus.SUCCESS
         }
-        if (isEatingLogFinished(currentEatingLog)) {
-            if (currentEatingLog.endTime > logTime) {
+        currentEatingLog.endTime?.dateTimeInMillis?.let {
+            if (it > logTime) {
                 return NewLogTimeValidationStatus.ERROR_TIME_TOO_EARLY
             }
-        } else {
-            if (currentEatingLog.startTime > logTime) {
+        } ?: currentEatingLog.startTime?.dateTimeInMillis?.let {
+            if (it > logTime) {
                 return NewLogTimeValidationStatus.ERROR_TIME_TOO_EARLY
             }
         }
@@ -43,15 +46,26 @@ open class EatingLogValidator @Inject constructor(private val clock: Clock) {
 
     open fun validateNewEatingLog(newEatingLog: EatingLog, eatingLogs: List<EatingLog>):
             EatingLogValidationStatus {
-        if (newEatingLog.startTime > newEatingLog.endTime) {
-            return EatingLogValidationStatus.START_TIME_LATER_THAN_END_TIME
+        if (newEatingLog.startTime == null) {
+            return EatingLogValidationStatus.NO_START_TIME
+        }
+        if (newEatingLog.startTime.dateTimeInMillis > clock.millis()) {
+            return EatingLogValidationStatus.ERROR_START_TIME_IN_THE_FUTURE
+        }
+        newEatingLog.endTime?.dateTimeInMillis?.let {
+            if (newEatingLog.startTime.dateTimeInMillis > it) {
+                return EatingLogValidationStatus.START_TIME_LATER_THAN_END_TIME
+            }
+            if (it > clock.millis()) {
+                return EatingLogValidationStatus.ERROR_END_TIME_IN_THE_FUTURE
+            }
         }
         val sortedEatingLogs = eatingLogs.sortedWith(compareBy(
-                { it.startTime },
-                { it.endTime }
+                { it.startTime?.dateTimeInMillis },
+                { it.endTime?.dateTimeInMillis }
         ))
         var idx = sortedEatingLogs.binarySearch(
-                newEatingLog, compareBy<EatingLog> { it.startTime }.thenBy { it.endTime })
+                newEatingLog, compareBy<EatingLog> { it.startTime?.dateTimeInMillis }.thenBy { it.endTime?.dateTimeInMillis })
         if (idx >= 0) {
             throw IllegalStateException("EatingLog shouldn't exist in the list at this stage")
         }
@@ -72,10 +86,13 @@ open class EatingLogValidator @Inject constructor(private val clock: Clock) {
     }
 
     private fun validateOrder(eatingLog: EatingLog, nextEatingLog: EatingLog): Boolean {
-        return eatingLog.endTime < nextEatingLog.startTime
+        if (eatingLog.endTime == null || nextEatingLog.startTime == null) {
+            return false
+        }
+        return eatingLog.endTime.dateTimeInMillis < nextEatingLog.startTime.dateTimeInMillis
     }
 
-    fun isEatingLogFinished(eatingLog: EatingLog?): Boolean {
-        return eatingLog == null || eatingLog.startTime != 0L && eatingLog.endTime != 0L
+    fun isEatingLogFinished(eatingLog: EatingLog): Boolean {
+        return eatingLog.startTime != null && eatingLog.endTime != null
     }
 }

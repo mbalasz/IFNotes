@@ -29,6 +29,7 @@ import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.equalTo
+import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.Matchers
 import org.junit.After
 import org.junit.Before
@@ -82,8 +83,8 @@ class IfNotesActivityTest {
                 assertThat(it.size, `is`(1))
                 it[0]
             }
-            assertThatMsAreEqualToTime(eatingLog.startTime, 10, 50)
-            assertThat(eatingLog.endTime, equalTo(0L))
+            assertThatMsAreEqualToTime(eatingLog.startTime!!.dateTimeInMillis, 10, 50)
+            assertThat(eatingLog.endTime, `is`(nullValue()))
         }
     }
 
@@ -100,8 +101,8 @@ class IfNotesActivityTest {
                 assertThat(it.size, `is`(1))
                 it[0]
             }
-            assertThatMsAreEqualToTime(eatingLog.startTime, 10, 50)
-            assertThatMsAreEqualToTime(eatingLog.endTime, 18, 50)
+            assertThatMsAreEqualToTime(eatingLog.startTime!!.dateTimeInMillis, 10, 50)
+            assertThatMsAreEqualToTime(eatingLog.endTime!!.dateTimeInMillis, 18, 50)
         }
     }
 
@@ -123,12 +124,12 @@ class IfNotesActivityTest {
                 assertThat(it.size, `is`(2))
             }
             assertThatMsAreEqualToDateTime(
-                eatingLogs[0].startTime, 1, 2, 2019, 10, 50)
+                eatingLogs[0].startTime!!.dateTimeInMillis, 1, 2, 2019, 10, 50)
             assertThatMsAreEqualToDateTime(
-                eatingLogs[0].endTime, 1, 2, 2019,  18, 50)
+                eatingLogs[0].endTime!!.dateTimeInMillis, 1, 2, 2019,  18, 50)
             assertThatMsAreEqualToDateTime(
-                eatingLogs[1].startTime, 2, 2, 2019, 9, 30)
-            assertThat(eatingLogs[1].endTime, equalTo(0L))
+                eatingLogs[1].startTime!!.dateTimeInMillis, 2, 2, 2019, 9, 30)
+            assertThat(eatingLogs[1].endTime, `is`(nullValue()))
         }
     }
 
@@ -150,8 +151,8 @@ class IfNotesActivityTest {
             val eatingLogs = subscriber.values()[0].also {
                 assertThat(it.size, `is`(1))
             }
-            assertThatMsAreEqualToTime(eatingLogs[0].startTime, 10, 30)
-            assertThatMsAreEqualToTime(eatingLogs[0].endTime, 10, 45)
+            assertThatMsAreEqualToTime(eatingLogs[0].startTime!!.dateTimeInMillis, 10, 30)
+            assertThatMsAreEqualToTime(eatingLogs[0].endTime!!.dateTimeInMillis, 10, 45)
         }
     }
 
@@ -167,8 +168,8 @@ class IfNotesActivityTest {
                 it[0]
             }
 
-            assertThatMsAreEqualToTime(eatingLog.startTime, 10, 35)
-            assertThat(eatingLog.endTime, equalTo(0L))
+            assertThatMsAreEqualToTime(eatingLog.startTime!!.dateTimeInMillis, 10, 35)
+            assertThat(eatingLog.endTime,`is`(nullValue()))
         }
     }
 
@@ -184,8 +185,8 @@ class IfNotesActivityTest {
                 it[0]
             }
 
-            assertThatMsAreEqualToTime(eatingLog.startTime, 10, 20)
-            assertThat(eatingLog.endTime, equalTo(0L))
+            assertThatMsAreEqualToTime(eatingLog.startTime!!.dateTimeInMillis, 10, 20)
+            assertThat(eatingLog.endTime, `is`(nullValue()))
         }
     }
 
@@ -201,8 +202,8 @@ class IfNotesActivityTest {
                 it[0]
             }
 
-            assertThatMsAreEqualToTime(eatingLog.startTime, 9, 50)
-            assertThat(eatingLog.endTime, equalTo(0L))
+            assertThatMsAreEqualToTime(eatingLog.startTime!!.dateTimeInMillis, 9, 50)
+            assertThat(eatingLog.endTime, `is`(nullValue()))
         }
     }
 
@@ -236,16 +237,16 @@ class IfNotesActivityTest {
                 assertThat(it.size, `is`(3))
             }
             assertThatMsAreEqualToDateTime(
-                eatingLogs[0].startTime, 1, 2, 2019, 10, 50)
+                eatingLogs[0].startTime!!.dateTimeInMillis, 1, 2, 2019, 10, 50)
             assertThatMsAreEqualToDateTime(
-                eatingLogs[0].endTime, 1, 2, 2019,  17, 20)
+                eatingLogs[0].endTime!!.dateTimeInMillis, 1, 2, 2019,  17, 20)
             assertThatMsAreEqualToDateTime(
-                eatingLogs[1].startTime, 2, 2, 2019, 9, 15)
+                eatingLogs[1].startTime!!.dateTimeInMillis, 2, 2, 2019, 9, 15)
             assertThatMsAreEqualToDateTime(
-                eatingLogs[1].endTime, 2, 2, 2019, 18, 0)
+                eatingLogs[1].endTime!!.dateTimeInMillis, 2, 2, 2019, 18, 0)
             assertThatMsAreEqualToDateTime(
-                eatingLogs[2].startTime, 3, 2, 2019, 4, 13)
-            assertThat(eatingLogs[2].endTime, equalTo(0L))
+                eatingLogs[2].startTime!!.dateTimeInMillis, 3, 2, 2019, 4, 13)
+            assertThat(eatingLogs[2].endTime, `is`(nullValue()))
         }
     }
 }

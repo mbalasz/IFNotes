@@ -22,7 +22,7 @@ interface EatingLogDao {
     @Query("DELETE FROM EatingLog")
     fun deleteAll()
 
-    @Query("SELECT * FROM eatingLog where startTime = (SELECT max(startTime) FROM eatinglog)")
+    @Query("SELECT * FROM eatingLog where start_time_dateTimeInMillis = (SELECT max(start_time_dateTimeInMillis) FROM eatinglog)")
     fun getMostRecentEatingLog(): Flowable<List<EatingLog>>
 
     @Query("SELECT * FROM eatingLog")

@@ -11,6 +11,7 @@ import com.example.mateusz.ifnotes.ifnotes.IFNotesViewModel.TimeSinceLastActivit
 import com.example.mateusz.ifnotes.lib.SystemClockWrapper
 import com.example.mateusz.ifnotes.model.Repository
 import com.example.mateusz.ifnotes.model.data.EatingLog
+import com.example.mateusz.ifnotes.model.data.LogDate
 import com.google.common.base.Optional
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
@@ -99,7 +100,7 @@ class IFNotesViewModelTest {
             verify(repository, never()).insertEatingLog(any())
             verify(repository, never()).updateEatingLog(any())
 
-            initEatingLogPublisher.onNext(Optional.of(EatingLog(startTime = 100L)))
+            initEatingLogPublisher.onNext(Optional.of(EatingLog(startTime = LogDate(100L))))
         }
 
         verify(repository).updateEatingLog(any())
@@ -116,13 +117,13 @@ class IFNotesViewModelTest {
 
         argumentCaptor<EatingLog>().apply {
             verify(repository).insertEatingLog(capture())
-            assertThat(firstValue.startTime, `is`(equalTo(1200L)))
+            assertThat(firstValue.startTime!!.dateTimeInMillis, `is`(equalTo(1200L)))
         }
     }
 
     @Test
     fun onLogButtonClicked_eatingLogInProgress_updatesCurrentEatingLog() = runBlocking<Unit> {
-        val eatingLogInProgress = EatingLog(id = 1, startTime = 300L)
+        val eatingLogInProgress = EatingLog(id = 1, startTime = LogDate(300L))
         whenever(repository.getMostRecentEatingLog())
             .thenReturn(Flowable.fromArray(Optional.of(eatingLogInProgress)))
         createIfNotesViewModel()
@@ -134,7 +135,7 @@ class IFNotesViewModelTest {
 
         argumentCaptor<EatingLog>().apply {
             verify(repository).updateEatingLog(capture())
-            assertThat(firstValue.endTime, `is`(equalTo(1200L)))
+            assertThat(firstValue.endTime!!.dateTimeInMillis, `is`(equalTo(1200L)))
         }
     }
 
@@ -147,7 +148,7 @@ class IFNotesViewModelTest {
         whenever(clock.millis()).thenReturn(200L)
         whenever(systemClock.elapsedRealtime()).thenReturn(500L)
 
-        initEatingLogPublisher.onNext(Optional.of(EatingLog(startTime = 100L)))
+        initEatingLogPublisher.onNext(Optional.of(EatingLog(startTime = LogDate(100L))))
 
         var expectedTimeSinceLastActivityChronometerData: TimeSinceLastActivityChronometerData? = null
         ifNotesViewModel.timeSinceLastActivity.observeForever {
