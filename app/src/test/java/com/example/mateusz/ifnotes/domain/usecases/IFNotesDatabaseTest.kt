@@ -59,7 +59,7 @@ class IFNotesDatabaseTest {
         eatingLogDao.insert(eatingLog2)
         eatingLogDao.insert(eatingLog3)
 
-        eatingLogDao.getMostRecentEatingLog()
+        eatingLogDao.observeMostRecentEatingLog()
                 .map { it[0].startTime!!.dateTimeInMillis }
                 .test()
                 .awaitCount(1)

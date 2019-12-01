@@ -6,9 +6,9 @@ import io.reactivex.Flowable
 import com.google.common.base.Optional
 import javax.inject.Inject
 
-class GetMostRecentEatingLog @Inject constructor(
+class ObserveMostRecentEatingLog @Inject constructor(
     private val eatingLogsRepository: EatingLogsRepository) {
     operator fun invoke(): Flowable<Optional<EatingLog>> {
-        return eatingLogsRepository.getMostRecentEatingLog()
+        return eatingLogsRepository.observeMostRecentEatingLog()
     }
 }

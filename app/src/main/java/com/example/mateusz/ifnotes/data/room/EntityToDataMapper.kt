@@ -5,7 +5,7 @@ import com.example.mateusz.ifnotes.domain.entity.EatingLog
 import javax.inject.Inject
 
 
-class EatingLogEntityMapper @Inject constructor() : Mapper<EatingLog, EatingLogData>() {
+class EntityToDataMapper @Inject constructor() : Mapper<EatingLog, EatingLogData>() {
     override fun mapFrom(from: EatingLog): EatingLogData {
         val startTime = from.startTime?.let {
             LogDateData(it.dateTimeInMillis, it.timezone)

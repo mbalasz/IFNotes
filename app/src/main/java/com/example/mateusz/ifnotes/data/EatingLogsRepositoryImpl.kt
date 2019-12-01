@@ -6,8 +6,7 @@ import com.example.mateusz.ifnotes.data.room.EatingLogDataMapper
 import com.example.mateusz.ifnotes.data.room.IFNotesDatabase
 import com.example.mateusz.ifnotes.domain.EatingLogsRepository
 import com.example.mateusz.ifnotes.domain.entity.EatingLog
-import com.example.mateusz.ifnotes.domain.entity.LogDate
-import com.example.mateusz.ifnotes.lib.EatingLogValidator
+import com.example.mateusz.ifnotes.domain.EatingLogValidator
 import com.google.common.base.Optional
 import io.reactivex.Flowable
 import kotlinx.coroutines.CoroutineDispatcher
@@ -30,7 +29,7 @@ open class EatingLogsRepositoryImpl @Inject constructor(
 
     open suspend fun updateEatingLog(eatingLogData: EatingLogData) = withContext(ioDispatcher) {
         val status = validateUpdate(eatingLogData)
-        if (status == EatingLogValidator.EatingLogValidationStatus.SUCCESS) {
+        if (status == EatingLogValidator.NewLogValidationStatus.SUCCESS) {
             iFNotesDatabase.eatingLogDao().update(eatingLogData)
         }
         status
@@ -44,8 +43,17 @@ open class EatingLogsRepositoryImpl @Inject constructor(
         iFNotesDatabase.eatingLogDao().getEatingLog(id)
     }
 
-    override fun getMostRecentEatingLog(): Flowable<Optional<EatingLog>> =
-        localDataSource.getMostRecentEatingLog()
+    override fun observeMostRecentEatingLog(): Flowable<Optional<EatingLog>> =
+        localDataSource.observeMostRecentEatingLog()
+
+
+    override suspend fun getMostRecentEatingLog(): EatingLog? {
+        return localDataSource.getMostRecentEatingLog()
+    }
+
+    override suspend fun insertEatingLog(eatingLog: EatingLog) {
+        localDataSource.insertEatingLog(eatingLog)
+    }
 
     open suspend fun deleteEatingLog(eatingLogData: EatingLogData) = withContext(ioDispatcher) {
         iFNotesDatabase.eatingLogDao().delete(eatingLogData)
@@ -55,7 +63,7 @@ open class EatingLogsRepositoryImpl @Inject constructor(
         iFNotesDatabase.eatingLogDao().deleteAll()
     }
 
-    private fun validateUpdate(eatingLogData: EatingLogData): EatingLogValidator.EatingLogValidationStatus {
+    private fun validateUpdate(eatingLogData: EatingLogData): EatingLogValidator.NewLogValidationStatus {
         val mutableLogs = iFNotesDatabase.eatingLogDao().getEatingLogs().toMutableList()
         val oldLog = mutableLogs.find { it.id == eatingLogData.id }
         oldLog?.let {

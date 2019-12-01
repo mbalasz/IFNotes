@@ -5,5 +5,9 @@ import com.google.common.base.Optional
 import io.reactivex.Flowable
 
 interface EatingLogsLocalDataSource {
-    fun getMostRecentEatingLog(): Flowable<Optional<EatingLog>>
+    fun observeMostRecentEatingLog(): Flowable<Optional<EatingLog>>
+
+    suspend fun getMostRecentEatingLog(): EatingLog?
+
+    suspend fun insertEatingLog(eatingLog: EatingLog)
 }

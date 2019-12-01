@@ -6,7 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.IODispatcher
 import com.example.mateusz.ifnotes.component.IFNotesApplication
 import com.example.mateusz.ifnotes.database.IFNotesDatabaseTestModule
-import com.example.mateusz.ifnotes.lib.EatingLogValidator
+import com.example.mateusz.ifnotes.domain.EatingLogValidator
 import com.example.mateusz.ifnotes.data.EatingLogsRepositoryImpl
 import com.example.mateusz.ifnotes.data.room.EatingLogData
 import com.example.mateusz.ifnotes.data.room.LogDateData
@@ -118,7 +118,7 @@ class EatingLogsRepositoryImplTest {
 
     @Test
     fun getMostRecentEatingLog_init_logAbsent() {
-        EatingLogsRepositoryImpl.getMostRecentEatingLog().test().awaitCount(1).assertValue(Optional.absent())
+        EatingLogsRepositoryImpl.observeMostRecentEatingLog().test().awaitCount(1).assertValue(Optional.absent())
     }
 
     @Test
@@ -134,7 +134,7 @@ class EatingLogsRepositoryImplTest {
         runBlocking {
             eatingLogs.forEach { EatingLogsRepositoryImpl.insertEatingLog(it) }
         }
-        EatingLogsRepositoryImpl.getMostRecentEatingLog()
+        EatingLogsRepositoryImpl.observeMostRecentEatingLog()
             .map {
                 assertThat(it.isPresent, `is`(true))
                 it.get().startTime!!.dateTimeInMillis

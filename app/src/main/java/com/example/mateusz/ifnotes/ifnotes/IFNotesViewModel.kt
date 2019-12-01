@@ -12,14 +12,15 @@ import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainSch
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScope
 import com.example.mateusz.ifnotes.eatinglogs.ui.EatingLogsActivity
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
-import com.example.mateusz.ifnotes.lib.EatingLogValidator
+import com.example.mateusz.ifnotes.domain.EatingLogValidator
 import com.example.mateusz.ifnotes.lib.Event
 import com.example.mateusz.ifnotes.lib.SystemClockWrapper
 import com.example.mateusz.ifnotes.data.EatingLogsRepositoryImpl
-import com.example.mateusz.ifnotes.data.room.EatingLogEntityMapper
+import com.example.mateusz.ifnotes.data.room.EntityToDataMapper
 import com.example.mateusz.ifnotes.domain.entity.EatingLog
 import com.example.mateusz.ifnotes.domain.entity.LogDate
-import com.example.mateusz.ifnotes.domain.usecases.GetMostRecentEatingLog
+import com.example.mateusz.ifnotes.domain.usecases.LogFirstMeal
+import com.example.mateusz.ifnotes.domain.usecases.ObserveMostRecentEatingLog
 import io.reactivex.Scheduler
 import io.reactivex.disposables.Disposable
 import kotlinx.coroutines.CoroutineScope
@@ -41,10 +42,11 @@ class IFNotesViewModel @Inject constructor(
     private val eatingLogValidator: EatingLogValidator,
     @MainScope mainScope: CoroutineScope,
     @MainScheduler mainScheduler: Scheduler,
-    getMostRecentEatingLog: GetMostRecentEatingLog,
+    observeMostRecentEatingLog: ObserveMostRecentEatingLog,
+    private val logFirstMeal: LogFirstMeal,
     // TODO Remove this dependency. PresentationLayer should have its own representation of the
     //Eating log
-    private val eatingLogEntityMapper: EatingLogEntityMapper
+    private val entityToDataMapper: EntityToDataMapper
 ) : AndroidViewModel(application), CoroutineScope by mainScope {
     companion object {
         val DARK_GREEN = Color.parseColor("#a4c639")
@@ -118,7 +120,7 @@ class IFNotesViewModel @Inject constructor(
     }
 
     init {
-        currentEatingLogDisposable = getMostRecentEatingLog()
+        currentEatingLogDisposable = observeMostRecentEatingLog()
             .observeOn(mainScheduler)
             .subscribe ({
                 if (!isFirstLogLoaded) {
@@ -195,8 +197,8 @@ class IFNotesViewModel @Inject constructor(
     private fun validateNewLogTime(logTime: Long): Boolean {
         when (eatingLogValidator.validateNewLogTime(
                 logTime, currentEatingLogLiveData.value)) {
-            EatingLogValidator.NewLogTimeValidationStatus.SUCCESS -> Unit
-            EatingLogValidator.NewLogTimeValidationStatus.ERROR_TIME_TOO_EARLY -> {
+            EatingLogValidator.NewLogValidationStatus.SUCCESS -> Unit
+            EatingLogValidator.NewLogValidationStatus.ERROR_TIME_TOO_EARLY -> {
                 val validationMessage =
                         LogTimeValidationMessage(
                                 message = "New log time cannot be sooner than the previous log" +
@@ -204,7 +206,7 @@ class IFNotesViewModel @Inject constructor(
                 logTimeValidationMessageLiveData.value = validationMessage
                 return false
             }
-            EatingLogValidator.NewLogTimeValidationStatus.ERROR_TIME_IN_THE_FUTURE -> {
+            EatingLogValidator.NewLogValidationStatus.ERROR_TIME_IN_THE_FUTURE -> {
                 val validationMessage =
                         LogTimeValidationMessage(message = "New log time cannot be in the future")
                 logTimeValidationMessageLiveData.value = validationMessage
@@ -220,19 +222,17 @@ class IFNotesViewModel @Inject constructor(
             val currentEatingLog = currentEatingLogLiveData.value
             val logTimeValidationStatus =
                 eatingLogValidator.validateNewLogTime(logTime, currentEatingLog)
-            if (logTimeValidationStatus != EatingLogValidator.NewLogTimeValidationStatus.SUCCESS) {
+            if (logTimeValidationStatus != EatingLogValidator.NewLogValidationStatus.SUCCESS) {
                 throw IllegalStateException(
                     "Attempt to update most recent eating log with an invalid logTime:" +
                         " $logTimeValidationStatus")
             }
             val newEatingLog: EatingLog
-            if (currentEatingLog == null || eatingLogValidator.isEatingLogFinished(currentEatingLog)) {
-                eatingLogsRepositoryImpl.insertEatingLog(
-                    eatingLogEntityMapper.mapFrom(
-                        EatingLog(startTime = LogDate(logTime, ""))))
+            if (currentEatingLog == null || currentEatingLog.isFinished()) {
+                logFirstMeal(LogDate(logTime, ""))
             } else {
                 newEatingLog = currentEatingLog.copy(endTime = LogDate(logTime, ""))
-                eatingLogsRepositoryImpl.updateEatingLog(eatingLogEntityMapper.mapFrom(newEatingLog))
+                eatingLogsRepositoryImpl.updateEatingLog(entityToDataMapper.mapFrom(newEatingLog))
             }
         }
     }

@@ -64,7 +64,7 @@ class IFNotesViewModelTest {
 
     @Before
     fun setUp() {
-        whenever(EatingLogsRepositoryImpl.getMostRecentEatingLog())
+        whenever(EatingLogsRepositoryImpl.observeMostRecentEatingLog())
             .thenReturn(Flowable.fromArray(Optional.absent()))
         val application = ApplicationProvider.getApplicationContext<Application>()
         component =
@@ -88,7 +88,7 @@ class IFNotesViewModelTest {
     @Test
     fun onLogButtonClicked_initEatingLogStillBeingLoaded_noop() = runBlocking<Unit> {
         val initEatingLogPublisher = PublishSubject.create<Optional<EatingLogData>>()
-        whenever(EatingLogsRepositoryImpl.getMostRecentEatingLog())
+        whenever(EatingLogsRepositoryImpl.observeMostRecentEatingLog())
             .thenReturn(initEatingLogPublisher.toFlowable(BackpressureStrategy.BUFFER))
         whenever(clock.millis()).thenReturn(1200L)
 
@@ -123,7 +123,7 @@ class IFNotesViewModelTest {
     @Test
     fun onLogButtonClicked_eatingLogInProgress_updatesCurrentEatingLog() = runBlocking<Unit> {
         val eatingLogInProgress = EatingLogData(id = 1, startTime = LogDateData(300L))
-        whenever(EatingLogsRepositoryImpl.getMostRecentEatingLog())
+        whenever(EatingLogsRepositoryImpl.observeMostRecentEatingLog())
             .thenReturn(Flowable.fromArray(Optional.of(eatingLogInProgress)))
         createIfNotesViewModel()
         whenever(clock.millis()).thenReturn(1200L)
@@ -141,7 +141,7 @@ class IFNotesViewModelTest {
     @Test
     fun mostRecentLogUpdated_timeSinceLastActivityIsUpdated() = testScope.runBlockingTest {
         val initEatingLogPublisher = PublishSubject.create<Optional<EatingLogData>>()
-        whenever(EatingLogsRepositoryImpl.getMostRecentEatingLog())
+        whenever(EatingLogsRepositoryImpl.observeMostRecentEatingLog())
             .thenReturn(initEatingLogPublisher.toFlowable(BackpressureStrategy.BUFFER))
         createIfNotesViewModel()
         whenever(clock.millis()).thenReturn(200L)

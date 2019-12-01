@@ -1,4 +1,4 @@
-package com.example.mateusz.ifnotes.lib
+package com.example.mateusz.ifnotes.domain
 
 import com.example.mateusz.ifnotes.domain.entity.EatingLog
 import java.lang.IllegalStateException
@@ -9,14 +9,10 @@ import javax.inject.Singleton
 @Singleton
 open class EatingLogValidator @Inject constructor(private val clock: Clock) {
 
-    enum class NewLogTimeValidationStatus {
+    enum class NewLogValidationStatus {
         SUCCESS,
         ERROR_TIME_TOO_EARLY,
-        ERROR_TIME_IN_THE_FUTURE
-    }
-
-    enum class EatingLogValidationStatus {
-        SUCCESS,
+        ERROR_TIME_IN_THE_FUTURE,
         START_TIME_TOO_EARLY,
         ERROR_START_TIME_IN_THE_FUTURE,
         ERROR_END_TIME_IN_THE_FUTURE,
@@ -25,39 +21,39 @@ open class EatingLogValidator @Inject constructor(private val clock: Clock) {
         NO_START_TIME,
     }
 
-    fun validateNewLogTime(logTime: Long, currentEatingLog: EatingLog?): NewLogTimeValidationStatus {
+    fun validateNewLogTime(logTime: Long, currentMostRecentEatingLog: EatingLog?): NewLogValidationStatus {
         if (logTime > clock.millis()) {
-            return NewLogTimeValidationStatus.ERROR_TIME_IN_THE_FUTURE
+            return NewLogValidationStatus.ERROR_TIME_IN_THE_FUTURE
         }
-        if (currentEatingLog == null) {
-            return NewLogTimeValidationStatus.SUCCESS
+        if (currentMostRecentEatingLog == null) {
+            return NewLogValidationStatus.SUCCESS
         }
-        currentEatingLog.endTime?.dateTimeInMillis?.let {
+        currentMostRecentEatingLog.endTime?.dateTimeInMillis?.let {
             if (it > logTime) {
-                return NewLogTimeValidationStatus.ERROR_TIME_TOO_EARLY
+                return NewLogValidationStatus.ERROR_TIME_TOO_EARLY
             }
-        } ?: currentEatingLog.startTime?.dateTimeInMillis?.let {
+        } ?: currentMostRecentEatingLog.startTime?.dateTimeInMillis?.let {
             if (it > logTime) {
-                return NewLogTimeValidationStatus.ERROR_TIME_TOO_EARLY
+                return NewLogValidationStatus.ERROR_TIME_TOO_EARLY
             }
         }
-        return NewLogTimeValidationStatus.SUCCESS
+        return NewLogValidationStatus.SUCCESS
     }
 
     open fun validateNewEatingLog(newEatingLog: EatingLog, eatingLogData: List<EatingLog>):
-            EatingLogValidationStatus {
+        NewLogValidationStatus {
         if (newEatingLog.startTime == null) {
-            return EatingLogValidationStatus.NO_START_TIME
+            return NewLogValidationStatus.NO_START_TIME
         }
         if (newEatingLog.startTime.dateTimeInMillis > clock.millis()) {
-            return EatingLogValidationStatus.ERROR_START_TIME_IN_THE_FUTURE
+            return NewLogValidationStatus.ERROR_START_TIME_IN_THE_FUTURE
         }
         newEatingLog.endTime?.dateTimeInMillis?.let {
             if (newEatingLog.startTime.dateTimeInMillis > it) {
-                return EatingLogValidationStatus.START_TIME_LATER_THAN_END_TIME
+                return NewLogValidationStatus.START_TIME_LATER_THAN_END_TIME
             }
             if (it > clock.millis()) {
-                return EatingLogValidationStatus.ERROR_END_TIME_IN_THE_FUTURE
+                return NewLogValidationStatus.ERROR_END_TIME_IN_THE_FUTURE
             }
         }
         val sortedEatingLogs = eatingLogData.sortedWith(compareBy(
@@ -73,16 +69,16 @@ open class EatingLogValidator @Inject constructor(private val clock: Clock) {
         if (idx > 0) {
             val prevEatingLog = sortedEatingLogs[idx - 1]
             if (!validateOrder(prevEatingLog, newEatingLog)) {
-                return EatingLogValidationStatus.START_TIME_TOO_EARLY
+                return NewLogValidationStatus.START_TIME_TOO_EARLY
             }
         }
         if (idx < sortedEatingLogs.size) {
             val nextEatingLog = sortedEatingLogs[idx]
             if (!validateOrder(newEatingLog, nextEatingLog)) {
-                return EatingLogValidationStatus.END_TIME_TOO_LATE
+                return NewLogValidationStatus.END_TIME_TOO_LATE
             }
         }
-        return EatingLogValidationStatus.SUCCESS
+        return NewLogValidationStatus.SUCCESS
     }
 
     private fun validateOrder(eatingLogData: EatingLog, nextEatingLog: EatingLog): Boolean {
