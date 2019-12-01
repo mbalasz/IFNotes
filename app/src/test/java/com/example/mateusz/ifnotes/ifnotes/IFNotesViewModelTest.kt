@@ -9,9 +9,9 @@ import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainSco
 import com.example.mateusz.ifnotes.database.IFNotesDatabaseTestModule
 import com.example.mateusz.ifnotes.ifnotes.IFNotesViewModel.TimeSinceLastActivityChronometerData
 import com.example.mateusz.ifnotes.lib.SystemClockWrapper
-import com.example.mateusz.ifnotes.model.Repository
-import com.example.mateusz.ifnotes.model.data.EatingLog
-import com.example.mateusz.ifnotes.model.data.LogDate
+import com.example.mateusz.ifnotes.data.EatingLogsRepositoryImpl
+import com.example.mateusz.ifnotes.data.room.EatingLogData
+import com.example.mateusz.ifnotes.data.room.LogDateData
 import com.google.common.base.Optional
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
@@ -24,7 +24,6 @@ import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import io.reactivex.Scheduler
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.schedulers.TestScheduler
 import io.reactivex.subjects.PublishSubject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
@@ -48,7 +47,7 @@ import javax.inject.Singleton
 
 @RunWith(AndroidJUnit4::class)
 class IFNotesViewModelTest {
-    @Mock private lateinit var repository: Repository
+    @Mock private lateinit var EatingLogsRepositoryImpl: EatingLogsRepositoryImpl
     @Mock private lateinit var clock: Clock
     @Mock private lateinit var systemClock: SystemClockWrapper
     private val testScope = TestCoroutineScope()
@@ -65,13 +64,13 @@ class IFNotesViewModelTest {
 
     @Before
     fun setUp() {
-        whenever(repository.getMostRecentEatingLog())
+        whenever(EatingLogsRepositoryImpl.getMostRecentEatingLog())
             .thenReturn(Flowable.fromArray(Optional.absent()))
         val application = ApplicationProvider.getApplicationContext<Application>()
         component =
             DaggerIFNotesViewModelTest_TestComponent
                 .factory()
-                .create(application, repository, clock, systemClock, testScope, testScheduler)
+                .create(application, EatingLogsRepositoryImpl, clock, systemClock, testScope, testScheduler)
     }
 
     @After
@@ -88,8 +87,8 @@ class IFNotesViewModelTest {
     @Suppress("DeferredResultUnused")
     @Test
     fun onLogButtonClicked_initEatingLogStillBeingLoaded_noop() = runBlocking<Unit> {
-        val initEatingLogPublisher = PublishSubject.create<Optional<EatingLog>>()
-        whenever(repository.getMostRecentEatingLog())
+        val initEatingLogPublisher = PublishSubject.create<Optional<EatingLogData>>()
+        whenever(EatingLogsRepositoryImpl.getMostRecentEatingLog())
             .thenReturn(initEatingLogPublisher.toFlowable(BackpressureStrategy.BUFFER))
         whenever(clock.millis()).thenReturn(1200L)
 
@@ -97,13 +96,13 @@ class IFNotesViewModelTest {
 
         testScope.runBlockingTest {
             ifNotesViewModel.onLogButtonClicked()
-            verify(repository, never()).insertEatingLog(any())
-            verify(repository, never()).updateEatingLog(any())
+            verify(EatingLogsRepositoryImpl, never()).insertEatingLog(any())
+            verify(EatingLogsRepositoryImpl, never()).updateEatingLog(any())
 
-            initEatingLogPublisher.onNext(Optional.of(EatingLog(startTime = LogDate(100L))))
+            initEatingLogPublisher.onNext(Optional.of(EatingLogData(startTime = LogDateData(100L))))
         }
 
-        verify(repository).updateEatingLog(any())
+        verify(EatingLogsRepositoryImpl).updateEatingLog(any())
     }
 
     @Test
@@ -115,16 +114,16 @@ class IFNotesViewModelTest {
             ifNotesViewModel.onLogButtonClicked()
         }
 
-        argumentCaptor<EatingLog>().apply {
-            verify(repository).insertEatingLog(capture())
+        argumentCaptor<EatingLogData>().apply {
+            verify(EatingLogsRepositoryImpl).insertEatingLog(capture())
             assertThat(firstValue.startTime!!.dateTimeInMillis, `is`(equalTo(1200L)))
         }
     }
 
     @Test
     fun onLogButtonClicked_eatingLogInProgress_updatesCurrentEatingLog() = runBlocking<Unit> {
-        val eatingLogInProgress = EatingLog(id = 1, startTime = LogDate(300L))
-        whenever(repository.getMostRecentEatingLog())
+        val eatingLogInProgress = EatingLogData(id = 1, startTime = LogDateData(300L))
+        whenever(EatingLogsRepositoryImpl.getMostRecentEatingLog())
             .thenReturn(Flowable.fromArray(Optional.of(eatingLogInProgress)))
         createIfNotesViewModel()
         whenever(clock.millis()).thenReturn(1200L)
@@ -133,22 +132,22 @@ class IFNotesViewModelTest {
             ifNotesViewModel.onLogButtonClicked()
         }
 
-        argumentCaptor<EatingLog>().apply {
-            verify(repository).updateEatingLog(capture())
+        argumentCaptor<EatingLogData>().apply {
+            verify(EatingLogsRepositoryImpl).updateEatingLog(capture())
             assertThat(firstValue.endTime!!.dateTimeInMillis, `is`(equalTo(1200L)))
         }
     }
 
     @Test
     fun mostRecentLogUpdated_timeSinceLastActivityIsUpdated() = testScope.runBlockingTest {
-        val initEatingLogPublisher = PublishSubject.create<Optional<EatingLog>>()
-        whenever(repository.getMostRecentEatingLog())
+        val initEatingLogPublisher = PublishSubject.create<Optional<EatingLogData>>()
+        whenever(EatingLogsRepositoryImpl.getMostRecentEatingLog())
             .thenReturn(initEatingLogPublisher.toFlowable(BackpressureStrategy.BUFFER))
         createIfNotesViewModel()
         whenever(clock.millis()).thenReturn(200L)
         whenever(systemClock.elapsedRealtime()).thenReturn(500L)
 
-        initEatingLogPublisher.onNext(Optional.of(EatingLog(startTime = LogDate(100L))))
+        initEatingLogPublisher.onNext(Optional.of(EatingLogData(startTime = LogDateData(100L))))
 
         var expectedTimeSinceLastActivityChronometerData: TimeSinceLastActivityChronometerData? = null
         ifNotesViewModel.timeSinceLastActivity.observeForever {
@@ -172,7 +171,7 @@ class IFNotesViewModelTest {
         @Component.Factory
         interface Factory {
             fun create(@BindsInstance application: Application,
-                       @BindsInstance repository: Repository,
+                       @BindsInstance EatingLogsRepositoryImpl: EatingLogsRepositoryImpl,
                        @BindsInstance clock: Clock,
                        @BindsInstance systemClock: SystemClockWrapper,
                        @BindsInstance @MainScope testScope: CoroutineScope,

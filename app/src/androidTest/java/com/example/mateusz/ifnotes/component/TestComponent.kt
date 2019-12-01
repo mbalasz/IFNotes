@@ -7,7 +7,7 @@ import com.example.mateusz.ifnotes.database.IFNotesDatabaseTestModule
 import com.example.mateusz.ifnotes.eatinglogs.EatingLogsModule
 import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogModule
 import com.example.mateusz.ifnotes.ifnotes.IFNotesModule
-import com.example.mateusz.ifnotes.model.Repository
+import com.example.mateusz.ifnotes.data.EatingLogsRepositoryImpl
 import dagger.BindsInstance
 import dagger.Component
 import dagger.android.AndroidInjectionModule
@@ -40,6 +40,6 @@ interface TestComponent : AndroidInjector<IFNotesApplication> {
             @BindsInstance clock: Clock): TestComponent
     }
 
-    fun repository(): Repository
+    fun repository(): EatingLogsRepositoryImpl
 }
 

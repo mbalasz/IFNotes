@@ -1,16 +1,16 @@
 package com.example.mateusz.ifnotes.chart
 
-import com.example.mateusz.ifnotes.model.data.EatingLog
+import com.example.mateusz.ifnotes.data.room.EatingLogData
 
 class EatingWindowChartDataProducer(timeWindowValidator: TimeWindowValidator)
     : EatingLogsChartDataProducer(timeWindowValidator) {
-    override fun getDataPoints(eatingLogs: List<EatingLog>): List<DataPoint> {
-        if (eatingLogs.isEmpty()) {
+    override fun getDataPoints(eatingLogData: List<EatingLogData>): List<DataPoint> {
+        if (eatingLogData.isEmpty()) {
             return emptyList()
         }
 
         val dataPoints = arrayListOf<DataPoint>()
-        for (eatingLog in eatingLogs) {
+        for (eatingLog in eatingLogData) {
             checkEatingLogValid(eatingLog)
             if (eatingLog.endTime == null || eatingLog.startTime == null) {
                 continue

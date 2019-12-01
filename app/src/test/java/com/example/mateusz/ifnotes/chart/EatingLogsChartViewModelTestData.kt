@@ -2,9 +2,9 @@ package com.example.mateusz.ifnotes.chart
 
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.example.mateusz.ifnotes.model.Repository
-import com.example.mateusz.ifnotes.model.data.EatingLog
-import com.example.mateusz.ifnotes.model.data.LogDate
+import com.example.mateusz.ifnotes.data.EatingLogsRepositoryImpl
+import com.example.mateusz.ifnotes.data.room.EatingLogData
+import com.example.mateusz.ifnotes.data.room.LogDateData
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Flowable
 import org.hamcrest.CoreMatchers.`is`
@@ -20,8 +20,8 @@ import org.mockito.junit.MockitoRule
 import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
-class EatingLogsChartViewModelTest {
-    @Mock private lateinit var repository: Repository
+class EatingLogsChartViewModelTestData {
+    @Mock private lateinit var EatingLogsRepositoryImpl: EatingLogsRepositoryImpl
     private lateinit var eatingLogsChartViewModel: EatingLogsChartViewModel
 
     @get:Rule
@@ -29,7 +29,7 @@ class EatingLogsChartViewModelTest {
 
     @Before
     fun setUp() {
-        whenever(repository.getEatingLogsObservable()).thenReturn(Flowable.empty())
+        whenever(EatingLogsRepositoryImpl.getEatingLogsObservable()).thenReturn(Flowable.empty())
     }
 
     @Test
@@ -41,10 +41,10 @@ class EatingLogsChartViewModelTest {
             10L
         )
         val eatingLogs = createEatingLogsWithFastingWindows(fastingWindowsHours)
-        whenever(repository.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
+        whenever(EatingLogsRepositoryImpl.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
 
         eatingLogsChartViewModel =
-            EatingLogsChartViewModel(ApplicationProvider.getApplicationContext(), repository)
+            EatingLogsChartViewModel(ApplicationProvider.getApplicationContext(), EatingLogsRepositoryImpl)
 
         eatingLogsChartViewModel.eatingLogsChartDataLiveData.observeForever {
             val entryPoints = it.entryPoints
@@ -57,17 +57,17 @@ class EatingLogsChartViewModelTest {
         }
     }
 
-    private fun createEatingLogsWithFastingWindows(fastingWindowsHours: List<Long>): List<EatingLog> {
-        var prevLog = EatingLog(
-            startTime = LogDate(100L, ""),
-            endTime = LogDate(300L, ""))
+    private fun createEatingLogsWithFastingWindows(fastingWindowsHours: List<Long>): List<EatingLogData> {
+        var prevLog = EatingLogData(
+            startTime = LogDateData(100L, ""),
+            endTime = LogDateData(300L, ""))
         val eatingLogs = mutableListOf(prevLog)
         fastingWindowsHours.forEach { fastingWindowHours ->
             prevLog.endTime?.dateTimeInMillis?.let { prevLogEndTime ->
                 val newLogStartTime = prevLogEndTime + TimeUnit.HOURS.toMillis(fastingWindowHours)
-                prevLog = EatingLog(
-                    startTime = LogDate(newLogStartTime),
-                    endTime = LogDate(newLogStartTime + 100L))
+                prevLog = EatingLogData(
+                    startTime = LogDateData(newLogStartTime),
+                    endTime = LogDateData(newLogStartTime + 100L))
                 eatingLogs.add(prevLog)
             }
         }

@@ -15,17 +15,17 @@ import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.lib.EatingLogValidator
 import com.example.mateusz.ifnotes.lib.Event
 import com.example.mateusz.ifnotes.lib.SystemClockWrapper
-import com.example.mateusz.ifnotes.model.Repository
-import com.example.mateusz.ifnotes.model.data.EatingLog
-import com.example.mateusz.ifnotes.model.data.LogDate
+import com.example.mateusz.ifnotes.data.EatingLogsRepositoryImpl
+import com.example.mateusz.ifnotes.data.room.EatingLogEntityMapper
+import com.example.mateusz.ifnotes.domain.entity.EatingLog
+import com.example.mateusz.ifnotes.domain.entity.LogDate
+import com.example.mateusz.ifnotes.domain.usecases.GetMostRecentEatingLog
 import io.reactivex.Scheduler
 import io.reactivex.disposables.Disposable
-import io.reactivex.functions.Consumer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.time.Clock
@@ -35,12 +35,16 @@ import javax.inject.Inject
 
 class IFNotesViewModel @Inject constructor(
     application: Application,
-    private val repository: Repository,
+    private val eatingLogsRepositoryImpl: EatingLogsRepositoryImpl,
     private val clock: Clock,
     private val systemClock: SystemClockWrapper,
     private val eatingLogValidator: EatingLogValidator,
     @MainScope mainScope: CoroutineScope,
-    @MainScheduler mainScheduler: Scheduler
+    @MainScheduler mainScheduler: Scheduler,
+    getMostRecentEatingLog: GetMostRecentEatingLog,
+    // TODO Remove this dependency. PresentationLayer should have its own representation of the
+    //Eating log
+    private val eatingLogEntityMapper: EatingLogEntityMapper
 ) : AndroidViewModel(application), CoroutineScope by mainScope {
     companion object {
         val DARK_GREEN = Color.parseColor("#a4c639")
@@ -114,7 +118,7 @@ class IFNotesViewModel @Inject constructor(
     }
 
     init {
-        currentEatingLogDisposable = repository.getMostRecentEatingLog()
+        currentEatingLogDisposable = getMostRecentEatingLog()
             .observeOn(mainScheduler)
             .subscribe ({
                 if (!isFirstLogLoaded) {
@@ -223,11 +227,12 @@ class IFNotesViewModel @Inject constructor(
             }
             val newEatingLog: EatingLog
             if (currentEatingLog == null || eatingLogValidator.isEatingLogFinished(currentEatingLog)) {
-                newEatingLog = EatingLog(startTime = LogDate(logTime, ""))
-                repository.insertEatingLog(newEatingLog)
+                eatingLogsRepositoryImpl.insertEatingLog(
+                    eatingLogEntityMapper.mapFrom(
+                        EatingLog(startTime = LogDate(logTime, ""))))
             } else {
                 newEatingLog = currentEatingLog.copy(endTime = LogDate(logTime, ""))
-                repository.updateEatingLog(newEatingLog)
+                eatingLogsRepositoryImpl.updateEatingLog(eatingLogEntityMapper.mapFrom(newEatingLog))
             }
         }
     }

@@ -1,8 +1,8 @@
 package com.example.mateusz.ifnotes.matchers
 
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
-import com.example.mateusz.ifnotes.model.data.EatingLog
-import com.example.mateusz.ifnotes.model.data.LogDate
+import com.example.mateusz.ifnotes.data.room.EatingLogData
+import com.example.mateusz.ifnotes.data.room.LogDateData
 import org.hamcrest.BaseMatcher
 import org.hamcrest.Description
 import org.hamcrest.Matcher
@@ -13,7 +13,7 @@ class EatingLogEqualsToDate(private val day: Int,
                    private val hour: Int,
                    private val minute: Int,
                    private val propertyName: String,
-                   private val extractor: (EatingLog) -> LogDate?) : BaseMatcher<EatingLog>() {
+                   private val extractor: (EatingLogData) -> LogDateData?) : BaseMatcher<EatingLogData>() {
 
     override fun describeTo(description: Description?) {
         description?.appendText(
@@ -23,7 +23,7 @@ class EatingLogEqualsToDate(private val day: Int,
 
     override fun describeMismatch(item: Any?, description: Description?) {
         description?.appendText("was equal to ")
-        val logDate = extractor(item as EatingLog)
+        val logDate = extractor(item as EatingLogData)
         logDate?.let {
             description?.appendText(DateTimeUtils.toDateTimeString(it.dateTimeInMillis))
         } ?: run {
@@ -32,19 +32,19 @@ class EatingLogEqualsToDate(private val day: Int,
     }
 
     override fun matches(item: Any?): Boolean {
-        val logDate = extractor(item as EatingLog)
+        val logDate = extractor(item as EatingLogData)
         return logDate?.let {
             DateTimeUtils.isEqualToDate(it.dateTimeInMillis, day, month, year, hour, minute)
         } ?: false
     }
 
     companion object {
-        fun startsOn(day: Int, month: Int, year: Int, hour: Int, minute: Int): Matcher<EatingLog> {
+        fun startsOn(day: Int, month: Int, year: Int, hour: Int, minute: Int): Matcher<EatingLogData> {
             return EatingLogEqualsToDate(
                 day, month, year, hour, minute, "start time") { it.startTime }
         }
 
-        fun endsOn(day: Int, month: Int, year: Int, hour: Int, minute: Int): Matcher<EatingLog> {
+        fun endsOn(day: Int, month: Int, year: Int, hour: Int, minute: Int): Matcher<EatingLogData> {
             return EatingLogEqualsToDate(
                 day, month, year, hour, minute, "end time") { it.endTime }
         }

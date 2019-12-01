@@ -9,7 +9,6 @@ import androidx.lifecycle.Observer
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.mateusz.ifnotes.component.AppTestModule
-import com.example.mateusz.ifnotes.component.ConcurrencyModule
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.IODispatcher
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScope
 import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel.ActivityForResultsData
@@ -22,9 +21,9 @@ import com.example.mateusz.ifnotes.eatinglogs.editlog.ui.EditEatingLogActivity
 import com.example.mateusz.ifnotes.lib.BackupManager
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.lib.Event
-import com.example.mateusz.ifnotes.model.Repository
-import com.example.mateusz.ifnotes.model.data.EatingLog
-import com.example.mateusz.ifnotes.model.data.LogDate
+import com.example.mateusz.ifnotes.data.EatingLogsRepositoryImpl
+import com.example.mateusz.ifnotes.data.room.EatingLogData
+import com.example.mateusz.ifnotes.data.room.LogDateData
 import com.nhaarman.mockitokotlin2.*
 import com.nhaarman.mockitokotlin2.verify
 import dagger.BindsInstance
@@ -58,8 +57,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @RunWith(AndroidJUnit4::class)
-class EatingLogsViewModelTest {
-    @Mock private lateinit var repository: Repository
+class EatingLogsViewModelTestData {
+    @Mock private lateinit var EatingLogsRepositoryImpl: EatingLogsRepositoryImpl
     @Mock private lateinit var refreshDataObserver: Observer<Event<Unit>>
     @Mock private lateinit var startActivityForResultObserver: Observer<Event<ActivityForResultsData>>
     @Mock private lateinit var eatingLogsItemView: EatingLogsItemView
@@ -77,35 +76,35 @@ class EatingLogsViewModelTest {
     val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
     private val eatingLogs = listOf(
-        EatingLog(
-            startTime = LogDate(DateTimeUtils.dateTimeToMillis(
+        EatingLogData(
+            startTime = LogDateData(DateTimeUtils.dateTimeToMillis(
                 20, 5, 2018, 10, 50)),
-            endTime = LogDate(DateTimeUtils.dateTimeToMillis(
+            endTime = LogDateData(DateTimeUtils.dateTimeToMillis(
                 20, 5, 2018, 18, 50))),
-        EatingLog(
-            startTime = LogDate(DateTimeUtils.dateTimeToMillis(
+        EatingLogData(
+            startTime = LogDateData(DateTimeUtils.dateTimeToMillis(
                 21, 5, 2018, 10, 50)),
-            endTime = LogDate(DateTimeUtils.dateTimeToMillis(
+            endTime = LogDateData(DateTimeUtils.dateTimeToMillis(
                 21, 5, 2018, 18, 50))),
-        EatingLog(
-            startTime = LogDate(DateTimeUtils.dateTimeToMillis(
+        EatingLogData(
+            startTime = LogDateData(DateTimeUtils.dateTimeToMillis(
                 25, 5, 2018, 11, 50)),
-            endTime = LogDate(DateTimeUtils.dateTimeToMillis(
+            endTime = LogDateData(DateTimeUtils.dateTimeToMillis(
                 25, 5, 2018, 18, 50))),
-        EatingLog(
-            startTime = LogDate(DateTimeUtils.dateTimeToMillis(
+        EatingLogData(
+            startTime = LogDateData(DateTimeUtils.dateTimeToMillis(
                 30, 5, 2019, 10, 50)),
-            endTime = LogDate(DateTimeUtils.dateTimeToMillis(
+            endTime = LogDateData(DateTimeUtils.dateTimeToMillis(
                 30, 5, 2019, 18, 50))))
 
     @Before
     fun setUp() {
-        whenever(repository.getEatingLogsObservable()).thenReturn(Flowable.fromArray())
+        whenever(EatingLogsRepositoryImpl.getEatingLogsObservable()).thenReturn(Flowable.fromArray())
     }
 
     @Test
     fun init_refreshData() {
-        whenever(repository.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
+        whenever(EatingLogsRepositoryImpl.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
         createEatingLogsViewModel()
 
         eatingLogsViewModel.refreshData.observeForever(refreshDataObserver)
@@ -114,7 +113,7 @@ class EatingLogsViewModelTest {
 
     @Test
     fun onBindEatingLogsItemView() {
-        whenever(repository.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
+        whenever(EatingLogsRepositoryImpl.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
         createEatingLogsViewModel()
 
         eatingLogsViewModel.onBindEatingLogsItemView(eatingLogsItemView, 0)
@@ -129,14 +128,14 @@ class EatingLogsViewModelTest {
 
     @Test
     fun onRemoveEatingLogItemClicked() = runBlocking<Unit> {
-        whenever(repository.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
+        whenever(EatingLogsRepositoryImpl.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
         createEatingLogsViewModel()
 
         testScope.runBlockingTest {
             eatingLogsViewModel.onRemoveEatingLogItemClicked(2)
         }
 
-        verify(repository).deleteEatingLog(sortDescendingByStartTime(eatingLogs)[2])
+        verify(EatingLogsRepositoryImpl).deleteEatingLog(sortDescendingByStartTime(eatingLogs)[2])
     }
 
     @Test
@@ -149,7 +148,7 @@ class EatingLogsViewModelTest {
 
     @Test
     fun onEditEatingLogItemClicked() {
-        whenever(repository.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
+        whenever(EatingLogsRepositoryImpl.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
         createEatingLogsViewModel()
         eatingLogsViewModel.startActivityForResult.observeForever(startActivityForResultObserver)
 
@@ -170,7 +169,7 @@ class EatingLogsViewModelTest {
 
     @Test
     fun getEatingLogsCount() {
-        whenever(repository.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
+        whenever(EatingLogsRepositoryImpl.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
         createEatingLogsViewModel()
 
         assertThat(eatingLogsViewModel.getEatingLogsCount(), `is`(equalTo(eatingLogs.size)))
@@ -223,7 +222,7 @@ class EatingLogsViewModelTest {
 
     @Test
     fun onActivityResult_chooseCsvLogsToImport() = runBlocking<Unit> {
-        whenever(repository.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
+        whenever(EatingLogsRepositoryImpl.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
         createEatingLogsViewModel()
         val csvLogsPipedOutputStream = PipedOutputStream()
         val csvLogsPipedInputStream = PipedInputStream(csvLogsPipedOutputStream)
@@ -238,10 +237,10 @@ class EatingLogsViewModelTest {
         eatingLogsViewModel.onActivityResult(
             CHOOSE_CSV_LOGS_TO_IMPORT_REQUEST_CODE, RESULT_OK, resultIntent)
 
-        inOrder(repository) {
-            verify(repository).deleteAll()
-            argumentCaptor<EatingLog>().apply {
-                verify(repository, times(eatingLogs.size)).insertEatingLog(capture())
+        inOrder(EatingLogsRepositoryImpl) {
+            verify(EatingLogsRepositoryImpl).deleteAll()
+            argumentCaptor<EatingLogData>().apply {
+                verify(EatingLogsRepositoryImpl, times(eatingLogs.size)).insertEatingLog(capture())
 
                 val capturedLogsIterator = allValues.iterator()
                 for (eatingLog in eatingLogs) {
@@ -262,19 +261,19 @@ class EatingLogsViewModelTest {
 
     @Test
     fun onActivityResult_chooseCsvLogsToImportAndIntentIsNull_noop() = runBlocking<Unit> {
-        whenever(repository.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
+        whenever(EatingLogsRepositoryImpl.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
         createEatingLogsViewModel()
 
         eatingLogsViewModel.onActivityResult(
             CHOOSE_CSV_LOGS_TO_IMPORT_REQUEST_CODE, RESULT_OK, null)
 
-        verify(repository, never()).deleteAll()
-        verify(repository, never()).insertEatingLog(any())
+        verify(EatingLogsRepositoryImpl, never()).deleteAll()
+        verify(EatingLogsRepositoryImpl, never()).insertEatingLog(any())
     }
 
     @Test
     fun onActivityResult_chooseCsvFileToExportLogs() = runBlocking<Unit> {
-        whenever(repository.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
+        whenever(EatingLogsRepositoryImpl.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
         createEatingLogsViewModel()
         val uriString = "file:///mnt/sdcard/logs.csv"
         val resultIntent = Intent.parseUri(uriString, 0)
@@ -289,7 +288,7 @@ class EatingLogsViewModelTest {
 
     @Test
     fun onActivityResult_chooseCsvFileToExportLogsAndIntentIsNull_noop() = runBlocking<Unit> {
-        whenever(repository.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
+        whenever(EatingLogsRepositoryImpl.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
         createEatingLogsViewModel()
 
         eatingLogsViewModel.onActivityResult(
@@ -298,8 +297,8 @@ class EatingLogsViewModelTest {
         verifyZeroInteractions(backupManager)
     }
 
-    private fun sortDescendingByStartTime(eatingLogs: List<EatingLog>) : List<EatingLog> {
-        return eatingLogs.sortedWith(
+    private fun sortDescendingByStartTime(eatingLogData: List<EatingLogData>) : List<EatingLogData> {
+        return eatingLogData.sortedWith(
             Comparator { a, b -> compareValuesBy(b, a, { it.startTime?.dateTimeInMillis }, { it.endTime?.dateTimeInMillis }) })
     }
 
@@ -322,7 +321,7 @@ class EatingLogsViewModelTest {
     private fun createEatingLogsViewModel() {
         DaggerEatingLogsViewModelTest_TestComponent.factory().create(
             ApplicationProvider.getApplicationContext(),
-            repository,
+            EatingLogsRepositoryImpl,
             testScope,
             backupManager,
             clock,
@@ -333,12 +332,12 @@ class EatingLogsViewModelTest {
     @Singleton
     @Component(modules = [AppTestModule::class])
     interface TestComponent {
-        fun inject(eatingLogsViewModelTest: EatingLogsViewModelTest)
+        fun inject(eatingLogsViewModelTest: EatingLogsViewModelTestData)
 
         @Component.Factory
         interface Factory {
             fun create(@BindsInstance application: Application,
-                       @BindsInstance repository: Repository,
+                       @BindsInstance EatingLogsRepositoryImpl: EatingLogsRepositoryImpl,
                        @BindsInstance @MainScope mainScope: CoroutineScope,
                        @BindsInstance backupManager: BackupManager,
                        @BindsInstance clock: Clock,

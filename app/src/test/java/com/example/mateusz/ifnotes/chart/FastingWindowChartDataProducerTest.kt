@@ -1,8 +1,8 @@
 package com.example.mateusz.ifnotes.chart
 
 import com.example.mateusz.ifnotes.chart.EatingLogsChartDataProducer.DataPoint
-import com.example.mateusz.ifnotes.model.data.EatingLog
-import com.example.mateusz.ifnotes.model.data.LogDate
+import com.example.mateusz.ifnotes.data.room.EatingLogData
+import com.example.mateusz.ifnotes.data.room.LogDateData
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
@@ -26,7 +26,7 @@ class FastingWindowChartDataProducerTest {
     @Test
     fun getDataPoints_singleLog_returnsEmptyDataPoints() {
         assertThat(
-            fastingWindowChartDataProducer.getDataPoints(listOf(EatingLog())),
+            fastingWindowChartDataProducer.getDataPoints(listOf(EatingLogData())),
             equalTo(emptyList()))
     }
 
@@ -35,8 +35,8 @@ class FastingWindowChartDataProducerTest {
         assertFailsWith(IllegalArgumentException::class) {
             fastingWindowChartDataProducer.getDataPoints(
                 listOf(
-                    EatingLog(startTime = LogDate(100L), endTime = LogDate(200L)),
-                    EatingLog(endTime = LogDate(1000L)))
+                    EatingLogData(startTime = LogDateData(100L), endTime = LogDateData(200L)),
+                    EatingLogData(endTime = LogDateData(1000L)))
             )
         }
     }
@@ -44,10 +44,10 @@ class FastingWindowChartDataProducerTest {
     @Test
     fun getDataPoints() {
         val logs = listOf(
-            EatingLog(startTime = LogDate(100L), endTime = LogDate(200L)),
-            EatingLog(startTime = LogDate(300L), endTime = LogDate(400L)),
-            EatingLog(startTime = LogDate(550L), endTime = LogDate(600L)),
-            EatingLog(startTime = LogDate(780L), endTime = LogDate(800L))
+            EatingLogData(startTime = LogDateData(100L), endTime = LogDateData(200L)),
+            EatingLogData(startTime = LogDateData(300L), endTime = LogDateData(400L)),
+            EatingLogData(startTime = LogDateData(550L), endTime = LogDateData(600L)),
+            EatingLogData(startTime = LogDateData(780L), endTime = LogDateData(800L))
         )
 
         val expectedDataPoints = listOf(
@@ -63,10 +63,10 @@ class FastingWindowChartDataProducerTest {
     fun getDataPoints_invalidTimeWindow_skipEatingLog() {
         val maxWindowHours = TimeUnit.HOURS.toMillis(MAX_FAST_WINDOW_HR)
         val logs = listOf(
-            EatingLog(startTime = LogDate(100L), endTime = LogDate(200L)),
-            EatingLog(startTime = LogDate(300), endTime = LogDate(400L)),
-            EatingLog(startTime = LogDate(400L + maxWindowHours + 1), endTime = LogDate(600L)),
-            EatingLog(startTime = LogDate(780L), endTime = LogDate(800L))
+            EatingLogData(startTime = LogDateData(100L), endTime = LogDateData(200L)),
+            EatingLogData(startTime = LogDateData(300), endTime = LogDateData(400L)),
+            EatingLogData(startTime = LogDateData(400L + maxWindowHours + 1), endTime = LogDateData(600L)),
+            EatingLogData(startTime = LogDateData(780L), endTime = LogDateData(800L))
         )
 
         val expectedDataPoints = listOf(

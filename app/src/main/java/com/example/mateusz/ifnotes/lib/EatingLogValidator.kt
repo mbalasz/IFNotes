@@ -1,6 +1,6 @@
 package com.example.mateusz.ifnotes.lib
 
-import com.example.mateusz.ifnotes.model.data.EatingLog
+import com.example.mateusz.ifnotes.domain.entity.EatingLog
 import java.lang.IllegalStateException
 import java.time.Clock
 import javax.inject.Inject
@@ -44,7 +44,7 @@ open class EatingLogValidator @Inject constructor(private val clock: Clock) {
         return NewLogTimeValidationStatus.SUCCESS
     }
 
-    open fun validateNewEatingLog(newEatingLog: EatingLog, eatingLogs: List<EatingLog>):
+    open fun validateNewEatingLog(newEatingLog: EatingLog, eatingLogData: List<EatingLog>):
             EatingLogValidationStatus {
         if (newEatingLog.startTime == null) {
             return EatingLogValidationStatus.NO_START_TIME
@@ -60,7 +60,7 @@ open class EatingLogValidator @Inject constructor(private val clock: Clock) {
                 return EatingLogValidationStatus.ERROR_END_TIME_IN_THE_FUTURE
             }
         }
-        val sortedEatingLogs = eatingLogs.sortedWith(compareBy(
+        val sortedEatingLogs = eatingLogData.sortedWith(compareBy(
                 { it.startTime?.dateTimeInMillis },
                 { it.endTime?.dateTimeInMillis }
         ))
@@ -85,11 +85,11 @@ open class EatingLogValidator @Inject constructor(private val clock: Clock) {
         return EatingLogValidationStatus.SUCCESS
     }
 
-    private fun validateOrder(eatingLog: EatingLog, nextEatingLog: EatingLog): Boolean {
-        if (eatingLog.endTime == null || nextEatingLog.startTime == null) {
+    private fun validateOrder(eatingLogData: EatingLog, nextEatingLog: EatingLog): Boolean {
+        if (eatingLogData.endTime == null || nextEatingLog.startTime == null) {
             return false
         }
-        return eatingLog.endTime.dateTimeInMillis < nextEatingLog.startTime.dateTimeInMillis
+        return eatingLogData.endTime.dateTimeInMillis < nextEatingLog.startTime.dateTimeInMillis
     }
 
     fun isEatingLogFinished(eatingLog: EatingLog): Boolean {

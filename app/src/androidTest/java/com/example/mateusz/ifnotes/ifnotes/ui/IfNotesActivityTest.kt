@@ -19,7 +19,7 @@ import com.example.mateusz.ifnotes.component.TestComponent
 import com.example.mateusz.ifnotes.date.DateTimeTestUtils.Companion.assertThatMsAreEqualToDateTime
 import com.example.mateusz.ifnotes.date.DateTimeTestUtils.Companion.assertThatMsAreEqualToTime
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
-import com.example.mateusz.ifnotes.model.Repository
+import com.example.mateusz.ifnotes.data.EatingLogsRepositoryImpl
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.schedulers.Schedulers
@@ -28,7 +28,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.runBlockingTest
 import org.hamcrest.CoreMatchers.`is`
-import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.Matchers
 import org.junit.After
@@ -44,7 +43,7 @@ class IfNotesActivityTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    private lateinit var repository: Repository
+    private lateinit var EatingLogsRepositoryImpl: EatingLogsRepositoryImpl
     var clock = mock<Clock>()
 
     private val testDispatcher = TestCoroutineDispatcher()
@@ -64,7 +63,7 @@ class IfNotesActivityTest {
     @Before
     fun setUp() {
         val component = ApplicationProvider.getApplicationContext<IFNotesApplication>().component as TestComponent
-        repository = component.repository()
+        EatingLogsRepositoryImpl = component.repository()
     }
 
     @After
@@ -78,7 +77,7 @@ class IfNotesActivityTest {
 
         onView(withId(R.id.logActivityButton)).perform(click())
 
-        repository.getEatingLogsObservable().test().awaitCount(1).assertOf { subscriber ->
+        EatingLogsRepositoryImpl.getEatingLogsObservable().test().awaitCount(1).assertOf { subscriber ->
             val eatingLog = subscriber.values()[0].let {
                 assertThat(it.size, `is`(1))
                 it[0]
@@ -96,7 +95,7 @@ class IfNotesActivityTest {
         whenever(clock.millis()).thenReturn(DateTimeUtils.timeToMillis(18, 50))
         onView(withId(R.id.logActivityButton)).perform(click())
 
-        repository.getEatingLogsObservable().test().awaitCount(1).assertOf { subscriber ->
+        EatingLogsRepositoryImpl.getEatingLogsObservable().test().awaitCount(1).assertOf { subscriber ->
             val eatingLog = subscriber.values()[0].let {
                 assertThat(it.size, `is`(1))
                 it[0]
@@ -119,7 +118,7 @@ class IfNotesActivityTest {
             DateTimeUtils.dateTimeToMillis(2, 2, 2019,9, 30))
         onView(withId(R.id.logActivityButton)).perform(click())
 
-        repository.getEatingLogsObservable().test().awaitCount(1).assertOf { subscriber ->
+        EatingLogsRepositoryImpl.getEatingLogsObservable().test().awaitCount(1).assertOf { subscriber ->
             val eatingLogs = subscriber.values()[0].also {
                 assertThat(it.size, `is`(2))
             }
@@ -147,7 +146,7 @@ class IfNotesActivityTest {
             .perform(PickerActions.setTime(10, 45))
         onView(ViewMatchers.withText("SAVE")).perform(click())
 
-        repository.getEatingLogsObservable().test().awaitCount(1).assertOf { subscriber ->
+        EatingLogsRepositoryImpl.getEatingLogsObservable().test().awaitCount(1).assertOf { subscriber ->
             val eatingLogs = subscriber.values()[0].also {
                 assertThat(it.size, `is`(1))
             }
@@ -162,7 +161,7 @@ class IfNotesActivityTest {
 
         onView(withId(R.id.logShortTimeAgo)).perform(click())
 
-        repository.getEatingLogsObservable().test().awaitCount(1).assertOf { subscriber ->
+        EatingLogsRepositoryImpl.getEatingLogsObservable().test().awaitCount(1).assertOf { subscriber ->
             val eatingLog = subscriber.values()[0].let {
                 assertThat(it.size, `is`(1))
                 it[0]
@@ -179,7 +178,7 @@ class IfNotesActivityTest {
 
         onView(withId(R.id.logMidTimeAgo)).perform(click())
 
-        repository.getEatingLogsObservable().test().awaitCount(1).assertOf { subscriber ->
+        EatingLogsRepositoryImpl.getEatingLogsObservable().test().awaitCount(1).assertOf { subscriber ->
             val eatingLog = subscriber.values()[0].let {
                 assertThat(it.size, `is`(1))
                 it[0]
@@ -196,7 +195,7 @@ class IfNotesActivityTest {
 
         onView(withId(R.id.logLongTimeAgo)).perform(click())
 
-        repository.getEatingLogsObservable().test().awaitCount(1).assertOf { subscriber ->
+        EatingLogsRepositoryImpl.getEatingLogsObservable().test().awaitCount(1).assertOf { subscriber ->
             val eatingLog = subscriber.values()[0].let {
                 assertThat(it.size, `is`(1))
                 it[0]
@@ -232,7 +231,7 @@ class IfNotesActivityTest {
             DateTimeUtils.dateTimeToMillis(3, 2, 2019,4, 13))
         onView(withId(R.id.logActivityButton)).perform(click())
 
-        repository.getEatingLogsObservable().test().awaitCount(1).assertOf { subscriber ->
+        EatingLogsRepositoryImpl.getEatingLogsObservable().test().awaitCount(1).assertOf { subscriber ->
             val eatingLogs = subscriber.values()[0].also {
                 assertThat(it.size, `is`(3))
             }

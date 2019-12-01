@@ -22,10 +22,10 @@ import com.example.mateusz.ifnotes.component.IFNotesApplication
 import com.example.mateusz.ifnotes.component.InjectionActivityTestRule
 import com.example.mateusz.ifnotes.component.TestComponent
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
-import com.example.mateusz.ifnotes.model.Repository
-import com.example.mateusz.ifnotes.model.data.EatingLog
+import com.example.mateusz.ifnotes.data.EatingLogsRepositoryImpl
+import com.example.mateusz.ifnotes.data.room.EatingLogData
 import com.example.mateusz.ifnotes.matchers.RecyclerViewMatcher
-import com.example.mateusz.ifnotes.model.data.LogDate
+import com.example.mateusz.ifnotes.data.room.LogDateData
 import com.nhaarman.mockitokotlin2.mock
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.CoroutineScope
@@ -44,12 +44,12 @@ import java.lang.RuntimeException
 import java.time.Clock
 
 @RunWith(AndroidJUnit4::class)
-class EatingLogsActivityTest {
+class EatingLogsActivityTestData {
 
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    private lateinit var repository: Repository
+    private lateinit var EatingLogsRepositoryImpl: EatingLogsRepositoryImpl
     var clock = mock<Clock>()
 
     private val testDispatcher = TestCoroutineDispatcher()
@@ -82,18 +82,18 @@ class EatingLogsActivityTest {
     fun displayLogsList() {
         val activity = injectionActivityTestRule.launchActivity(Intent())
         val component = ApplicationProvider.getApplicationContext<IFNotesApplication>().component as TestComponent
-        repository = component.repository()
+        EatingLogsRepositoryImpl = component.repository()
         activity.runOnUiThread {
             testDispatcher.runBlockingTest {
-                repository.insertEatingLog(EatingLog(
-                    startTime = LogDate(DateTimeUtils.dateTimeToMillis(1, 2, 2019, 10, 50)),
-                    endTime = LogDate(DateTimeUtils.dateTimeToMillis(1, 2, 2019, 18, 50))))
-                repository.insertEatingLog(EatingLog(
-                    startTime = LogDate(DateTimeUtils.dateTimeToMillis(2, 2, 2019, 10, 50)),
-                    endTime = LogDate(DateTimeUtils.dateTimeToMillis(2, 2, 2019, 18, 50))))
-                repository.insertEatingLog(EatingLog(
-                    startTime = LogDate(DateTimeUtils.dateTimeToMillis(3, 2, 2019, 10, 50)),
-                    endTime = LogDate(DateTimeUtils.dateTimeToMillis(3, 2, 2019, 18, 50))))
+                EatingLogsRepositoryImpl.insertEatingLog(EatingLogData(
+                    startTime = LogDateData(DateTimeUtils.dateTimeToMillis(1, 2, 2019, 10, 50)),
+                    endTime = LogDateData(DateTimeUtils.dateTimeToMillis(1, 2, 2019, 18, 50))))
+                EatingLogsRepositoryImpl.insertEatingLog(EatingLogData(
+                    startTime = LogDateData(DateTimeUtils.dateTimeToMillis(2, 2, 2019, 10, 50)),
+                    endTime = LogDateData(DateTimeUtils.dateTimeToMillis(2, 2, 2019, 18, 50))))
+                EatingLogsRepositoryImpl.insertEatingLog(EatingLogData(
+                    startTime = LogDateData(DateTimeUtils.dateTimeToMillis(3, 2, 2019, 10, 50)),
+                    endTime = LogDateData(DateTimeUtils.dateTimeToMillis(3, 2, 2019, 18, 50))))
             }
         }
         onView(withId(R.id.eatingLogsRecyclerView)).check(RecyclerViewCountAssertion(3))
@@ -116,15 +116,15 @@ class EatingLogsActivityTest {
     fun removeLog() {
         val activity = injectionActivityTestRule.launchActivity(Intent())
         val component = ApplicationProvider.getApplicationContext<IFNotesApplication>().component as TestComponent
-        repository = component.repository()
+        EatingLogsRepositoryImpl = component.repository()
         activity.runOnUiThread {
             testDispatcher.runBlockingTest {
-                repository.insertEatingLog(EatingLog(
-                    startTime = LogDate(DateTimeUtils.dateTimeToMillis(1, 2, 2019, 10, 50)),
-                    endTime = LogDate(DateTimeUtils.dateTimeToMillis(1, 2, 2019, 18, 50))))
-                repository.insertEatingLog(EatingLog(
-                    startTime = LogDate(DateTimeUtils.dateTimeToMillis(2, 2, 2019, 10, 50)),
-                    endTime = LogDate(DateTimeUtils.dateTimeToMillis(2, 2, 2019, 18, 50))))
+                EatingLogsRepositoryImpl.insertEatingLog(EatingLogData(
+                    startTime = LogDateData(DateTimeUtils.dateTimeToMillis(1, 2, 2019, 10, 50)),
+                    endTime = LogDateData(DateTimeUtils.dateTimeToMillis(1, 2, 2019, 18, 50))))
+                EatingLogsRepositoryImpl.insertEatingLog(EatingLogData(
+                    startTime = LogDateData(DateTimeUtils.dateTimeToMillis(2, 2, 2019, 10, 50)),
+                    endTime = LogDateData(DateTimeUtils.dateTimeToMillis(2, 2, 2019, 18, 50))))
             }
         }
 

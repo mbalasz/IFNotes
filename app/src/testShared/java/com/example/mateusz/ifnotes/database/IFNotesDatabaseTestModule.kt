@@ -2,7 +2,7 @@ package com.example.mateusz.ifnotes.database
 
 import android.app.Application
 import androidx.room.Room
-import com.example.mateusz.ifnotes.model.data.IFNotesDatabase
+import com.example.mateusz.ifnotes.data.room.IFNotesDatabase
 import dagger.Module
 import dagger.Provides
 import javax.inject.Singleton

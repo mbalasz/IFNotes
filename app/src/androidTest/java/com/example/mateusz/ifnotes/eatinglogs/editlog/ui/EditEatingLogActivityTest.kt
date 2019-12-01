@@ -20,10 +20,10 @@ import com.example.mateusz.ifnotes.component.InjectionActivityTestRule
 import com.example.mateusz.ifnotes.component.TestComponent
 import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogViewModel
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
-import com.example.mateusz.ifnotes.model.Repository
-import com.example.mateusz.ifnotes.model.data.EatingLog
+import com.example.mateusz.ifnotes.data.EatingLogsRepositoryImpl
+import com.example.mateusz.ifnotes.data.room.EatingLogData
 import com.example.mateusz.ifnotes.date.DateTimeTestUtils.Companion.assertThatMsAreEqualToDateTime
-import com.example.mateusz.ifnotes.model.data.LogDate
+import com.example.mateusz.ifnotes.data.room.LogDateData
 import io.reactivex.schedulers.TestScheduler
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
@@ -50,7 +50,7 @@ class EditEatingLogActivityTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    private lateinit var repository: Repository
+    private lateinit var EatingLogsRepositoryImpl: EatingLogsRepositoryImpl
     private lateinit var application: IFNotesApplication
     private lateinit var intent: Intent
 
@@ -70,7 +70,7 @@ class EditEatingLogActivityTest {
     fun setUp() {
         application = ApplicationProvider.getApplicationContext()
         val component = application.component as TestComponent
-        repository = component.repository()
+        EatingLogsRepositoryImpl = component.repository()
     }
 
     @After
@@ -81,14 +81,14 @@ class EditEatingLogActivityTest {
     @Test
     fun editFirstMeal() = testScope.runBlockingTest {
         val originalEatingLog =
-            EatingLog(id = 3, startTime = LogDate(DEFAULT_START_TIME), endTime = LogDate(DEFAULT_END_TIME))
-        repository.insertEatingLog(originalEatingLog)
+            EatingLogData(id = 3, startTime = LogDateData(DEFAULT_START_TIME), endTime = LogDateData(DEFAULT_END_TIME))
+        EatingLogsRepositoryImpl.insertEatingLog(originalEatingLog)
         startActivity(3)
 
         setDateTime(R.id.editFirstMealButton, 2019, 1, 4, 18, 50)
         onView(withId(R.id.saveButton)).perform(click())
 
-        val eatingLogs = repository.getEatingLogsObservable().test().awaitCount(1).values()[0]
+        val eatingLogs = EatingLogsRepositoryImpl.getEatingLogsObservable().test().awaitCount(1).values()[0]
         assertThat(eatingLogs.size, `is`(1))
         assertThatMsAreEqualToDateTime(eatingLogs[0].startTime!!.dateTimeInMillis, 4, 0, 2019, 18, 50)
     }
@@ -96,14 +96,14 @@ class EditEatingLogActivityTest {
     @Test
     fun editLastMeal() = testScope.runBlockingTest {
         val originalEatingLog =
-            EatingLog(id = 3, startTime = LogDate(DEFAULT_START_TIME), endTime = LogDate(DEFAULT_END_TIME))
-        repository.insertEatingLog(originalEatingLog)
+            EatingLogData(id = 3, startTime = LogDateData(DEFAULT_START_TIME), endTime = LogDateData(DEFAULT_END_TIME))
+        EatingLogsRepositoryImpl.insertEatingLog(originalEatingLog)
         startActivity(3)
 
         setDateTime(R.id.editLastMealButton, 2019, 1, 5, 21, 31)
         onView(withId(R.id.saveButton)).perform(click())
 
-        val eatingLogs = repository.getEatingLogsObservable().test().awaitCount(1).values()[0]
+        val eatingLogs = EatingLogsRepositoryImpl.getEatingLogsObservable().test().awaitCount(1).values()[0]
         assertThat(eatingLogs.size, `is`(1))
         assertThatMsAreEqualToDateTime(eatingLogs[0].endTime!!.dateTimeInMillis, 5, 0, 2019, 21, 31)
     }
@@ -111,15 +111,15 @@ class EditEatingLogActivityTest {
     @Test
     fun discard_doesNotSaveChanges() = testScope.runBlockingTest {
         val originalEatingLog =
-            EatingLog(id = 3, startTime = LogDate(DEFAULT_START_TIME), endTime = LogDate(DEFAULT_END_TIME))
-        repository.insertEatingLog(originalEatingLog)
+            EatingLogData(id = 3, startTime = LogDateData(DEFAULT_START_TIME), endTime = LogDateData(DEFAULT_END_TIME))
+        EatingLogsRepositoryImpl.insertEatingLog(originalEatingLog)
         startActivity(3)
 
         setDateTime(R.id.editFirstMealButton, 2019, 1, 4, 18, 50)
         setDateTime(R.id.editLastMealButton, 2019, 1, 5, 21, 31)
         onView(withId(R.id.discardButton)).perform(click())
 
-        val eatingLogs = repository.getEatingLogsObservable().test().awaitCount(1).values()[0]
+        val eatingLogs = EatingLogsRepositoryImpl.getEatingLogsObservable().test().awaitCount(1).values()[0]
         assertThat(eatingLogs.size, `is`(1))
         assertThatMsAreEqualToDateTime(eatingLogs[0].startTime!!.dateTimeInMillis, 5, 0, 2019, 10, 50)
         assertThatMsAreEqualToDateTime(eatingLogs[0].endTime!!.dateTimeInMillis, 5, 0, 2019, 19, 50)

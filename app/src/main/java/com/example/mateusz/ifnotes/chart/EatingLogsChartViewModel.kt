@@ -6,7 +6,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.mateusz.ifnotes.chart.EatingLogsChartDataProducer.DataPoint
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
-import com.example.mateusz.ifnotes.model.Repository
+import com.example.mateusz.ifnotes.data.EatingLogsRepositoryImpl
 import com.github.mikephil.charting.data.Entry
 import io.reactivex.disposables.Disposable
 import java.lang.IllegalStateException
@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 class EatingLogsChartViewModel @Inject constructor(
     application: Application,
-    repository: Repository
+    EatingLogsRepositoryImpl: EatingLogsRepositoryImpl
 ) : AndroidViewModel(application) {
     companion object {
         private const val MAX_WINDOW_HOURS = 19L
@@ -30,7 +30,7 @@ class EatingLogsChartViewModel @Inject constructor(
     private val windowValidator = TimeWindowValidator(MAX_WINDOW_HOURS)
 
     init {
-        eatingLogsSubscription = repository.getEatingLogsObservable().subscribe {
+        eatingLogsSubscription = EatingLogsRepositoryImpl.getEatingLogsObservable().subscribe {
             val eatingLogs = it.sortedWith(
                     Comparator { a, b -> compareValuesBy(a, b, { it.startTime?.dateTimeInMillis }, { it.endTime?.dateTimeInMillis }) })
             val dataPoints = FastingWindowChartDataProducer(windowValidator).getDataPoints(eatingLogs)
@@ -58,7 +58,7 @@ class EatingLogsChartViewModel @Inject constructor(
     private fun getLabelsFromDataPoints(dataPoints: List<DataPoint>): List<String> {
         val labels = arrayListOf<String>()
         for (dataPoint in dataPoints) {
-            val eatingLog = dataPoint.eatingLog
+            val eatingLog = dataPoint.eatingLogData
             eatingLog.startTime?.let {
                 labels.add(DateTimeUtils.toDateString(it.dateTimeInMillis))
             } ?: throw IllegalStateException("DataPoint's EatingLog has no start time")

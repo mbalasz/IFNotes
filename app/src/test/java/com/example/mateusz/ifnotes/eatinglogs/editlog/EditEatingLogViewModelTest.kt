@@ -5,9 +5,9 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
-import com.example.mateusz.ifnotes.model.Repository
-import com.example.mateusz.ifnotes.model.data.EatingLog
-import com.example.mateusz.ifnotes.model.data.LogDate
+import com.example.mateusz.ifnotes.data.EatingLogsRepositoryImpl
+import com.example.mateusz.ifnotes.data.room.EatingLogData
+import com.example.mateusz.ifnotes.data.room.LogDateData
 import com.example.mateusz.ifnotes.time.DateDialogFragment
 import com.example.mateusz.ifnotes.time.TimeDialogFragment
 import com.nhaarman.mockitokotlin2.argumentCaptor
@@ -36,7 +36,7 @@ import kotlin.test.assertNotNull
 @RunWith(AndroidJUnit4::class)
 class EditEatingLogViewModelTest {
     private val testScope = TestCoroutineScope()
-    @Mock private lateinit var repository: Repository
+    @Mock private lateinit var EatingLogsRepositoryImpl: EatingLogsRepositoryImpl
 
     @get:Rule
     val mockitoRule: MockitoRule = MockitoJUnit.rule()
@@ -49,7 +49,7 @@ class EditEatingLogViewModelTest {
     @Before
     fun setUp() {
         editEatingLogViewModel = EditEatingLogViewModel(
-            ApplicationProvider.getApplicationContext(), repository, testScope)
+            ApplicationProvider.getApplicationContext(), EatingLogsRepositoryImpl, testScope)
     }
 
     @After
@@ -77,8 +77,8 @@ class EditEatingLogViewModelTest {
             DateTimeUtils.dateTimeToMillis(13, 3, 2019, 10, 20)
         val lastMealDateTime =
             DateTimeUtils.dateTimeToMillis(13, 3, 2019, 18, 50)
-        whenever(repository.getEatingLog(13)).
-            thenReturn(EatingLog(startTime = LogDate(firstMealDateTime), endTime = LogDate(lastMealDateTime)))
+        whenever(EatingLogsRepositoryImpl.getEatingLog(13)).
+            thenReturn(EatingLogData(startTime = LogDateData(firstMealDateTime), endTime = LogDateData(lastMealDateTime)))
         val intent = Intent().apply {
             putExtra(EditEatingLogViewModel.EXTRA_EATING_LOG_ID, 13)
         }
@@ -106,8 +106,8 @@ class EditEatingLogViewModelTest {
     fun onEditFirstMeal_sendsDateDialogFragmentWithOriginalLogTime() = testScope.runBlockingTest {
         val firstMealDateTime =
             DateTimeUtils.dateTimeToMillis(13, 3, 2019, 10, 20)
-        whenever(repository.getEatingLog(13)).
-            thenReturn(EatingLog(startTime = LogDate(firstMealDateTime)))
+        whenever(EatingLogsRepositoryImpl.getEatingLog(13)).
+            thenReturn(EatingLogData(startTime = LogDateData(firstMealDateTime)))
         val intent = Intent().apply {
             putExtra(EditEatingLogViewModel.EXTRA_EATING_LOG_ID, 13)
         }
@@ -204,13 +204,13 @@ class EditEatingLogViewModelTest {
             DateTimeUtils.dateTimeToMillis(13, 3, 2019, 10, 20)
         val lastMealOriginalDateTime =
             DateTimeUtils.dateTimeToMillis(13, 3, 2019, 15, 20)
-        whenever(repository.getEatingLog(13)).
-            thenReturn(EatingLog(startTime = LogDate(firstMealOriginalDateTime), endTime = LogDate(lastMealOriginalDateTime)))
+        whenever(EatingLogsRepositoryImpl.getEatingLog(13)).
+            thenReturn(EatingLogData(startTime = LogDateData(firstMealOriginalDateTime), endTime = LogDateData(lastMealOriginalDateTime)))
         val intent = Intent().apply {
             putExtra(EditEatingLogViewModel.EXTRA_EATING_LOG_ID, 13)
         }
         editEatingLogViewModel.onActivityCreated(intent)
-        reset(repository)
+        reset(EatingLogsRepositoryImpl)
         editEatingLogViewModel.onEditLastMeal()
         editEatingLogViewModel.onDateSaved(13, 3, 2019)
         editEatingLogViewModel.onTimeSaved(18, 21)
@@ -221,7 +221,7 @@ class EditEatingLogViewModelTest {
 
         editEatingLogViewModel.onDiscardButtonClicked()
 
-        verifyZeroInteractions(repository)
+        verifyZeroInteractions(EatingLogsRepositoryImpl)
     }
 
     @Test
@@ -230,8 +230,8 @@ class EditEatingLogViewModelTest {
             DateTimeUtils.dateTimeToMillis(13, 3, 2019, 10, 20)
         val lastMealOriginalDateTime =
             DateTimeUtils.dateTimeToMillis(13, 3, 2019, 15, 20)
-        whenever(repository.getEatingLog(13)).
-            thenReturn(EatingLog(startTime = LogDate(firstMealOriginalDateTime), endTime = LogDate(lastMealOriginalDateTime)))
+        whenever(EatingLogsRepositoryImpl.getEatingLog(13)).
+            thenReturn(EatingLogData(startTime = LogDateData(firstMealOriginalDateTime), endTime = LogDateData(lastMealOriginalDateTime)))
         val intent = Intent().apply {
             putExtra(EditEatingLogViewModel.EXTRA_EATING_LOG_ID, 13)
         }
@@ -246,8 +246,8 @@ class EditEatingLogViewModelTest {
 
         editEatingLogViewModel.onSaveButtonClicked()
 
-        argumentCaptor<EatingLog>().apply {
-            verify(repository).updateEatingLog(capture())
+        argumentCaptor<EatingLogData>().apply {
+            verify(EatingLogsRepositoryImpl).updateEatingLog(capture())
             firstValue.startTime.apply {
                 assertThatMsAreEqualToDateTime(this!!.dateTimeInMillis, 2019, 3, 13, 11, 17)
             }
@@ -263,8 +263,8 @@ class EditEatingLogViewModelTest {
             DateTimeUtils.dateTimeToMillis(13, 3, 2019, 10, 20)
         val lastMealOriginalDateTime =
             DateTimeUtils.dateTimeToMillis(13, 3, 2019, 15, 20)
-        whenever(repository.getEatingLog(13)).
-            thenReturn(EatingLog(startTime = LogDate(firstMealOriginalDateTime), endTime = LogDate(lastMealOriginalDateTime)))
+        whenever(EatingLogsRepositoryImpl.getEatingLog(13)).
+            thenReturn(EatingLogData(startTime = LogDateData(firstMealOriginalDateTime), endTime = LogDateData(lastMealOriginalDateTime)))
         val intent = Intent().apply {
             putExtra(EditEatingLogViewModel.EXTRA_EATING_LOG_ID, 13)
         }
@@ -275,8 +275,8 @@ class EditEatingLogViewModelTest {
 
         editEatingLogViewModel.onSaveButtonClicked()
 
-        argumentCaptor<EatingLog>().apply {
-            verify(repository).updateEatingLog(capture())
+        argumentCaptor<EatingLogData>().apply {
+            verify(EatingLogsRepositoryImpl).updateEatingLog(capture())
             firstValue.startTime.apply {
                 assertThatMsAreEqualToDateTime(this!!.dateTimeInMillis, 2019, 3, 13, 10, 20)
             }
@@ -292,8 +292,8 @@ class EditEatingLogViewModelTest {
             DateTimeUtils.dateTimeToMillis(13, 3, 2019, 10, 20)
         val lastMealOriginalDateTime =
             DateTimeUtils.dateTimeToMillis(13, 3, 2019, 15, 20)
-        whenever(repository.getEatingLog(13)).
-            thenReturn(EatingLog(startTime = LogDate(firstMealOriginalDateTime), endTime = LogDate(lastMealOriginalDateTime)))
+        whenever(EatingLogsRepositoryImpl.getEatingLog(13)).
+            thenReturn(EatingLogData(startTime = LogDateData(firstMealOriginalDateTime), endTime = LogDateData(lastMealOriginalDateTime)))
         val intent = Intent().apply {
             putExtra(EditEatingLogViewModel.EXTRA_EATING_LOG_ID, 13)
         }
@@ -304,8 +304,8 @@ class EditEatingLogViewModelTest {
 
         editEatingLogViewModel.onSaveButtonClicked()
 
-        argumentCaptor<EatingLog>().apply {
-            verify(repository).updateEatingLog(capture())
+        argumentCaptor<EatingLogData>().apply {
+            verify(EatingLogsRepositoryImpl).updateEatingLog(capture())
             firstValue.startTime.apply {
                 assertThatMsAreEqualToDateTime(this!!.dateTimeInMillis, 2019, 3, 13, 13, 54)
             }
