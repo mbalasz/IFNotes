@@ -32,6 +32,8 @@ class RoomEatingLogsLocalDatabase @Inject constructor(
     }
 
     override suspend fun getMostRecentEatingLog(): EatingLog? = withContext(ioDispatcher) {
-        dataToEntitiyMapper.mapFrom(iFNotesDatabase.eatingLogDao().getMostRecentEatingLog())
+        iFNotesDatabase.eatingLogDao().getMostRecentEatingLog()?.let {
+            dataToEntitiyMapper.mapFrom(it)
+        }
     }
 }

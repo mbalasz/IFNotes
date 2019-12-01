@@ -5,8 +5,7 @@ import com.example.mateusz.ifnotes.domain.entity.EatingLog
 import com.example.mateusz.ifnotes.domain.entity.LogDate
 import javax.inject.Inject
 
-class LogFirstMeal @Inject constructor(
-    private val eatingLogsRepository: EatingLogsRepository) {
+class LogFirstMeal @Inject constructor(private val eatingLogsRepository: EatingLogsRepository) {
 
     // TODO: make this operation atomic
     suspend operator fun invoke(logDate: LogDate): ValidationStatus {
