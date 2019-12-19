@@ -20,6 +20,7 @@ import com.example.mateusz.ifnotes.data.room.EntityToDataMapper
 import com.example.mateusz.ifnotes.domain.entity.EatingLog
 import com.example.mateusz.ifnotes.domain.entity.LogDate
 import com.example.mateusz.ifnotes.domain.usecases.LogFirstMeal
+import com.example.mateusz.ifnotes.domain.usecases.LogLastMeal
 import com.example.mateusz.ifnotes.domain.usecases.ObserveMostRecentEatingLog
 import io.reactivex.Scheduler
 import io.reactivex.disposables.Disposable
@@ -44,6 +45,7 @@ class IFNotesViewModel @Inject constructor(
     @MainScheduler mainScheduler: Scheduler,
     observeMostRecentEatingLog: ObserveMostRecentEatingLog,
     private val logFirstMeal: LogFirstMeal,
+    private val logLastMeal: LogLastMeal,
     // TODO Remove this dependency. PresentationLayer should have its own representation of the
     //Eating log
     private val entityToDataMapper: EntityToDataMapper
@@ -227,12 +229,10 @@ class IFNotesViewModel @Inject constructor(
                     "Attempt to update most recent eating log with an invalid logTime:" +
                         " $logTimeValidationStatus")
             }
-            val newEatingLog: EatingLog
             if (currentEatingLog == null || currentEatingLog.isFinished()) {
                 logFirstMeal(LogDate(logTime, ""))
             } else {
-                newEatingLog = currentEatingLog.copy(endTime = LogDate(logTime, ""))
-                eatingLogsRepositoryImpl.updateEatingLog(entityToDataMapper.mapFrom(newEatingLog))
+                logLastMeal(LogDate(logTime, ""))
             }
         }
     }

@@ -39,6 +39,10 @@ open class EatingLogsRepositoryImpl @Inject constructor(
         iFNotesDatabase.eatingLogDao().insert(eatingLogData)
     }
 
+    override suspend fun updateEatingLog(eatingLog: EatingLog) {
+        localDataSource.updateEatingLog(eatingLog)
+    }
+
     open suspend fun getEatingLog(id: Int): EatingLogData? = withContext(ioDispatcher) {
         iFNotesDatabase.eatingLogDao().getEatingLog(id)
     }
@@ -61,6 +65,10 @@ open class EatingLogsRepositoryImpl @Inject constructor(
 
     open suspend fun deleteAll() = withContext(ioDispatcher) {
         iFNotesDatabase.eatingLogDao().deleteAll()
+    }
+
+    override suspend fun <T> runInTransaction(callable: suspend () -> T): T {
+        return localDataSource.runInTransaction(callable)
     }
 
     private fun validateUpdate(eatingLogData: EatingLogData): EatingLogValidator.NewLogValidationStatus {

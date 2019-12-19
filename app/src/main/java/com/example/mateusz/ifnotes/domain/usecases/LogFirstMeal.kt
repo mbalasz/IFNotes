@@ -11,11 +11,13 @@ class LogFirstMeal @Inject constructor(private val eatingLogsRepository: EatingL
     suspend operator fun invoke(logDate: LogDate): ValidationStatus {
         val currentMostRecentEatingLog = eatingLogsRepository.getMostRecentEatingLog()
         if (currentMostRecentEatingLog != null && !currentMostRecentEatingLog.isFinished()) {
-            return ValidationStatus.MOST_RECENT_EATING_LOG_NOT_FINISHED
+            return ValidationStatus.ERROR_MOST_RECENT_EATING_LOG_NOT_FINISHED
         }
 
-        val validationStatus = currentMostRecentEatingLog?.endTime?.dateTimeInMillis?.let {
-            validateNewLogTime(logDate.dateTimeInMillis, it)
+        val validationStatus = currentMostRecentEatingLog?.let {eatingLog ->
+            eatingLog.endTime?.dateTimeInMillis?.let {
+                validateNewLogTime(logDate.dateTimeInMillis, it)
+            } ?: throw IllegalStateException("EatingLog is not finished")
         } ?: ValidationStatus.SUCCESS
 
         if (validationStatus == ValidationStatus.SUCCESS) {
@@ -25,17 +27,17 @@ class LogFirstMeal @Inject constructor(private val eatingLogsRepository: EatingL
         return validationStatus
     }
 
-    private fun validateNewLogTime(firstMealLogTime: Long, prevLogLastMealLogTime: Long):
+    private fun validateNewLogTime(firstMealLogTime: Long, prevLogLastMealTime: Long):
         ValidationStatus {
-        if (prevLogLastMealLogTime > firstMealLogTime) {
-            return ValidationStatus.ERROR_TIME_TOO_EARLY
+        if (prevLogLastMealTime > firstMealLogTime) {
+            return ValidationStatus.ERROR_FIRST_MEAL_LOG_TIME_IS_EARLIER_THAN_LAST_MEAL_LOG_TIME
         }
         return ValidationStatus.SUCCESS
     }
 
     enum class ValidationStatus {
         SUCCESS,
-        ERROR_TIME_TOO_EARLY,
-        MOST_RECENT_EATING_LOG_NOT_FINISHED,
+        ERROR_FIRST_MEAL_LOG_TIME_IS_EARLIER_THAN_LAST_MEAL_LOG_TIME,
+        ERROR_MOST_RECENT_EATING_LOG_NOT_FINISHED,
     }
 }

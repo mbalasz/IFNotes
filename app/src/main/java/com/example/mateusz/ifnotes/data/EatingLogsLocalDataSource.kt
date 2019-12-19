@@ -10,4 +10,8 @@ interface EatingLogsLocalDataSource {
     suspend fun getMostRecentEatingLog(): EatingLog?
 
     suspend fun insertEatingLog(eatingLog: EatingLog)
+
+    suspend fun updateEatingLog(eatingLog: EatingLog)
+
+    suspend fun <T> runInTransaction(callable: suspend () -> T): T
 }
