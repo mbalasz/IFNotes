@@ -49,6 +49,4 @@ class RoomEatingLogsLocalDatabase @Inject constructor(
     override suspend fun <T> runInTransaction(callable: suspend () -> T): T = withContext(ioDispatcher) {
         iFNotesDatabase.withTransaction(callable)
     }
-
-    private
 }

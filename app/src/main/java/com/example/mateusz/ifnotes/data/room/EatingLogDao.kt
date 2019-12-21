@@ -14,7 +14,7 @@ interface EatingLogDao {
     fun insert(eatingLogData: EatingLogData)
 
     @Update
-    fun update(eatingLogData: EatingLogData)
+    suspend fun update(eatingLogData: EatingLogData)
 
     @Delete
     fun delete(eatingLogData: EatingLogData)
@@ -26,7 +26,7 @@ interface EatingLogDao {
     fun observeMostRecentEatingLog(): Flowable<List<EatingLogData>>
 
     @Query("SELECT * FROM eatingLogData where start_time_dateTimeInMillis = (SELECT max(start_time_dateTimeInMillis) FROM eatinglogData)")
-    fun getMostRecentEatingLog(): EatingLogData?
+    suspend fun getMostRecentEatingLog(): EatingLogData?
 
     @Query("SELECT * FROM eatingLogData")
     fun getEatingLogsFlowable(): Flowable<List<EatingLogData>>
