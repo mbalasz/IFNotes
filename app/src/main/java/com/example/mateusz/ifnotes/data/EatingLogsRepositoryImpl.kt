@@ -67,8 +67,8 @@ open class EatingLogsRepositoryImpl @Inject constructor(
         iFNotesDatabase.eatingLogDao().deleteAll()
     }
 
-    override suspend fun <T> runInTransaction(callable: suspend () -> T): T {
-        return localDataSource.runInTransaction(callable)
+    override suspend fun <T> runInTransaction(block: suspend () -> T): T {
+        return localDataSource.runInTransaction(block)
     }
 
     private fun validateUpdate(eatingLogData: EatingLogData): EatingLogValidator.NewLogValidationStatus {

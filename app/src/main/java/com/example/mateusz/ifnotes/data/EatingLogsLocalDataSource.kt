@@ -13,5 +13,5 @@ interface EatingLogsLocalDataSource {
 
     suspend fun updateEatingLog(eatingLog: EatingLog)
 
-    suspend fun <T> runInTransaction(callable: suspend () -> T): T
+    suspend fun <T> runInTransaction(block: suspend () -> T): T
 }

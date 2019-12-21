@@ -11,7 +11,7 @@ import io.reactivex.Flowable
 @Dao
 interface EatingLogDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(eatingLogData: EatingLogData)
+    suspend fun insert(eatingLogData: EatingLogData)
 
     @Update
     suspend fun update(eatingLogData: EatingLogData)

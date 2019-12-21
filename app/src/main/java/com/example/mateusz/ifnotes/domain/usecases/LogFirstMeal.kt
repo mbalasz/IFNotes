@@ -7,8 +7,13 @@ import javax.inject.Inject
 
 class LogFirstMeal @Inject constructor(private val eatingLogsRepository: EatingLogsRepository) {
 
-    // TODO: make this operation atomic
     suspend operator fun invoke(logDate: LogDate): ValidationStatus {
+        return eatingLogsRepository.runInTransaction {
+            logFirstMeal(logDate)
+        }
+    }
+
+    private suspend fun logFirstMeal(logDate: LogDate): ValidationStatus {
         val currentMostRecentEatingLog = eatingLogsRepository.getMostRecentEatingLog()
         if (currentMostRecentEatingLog != null && !currentMostRecentEatingLog.isFinished()) {
             return ValidationStatus.ERROR_MOST_RECENT_EATING_LOG_NOT_FINISHED

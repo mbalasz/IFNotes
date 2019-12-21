@@ -7,11 +7,7 @@ import com.example.mateusz.ifnotes.domain.entity.EatingLog
 import com.google.common.base.Optional
 import io.reactivex.Flowable
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
-import java.util.concurrent.Callable
 import javax.inject.Inject
 
 class RoomEatingLogsLocalDatabase @Inject constructor(
@@ -46,7 +42,7 @@ class RoomEatingLogsLocalDatabase @Inject constructor(
         }
     }
 
-    override suspend fun <T> runInTransaction(callable: suspend () -> T): T = withContext(ioDispatcher) {
-        iFNotesDatabase.withTransaction(callable)
+    override suspend fun <T> runInTransaction(block: suspend () -> T): T = withContext(ioDispatcher) {
+        iFNotesDatabase.withTransaction(block)
     }
 }
