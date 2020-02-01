@@ -9,9 +9,17 @@ interface EatingLogsLocalDataSource {
 
     suspend fun getMostRecentEatingLog(): EatingLog?
 
+    fun observeEatingLogs(): Flowable<List<EatingLog>>
+
+    suspend fun getEatingLogs(): List<EatingLog>
+
     suspend fun insertEatingLog(eatingLog: EatingLog)
 
     suspend fun updateEatingLog(eatingLog: EatingLog)
+
+    suspend fun deleteEatingLog(eatingLog: EatingLog)
+
+    suspend fun deleteAllEatingLogs()
 
     suspend fun <T> runInTransaction(block: suspend () -> T): T
 }

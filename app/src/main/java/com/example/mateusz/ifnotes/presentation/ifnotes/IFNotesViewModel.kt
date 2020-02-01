@@ -1,4 +1,4 @@
-package com.example.mateusz.ifnotes.ifnotes
+package com.example.mateusz.ifnotes.presentation.ifnotes
 
 import android.app.Application
 import android.content.Intent
@@ -10,18 +10,16 @@ import androidx.lifecycle.Transformations
 import com.example.mateusz.ifnotes.chart.ui.EatingLogsChartActivity
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScheduler
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScope
-import com.example.mateusz.ifnotes.eatinglogs.ui.EatingLogsActivity
-import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.domain.EatingLogValidator
-import com.example.mateusz.ifnotes.lib.Event
-import com.example.mateusz.ifnotes.lib.SystemClockWrapper
-import com.example.mateusz.ifnotes.data.EatingLogsRepositoryImpl
-import com.example.mateusz.ifnotes.data.room.EntityToDataMapper
 import com.example.mateusz.ifnotes.domain.entity.EatingLog
 import com.example.mateusz.ifnotes.domain.entity.LogDate
 import com.example.mateusz.ifnotes.domain.usecases.LogFirstMeal
 import com.example.mateusz.ifnotes.domain.usecases.LogLastMeal
 import com.example.mateusz.ifnotes.domain.usecases.ObserveMostRecentEatingLog
+import com.example.mateusz.ifnotes.eatinglogs.ui.EatingLogsActivity
+import com.example.mateusz.ifnotes.lib.DateTimeUtils
+import com.example.mateusz.ifnotes.lib.Event
+import com.example.mateusz.ifnotes.lib.SystemClockWrapper
 import io.reactivex.Scheduler
 import io.reactivex.disposables.Disposable
 import kotlinx.coroutines.CoroutineScope
@@ -37,7 +35,6 @@ import javax.inject.Inject
 
 class IFNotesViewModel @Inject constructor(
     application: Application,
-    private val eatingLogsRepositoryImpl: EatingLogsRepositoryImpl,
     private val clock: Clock,
     private val systemClock: SystemClockWrapper,
     private val eatingLogValidator: EatingLogValidator,
@@ -45,10 +42,7 @@ class IFNotesViewModel @Inject constructor(
     @MainScheduler mainScheduler: Scheduler,
     observeMostRecentEatingLog: ObserveMostRecentEatingLog,
     private val logFirstMeal: LogFirstMeal,
-    private val logLastMeal: LogLastMeal,
-    // TODO Remove this dependency. PresentationLayer should have its own representation of the
-    //Eating log
-    private val entityToDataMapper: EntityToDataMapper
+    private val logLastMeal: LogLastMeal
 ) : AndroidViewModel(application), CoroutineScope by mainScope {
     companion object {
         val DARK_GREEN = Color.parseColor("#a4c639")
@@ -96,12 +90,12 @@ class IFNotesViewModel @Inject constructor(
         eatingLog?.let { currEatingLog ->
             currEatingLog.endTime?.dateTimeInMillis?.let {
                 TimeSinceLastActivityChronometerData(
-                        getElapsedRealTimeSinceBaseInMillis(it),
-                        DARK_GREEN)
+                    getElapsedRealTimeSinceBaseInMillis(it),
+                    DARK_GREEN)
             } ?: currEatingLog.startTime?.dateTimeInMillis?.let {
                 TimeSinceLastActivityChronometerData(
-                        getElapsedRealTimeSinceBaseInMillis(it),
-                        DARK_RED)
+                    getElapsedRealTimeSinceBaseInMillis(it),
+                    DARK_RED)
             }
         } ?: run { null }
     }
@@ -112,11 +106,11 @@ class IFNotesViewModel @Inject constructor(
                             SimpleDateFormat("dd/M/yyyy HH:mm:ss", Locale.ENGLISH)
                     eatingLog.endTime?.dateTimeInMillis?.let {
                         EatingLogDisplay(
-                                LogState.LAST_MEAL, simpleDateFormat.format(it))
+                            LogState.LAST_MEAL, simpleDateFormat.format(it))
                     } ?: eatingLog.startTime?.dateTimeInMillis?.let {
                         EatingLogDisplay(
-                                LogState.FIRST_MEAL,
-                                simpleDateFormat.format(it))
+                            LogState.FIRST_MEAL,
+                            simpleDateFormat.format(it))
                     }
                 } ?: run { EatingLogDisplay(LogState.NO_CURRENT_LOG, "") }
     }
@@ -202,15 +196,15 @@ class IFNotesViewModel @Inject constructor(
             EatingLogValidator.NewLogValidationStatus.SUCCESS -> Unit
             EatingLogValidator.NewLogValidationStatus.ERROR_TIME_TOO_EARLY -> {
                 val validationMessage =
-                        LogTimeValidationMessage(
-                                message = "New log time cannot be sooner than the previous log" +
-                                        " time")
+                    LogTimeValidationMessage(
+                        message = "New log time cannot be sooner than the previous log" +
+                            " time")
                 logTimeValidationMessageLiveData.value = validationMessage
                 return false
             }
             EatingLogValidator.NewLogValidationStatus.ERROR_TIME_IN_THE_FUTURE -> {
                 val validationMessage =
-                        LogTimeValidationMessage(message = "New log time cannot be in the future")
+                    LogTimeValidationMessage(message = "New log time cannot be in the future")
                 logTimeValidationMessageLiveData.value = validationMessage
                 return false
             }

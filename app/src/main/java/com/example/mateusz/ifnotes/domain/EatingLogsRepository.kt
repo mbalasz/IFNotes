@@ -9,11 +9,19 @@ interface EatingLogsRepository {
     // mostRecentEatingLog changes infrequently.
     fun observeMostRecentEatingLog(): Flowable<Optional<EatingLog>>
 
+    fun observeEatingLogs(): Flowable<List<EatingLog>>
+
     suspend fun getMostRecentEatingLog(): EatingLog?
 
     suspend fun insertEatingLog(eatingLog: EatingLog)
 
     suspend fun updateEatingLog(eatingLog: EatingLog)
+
+    suspend fun getEatingLogs(): List<EatingLog>
+
+    suspend fun deleteEatingLog(eatingLog: EatingLog)
+
+    suspend fun deleteAllEatingLogs()
 
     suspend fun <T> runInTransaction (block: suspend () -> T): T
 }

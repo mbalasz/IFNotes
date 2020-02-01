@@ -1,4 +1,4 @@
-package com.example.mateusz.ifnotes.ifnotes.ui
+package com.example.mateusz.ifnotes.presentation.ifnotes.ui
 
 import android.graphics.Color
 import android.os.Bundle
@@ -8,10 +8,10 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.example.mateusz.ifnotes.R
 import com.example.mateusz.ifnotes.component.ViewModelFactory
-import com.example.mateusz.ifnotes.ifnotes.IFNotesViewModel
-import com.example.mateusz.ifnotes.ifnotes.IFNotesViewModel.Companion.LONG_TIME_MS
-import com.example.mateusz.ifnotes.ifnotes.IFNotesViewModel.Companion.MID_TIME_MS
-import com.example.mateusz.ifnotes.ifnotes.IFNotesViewModel.Companion.SHORT_TIME_MS
+import com.example.mateusz.ifnotes.presentation.ifnotes.IFNotesViewModel
+import com.example.mateusz.ifnotes.presentation.ifnotes.IFNotesViewModel.Companion.LONG_TIME_MS
+import com.example.mateusz.ifnotes.presentation.ifnotes.IFNotesViewModel.Companion.MID_TIME_MS
+import com.example.mateusz.ifnotes.presentation.ifnotes.IFNotesViewModel.Companion.SHORT_TIME_MS
 import com.example.mateusz.ifnotes.time.TimeDialogFragment
 import dagger.android.AndroidInjection
 import kotlinx.android.synthetic.main.activity_ifnotes.chart
@@ -56,7 +56,7 @@ class IFNotesActivity : AppCompatActivity(), TimeDialogFragment.TimeDialogListen
         AndroidInjection.inject(this)
 
         lastActivityChronometerWrapper =
-                LastActivityChronometerWrapper(timeSinceLastActivityChronometer)
+            LastActivityChronometerWrapper(timeSinceLastActivityChronometer)
         initUi()
 
         ifNotesViewModel.currentEatingLogDisplayLiveData.observe(

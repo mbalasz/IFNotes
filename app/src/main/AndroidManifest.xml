@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:name=".component.IFNotesApplication">
-        <activity android:name=".ifnotes.ui.IFNotesActivity">
+        <activity android:name=".presentation.ifnotes.ui.IFNotesActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 

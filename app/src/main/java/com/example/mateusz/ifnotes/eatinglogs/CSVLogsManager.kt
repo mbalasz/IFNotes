@@ -4,8 +4,8 @@ import android.content.Context
 import android.net.Uri
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.IODispatcher
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
-import com.example.mateusz.ifnotes.data.room.EatingLogData
-import com.example.mateusz.ifnotes.data.room.LogDateData
+import com.example.mateusz.ifnotes.domain.entity.EatingLog
+import com.example.mateusz.ifnotes.domain.entity.LogDate
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
@@ -28,14 +28,14 @@ open class CSVLogsManager @Inject constructor(
         private const val LAST_MEAL_TIME_IDX = 3
     }
 
-    open suspend fun getEatingLogsFromCsv(uri: Uri): List<EatingLogData> = withContext(ioDispatcher) {
+    open suspend fun getEatingLogsFromCsv(uri: Uri): List<EatingLog> = withContext(ioDispatcher) {
         val inputStream = context.contentResolver.openInputStream(uri)
         val bufferedReader = BufferedReader(InputStreamReader(inputStream))
 
         // Read headers
         bufferedReader.readLine()
 
-        val eatingLogs = mutableListOf<EatingLogData>()
+        val eatingLogs = mutableListOf<EatingLog>()
         var line = bufferedReader.readLine()
         while (line != null) {
             if (line.isNotEmpty()) {
@@ -49,11 +49,11 @@ open class CSVLogsManager @Inject constructor(
         eatingLogs
     }
 
-    open fun createCsvFromEatingLogs(eatingLogData: List<EatingLogData>): String {
+    open fun createCsvFromEatingLogs(eatingLog: List<EatingLog>): String {
         val csvLogsBuilder = StringBuilder()
         val csvDateTimeFormat = SimpleDateFormat("${getDateFormat()},${getTimeFormat()}", Locale.ENGLISH)
         csvLogsBuilder.appendln("Start date,Start time,End date,End time")
-        for (eatingLog in eatingLogData) {
+        for (eatingLog in eatingLog) {
             eatingLog.startTime?.let {
                 val startDateTime = DateTimeUtils.toDateTimeString(it.dateTimeInMillis, csvDateTimeFormat)
                 csvLogsBuilder.append(startDateTime)
@@ -70,7 +70,7 @@ open class CSVLogsManager @Inject constructor(
         return csvLogsBuilder.toString()
     }
 
-    private fun maybeCreateEatingLogFromLine(line: String): EatingLogData? {
+    private fun maybeCreateEatingLogFromLine(line: String): EatingLog? {
         val tokens = line.split(",")
         if (tokens.isNotEmpty() && tokens.size >= 2) {
             val firstMealDate = tokens[FIRST_MEAL_DATE_IDX].replace('/', '-')
@@ -83,9 +83,9 @@ open class CSVLogsManager @Inject constructor(
                 endTime = parseDateTime("$lastMealDate $lastMealTime") ?: return null
             }
             if (endTime != null) {
-                return EatingLogData(startTime = LogDateData(startTime, ""), endTime = LogDateData(endTime, ""))
+                return EatingLog(startTime = LogDate(startTime, ""), endTime = LogDate(endTime, ""))
             }
-            return EatingLogData(startTime = LogDateData(startTime, ""))
+            return EatingLog(startTime = LogDate(startTime, ""))
         }
         return null
     }

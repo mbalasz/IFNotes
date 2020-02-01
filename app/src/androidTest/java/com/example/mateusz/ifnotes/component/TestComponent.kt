@@ -6,7 +6,7 @@ import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainSco
 import com.example.mateusz.ifnotes.database.IFNotesDatabaseTestModule
 import com.example.mateusz.ifnotes.eatinglogs.EatingLogsModule
 import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogModule
-import com.example.mateusz.ifnotes.ifnotes.IFNotesModule
+import com.example.mateusz.ifnotes.presentation.ifnotes.IFNotesModule
 import com.example.mateusz.ifnotes.data.EatingLogsRepositoryImpl
 import dagger.BindsInstance
 import dagger.Component

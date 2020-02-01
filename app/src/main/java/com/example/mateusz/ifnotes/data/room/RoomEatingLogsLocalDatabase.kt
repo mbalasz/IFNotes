@@ -15,7 +15,6 @@ class RoomEatingLogsLocalDatabase @Inject constructor(
     private val dataToEntitiyMapper: EatingLogDataMapper,
     private val entityToDataMapper: EntityToDataMapper,
     @IODispatcher private val ioDispatcher: CoroutineDispatcher) : EatingLogsLocalDataSource {
-
     override fun observeMostRecentEatingLog(): Flowable<Optional<EatingLog>> {
         return iFNotesDatabase.eatingLogDao().observeMostRecentEatingLog().map { list ->
             if (list.isNotEmpty()) {
@@ -28,6 +27,26 @@ class RoomEatingLogsLocalDatabase @Inject constructor(
         }
     }
 
+    override suspend fun getMostRecentEatingLog(): EatingLog? = withContext(ioDispatcher) {
+        iFNotesDatabase.eatingLogDao().getMostRecentEatingLog()?.let {
+            dataToEntitiyMapper.mapFrom(it)
+        }
+    }
+
+    override fun observeEatingLogs(): Flowable<List<EatingLog>> {
+        return iFNotesDatabase.eatingLogDao().observeEatingLogs().map {list ->
+            list.map {
+                dataToEntitiyMapper.mapFrom(it)
+            }
+        }
+    }
+
+    override suspend fun getEatingLogs(): List<EatingLog> = withContext(ioDispatcher) {
+        iFNotesDatabase.eatingLogDao().getEatingLogs().map {
+            dataToEntitiyMapper.mapFrom(it)
+        }
+    }
+
     override suspend fun insertEatingLog(eatingLog: EatingLog) = withContext(ioDispatcher) {
         iFNotesDatabase.eatingLogDao().insert(entityToDataMapper.mapFrom(eatingLog))
     }
@@ -36,10 +55,13 @@ class RoomEatingLogsLocalDatabase @Inject constructor(
         iFNotesDatabase.eatingLogDao().update(entityToDataMapper.mapFrom(eatingLog))
     }
 
-    override suspend fun getMostRecentEatingLog(): EatingLog? = withContext(ioDispatcher) {
-        iFNotesDatabase.eatingLogDao().getMostRecentEatingLog()?.let {
-            dataToEntitiyMapper.mapFrom(it)
-        }
+
+    override suspend fun deleteEatingLog(eatingLog: EatingLog) = withContext(ioDispatcher) {
+        iFNotesDatabase.eatingLogDao().delete(entityToDataMapper.mapFrom(eatingLog))
+    }
+
+    override suspend fun deleteAllEatingLogs() = withContext(ioDispatcher) {
+        iFNotesDatabase.eatingLogDao().deleteAll()
     }
 
     override suspend fun <T> runInTransaction(block: suspend () -> T): T = withContext(ioDispatcher) {

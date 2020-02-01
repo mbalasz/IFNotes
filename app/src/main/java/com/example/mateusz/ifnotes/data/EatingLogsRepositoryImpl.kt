@@ -22,9 +22,12 @@ open class EatingLogsRepositoryImpl @Inject constructor(
     @IODispatcher private val ioDispatcher: CoroutineDispatcher,
     private val eatingLogDataMapper: EatingLogDataMapper
 ) : EatingLogsRepository {
-
     open fun getEatingLogsObservable(): Flowable<List<EatingLogData>> {
         return iFNotesDatabase.eatingLogDao().getEatingLogsFlowable()
+    }
+
+    override fun observeEatingLogs(): Flowable<List<EatingLog>> {
+        return localDataSource.observeEatingLogs()
     }
 
     open suspend fun updateEatingLog(eatingLogData: EatingLogData) = withContext(ioDispatcher) {
@@ -35,12 +38,24 @@ open class EatingLogsRepositoryImpl @Inject constructor(
         status
     }
 
+    override suspend fun getEatingLogs(): List<EatingLog> {
+        return localDataSource.getEatingLogs()
+    }
+
     open suspend fun insertEatingLog(eatingLogData: EatingLogData) = withContext(ioDispatcher) {
         iFNotesDatabase.eatingLogDao().insert(eatingLogData)
     }
 
     override suspend fun updateEatingLog(eatingLog: EatingLog) {
         localDataSource.updateEatingLog(eatingLog)
+    }
+
+    override suspend fun deleteEatingLog(eatingLog: EatingLog) {
+        localDataSource.deleteEatingLog(eatingLog)
+    }
+
+    override suspend fun deleteAllEatingLogs() {
+        localDataSource.deleteAllEatingLogs()
     }
 
     open suspend fun getEatingLog(id: Int): EatingLogData? = withContext(ioDispatcher) {
@@ -71,7 +86,7 @@ open class EatingLogsRepositoryImpl @Inject constructor(
         return localDataSource.runInTransaction(block)
     }
 
-    private fun validateUpdate(eatingLogData: EatingLogData): EatingLogValidator.NewLogValidationStatus {
+    private suspend fun validateUpdate(eatingLogData: EatingLogData): EatingLogValidator.NewLogValidationStatus {
         val mutableLogs = iFNotesDatabase.eatingLogDao().getEatingLogs().toMutableList()
         val oldLog = mutableLogs.find { it.id == eatingLogData.id }
         oldLog?.let {

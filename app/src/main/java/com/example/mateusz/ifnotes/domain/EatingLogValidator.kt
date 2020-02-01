@@ -81,6 +81,9 @@ open class EatingLogValidator @Inject constructor(private val clock: Clock) {
         return NewLogValidationStatus.SUCCESS
     }
 
+    // TODO: create a validate method for the whole list of eating logs. This is for the use case
+    // when we try to batch insert multiple logs from a data repos such as csv file.
+
     private fun validateOrder(eatingLogData: EatingLog, nextEatingLog: EatingLog): Boolean {
         if (eatingLogData.endTime == null || nextEatingLog.startTime == null) {
             return false

@@ -4,7 +4,7 @@ import com.example.mateusz.ifnotes.chart.EatingLogsChartModule
 import com.example.mateusz.ifnotes.data.RepositoryModule
 import com.example.mateusz.ifnotes.eatinglogs.EatingLogsModule
 import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogModule
-import com.example.mateusz.ifnotes.ifnotes.IFNotesModule
+import com.example.mateusz.ifnotes.presentation.ifnotes.IFNotesModule
 import com.example.mateusz.ifnotes.data.room.IFNotesDatabaseModule
 import dagger.Component
 import dagger.android.AndroidInjectionModule

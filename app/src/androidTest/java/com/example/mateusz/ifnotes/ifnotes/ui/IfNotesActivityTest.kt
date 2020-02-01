@@ -20,6 +20,7 @@ import com.example.mateusz.ifnotes.date.DateTimeTestUtils.Companion.assertThatMs
 import com.example.mateusz.ifnotes.date.DateTimeTestUtils.Companion.assertThatMsAreEqualToTime
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.data.EatingLogsRepositoryImpl
+import com.example.mateusz.ifnotes.presentation.ifnotes.ui.IFNotesActivity
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.schedulers.Schedulers

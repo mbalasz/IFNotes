@@ -7,11 +7,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScheduler
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScope
 import com.example.mateusz.ifnotes.database.IFNotesDatabaseTestModule
-import com.example.mateusz.ifnotes.ifnotes.IFNotesViewModel.TimeSinceLastActivityChronometerData
+import com.example.mateusz.ifnotes.presentation.ifnotes.IFNotesViewModel.TimeSinceLastActivityChronometerData
 import com.example.mateusz.ifnotes.lib.SystemClockWrapper
 import com.example.mateusz.ifnotes.data.EatingLogsRepositoryImpl
 import com.example.mateusz.ifnotes.data.room.EatingLogData
 import com.example.mateusz.ifnotes.data.room.LogDateData
+import com.example.mateusz.ifnotes.presentation.ifnotes.IFNotesViewModel
 import com.google.common.base.Optional
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.argumentCaptor
