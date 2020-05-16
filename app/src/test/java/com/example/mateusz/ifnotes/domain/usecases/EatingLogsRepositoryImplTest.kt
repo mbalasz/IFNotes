@@ -1,17 +1,15 @@
-package com.example.mateusz.ifnotes.model.data
+package com.example.mateusz.ifnotes.domain.usecases
 
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.IODispatcher
 import com.example.mateusz.ifnotes.component.IFNotesApplication
+import com.example.mateusz.ifnotes.data.EatingLogsRepositoryImpl
 import com.example.mateusz.ifnotes.database.IFNotesDatabaseTestModule
-import com.example.mateusz.ifnotes.lib.EatingLogValidator
-import com.example.mateusz.ifnotes.model.Repository
+import com.example.mateusz.ifnotes.domain.entity.EatingLog
+import com.example.mateusz.ifnotes.domain.entity.LogDate
 import com.google.common.base.Optional
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.whenever
 import dagger.BindsInstance
 import dagger.Component
 import kotlinx.coroutines.CoroutineDispatcher
@@ -28,19 +26,15 @@ import javax.inject.Singleton
 // TODO: replace runBlocking with runBlockingTest once
 // https://github.com/Kotlin/kotlinx.coroutines/pull/1206 is merged.
 @RunWith(AndroidJUnit4::class)
-class RepositoryTest {
-    @Inject lateinit var repository: Repository
-    private val eatingLogValidator = mock<EatingLogValidator>()
+class EatingLogsRepositoryImplTest {
+    @Inject lateinit var eatingLogsRepositoryImpl: EatingLogsRepositoryImpl
 
     private val testDispatcher = TestCoroutineDispatcher()
 
     @Before
     fun setUp() {
-        whenever(eatingLogValidator.validateNewEatingLog(any(), any()))
-                .thenReturn(EatingLogValidator.EatingLogValidationStatus.SUCCESS)
-        DaggerRepositoryTest_TestComponent.builder()
+        DaggerEatingLogsRepositoryImplTest_TestComponent.builder()
                 .application(ApplicationProvider.getApplicationContext<IFNotesApplication>())
-                .eatingLogValidator(eatingLogValidator)
                 .ioDispatcher(testDispatcher)
                 .build()
                 .inject(this)
@@ -48,40 +42,21 @@ class RepositoryTest {
 
     @Test
     fun getEatingLogsObservable_initIsEmpty() {
-        repository.getEatingLogsObservable().test().awaitCount(1).assertValue(emptyList())
+        eatingLogsRepositoryImpl.observeEatingLogs().test().awaitCount(1).assertValue(emptyList())
     }
 
     @Test
     fun updateEatingLog() {
         val eatingLog = EatingLog(id = 1, startTime = LogDate(100L))
         runBlocking {
-            repository.insertEatingLog(eatingLog)
+            eatingLogsRepositoryImpl.insertEatingLog(eatingLog)
             val updatedEatingLog = eatingLog.copy(endTime = LogDate(200L))
-            repository.updateEatingLog(updatedEatingLog)
-            repository.getEatingLogsObservable().test().awaitCount(1).assertValue(listOf(updatedEatingLog))
-        }
-    }
-
-    @Test
-    fun updateEatingLog_invalidLog_doNotUpdate() {
-        whenever(eatingLogValidator.validateNewEatingLog(any(), any()))
-                .thenReturn(
-                        EatingLogValidator.EatingLogValidationStatus.START_TIME_LATER_THAN_END_TIME)
-        val oldEatingLog = EatingLog(id = 1, startTime = LogDate(100L))
-        runBlocking {
-            repository.insertEatingLog(oldEatingLog)
-            val updatedEatingLog = oldEatingLog.copy(endTime = LogDate(200L))
-            repository.updateEatingLog(updatedEatingLog)
-            repository.getEatingLogsObservable().test().awaitCount(1).assertValue(listOf(oldEatingLog))
-        }
-    }
-
-    @Test
-    fun updateEatingLog_noPreviousLogToUpdate() {
-        val eatingLog = EatingLog(id = 1, startTime = LogDate(100L))
-        runBlocking {
-            repository.updateEatingLog(eatingLog)
-            repository.getEatingLogsObservable().test().awaitCount(1).assertValue(emptyList())
+            eatingLogsRepositoryImpl.updateEatingLog(updatedEatingLog)
+            eatingLogsRepositoryImpl
+                .observeEatingLogs()
+                .test()
+                .awaitCount(1)
+                .assertValue(listOf(updatedEatingLog))
         }
     }
 
@@ -97,9 +72,12 @@ class RepositoryTest {
                 EatingLog(id = 6, startTime = LogDate(50)))
         runBlocking {
             eatingLogs.forEach {
-                repository.insertEatingLog(it)
+                eatingLogsRepositoryImpl.insertEatingLog(it)
             }
-            repository.getEatingLogsObservable().test().awaitCount(1).assertValue(eatingLogs)
+            eatingLogsRepositoryImpl.observeEatingLogs()
+                .test()
+                .awaitCount(1)
+                .assertValue(eatingLogs)
         }
     }
 
@@ -108,15 +86,15 @@ class RepositoryTest {
         val eatingLog = EatingLog(id = 1, startTime = LogDate(100L))
         val eatingLogTwo = EatingLog(id = 2, startTime = LogDate(200L))
         runBlocking {
-            repository.insertEatingLog(eatingLog)
-            repository.insertEatingLog(eatingLogTwo)
-            assertThat(repository.getEatingLog(2), equalTo(eatingLogTwo))
+            eatingLogsRepositoryImpl.insertEatingLog(eatingLog)
+            eatingLogsRepositoryImpl.insertEatingLog(eatingLogTwo)
+            assertThat(eatingLogsRepositoryImpl.getEatingLog(2), equalTo(eatingLogTwo))
         }
     }
 
     @Test
     fun getMostRecentEatingLog_init_logAbsent() {
-        repository.getMostRecentEatingLog().test().awaitCount(1).assertValue(Optional.absent())
+        eatingLogsRepositoryImpl.observeMostRecentEatingLog().test().awaitCount(1).assertValue(Optional.absent())
     }
 
     @Test
@@ -130,9 +108,9 @@ class RepositoryTest {
                 EatingLog(id = 5, startTime = LogDate(250)),
                 EatingLog(id = 6, startTime = LogDate(50)))
         runBlocking {
-            eatingLogs.forEach { repository.insertEatingLog(it) }
+            eatingLogs.forEach { eatingLogsRepositoryImpl.insertEatingLog(it) }
         }
-        repository.getMostRecentEatingLog()
+        eatingLogsRepositoryImpl.observeMostRecentEatingLog()
             .map {
                 assertThat(it.isPresent, `is`(true))
                 it.get().startTime!!.dateTimeInMillis
@@ -146,10 +124,10 @@ class RepositoryTest {
         val eatingLog = EatingLog(id = 0)
 
         runBlocking {
-            repository.insertEatingLog(eatingLog)
-            repository.deleteEatingLog(eatingLog)
+            eatingLogsRepositoryImpl.insertEatingLog(eatingLog)
+            eatingLogsRepositoryImpl.deleteEatingLog(eatingLog)
 
-            assertThat(repository.getEatingLog(0), `is`(nullValue()))
+            assertThat(eatingLogsRepositoryImpl.getEatingLog(0), `is`(nullValue()))
         }
     }
 
@@ -165,19 +143,19 @@ class RepositoryTest {
 
         runBlocking {
             eatingLogs.forEach {
-                repository.insertEatingLog(it)
+                eatingLogsRepositoryImpl.insertEatingLog(it)
             }
-            repository.deleteAll()
+            eatingLogsRepositoryImpl.deleteAllEatingLogs()
         }
 
-        repository.getEatingLogsObservable().test().awaitCount(1).assertValue(emptyList())
+        eatingLogsRepositoryImpl.observeEatingLogs().test().awaitCount(1).assertValue(emptyList())
     }
 
     @Singleton
     @Component(modules = [
         IFNotesDatabaseTestModule::class])
     interface TestComponent {
-        fun inject(repositoryTest: RepositoryTest)
+        fun inject(repositoryTest: EatingLogsRepositoryImplTest)
 
         @Component.Builder
         interface Builder {
@@ -185,9 +163,6 @@ class RepositoryTest {
 
             @BindsInstance
             fun application(application: Application): Builder
-
-            @BindsInstance
-            fun eatingLogValidator(eatingLogValidator: EatingLogValidator): Builder
 
             @BindsInstance
             fun ioDispatcher(@IODispatcher ioDispatcher: CoroutineDispatcher): Builder

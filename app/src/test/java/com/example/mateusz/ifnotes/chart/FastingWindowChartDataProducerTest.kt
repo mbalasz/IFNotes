@@ -1,12 +1,11 @@
 package com.example.mateusz.ifnotes.chart
 
 import com.example.mateusz.ifnotes.chart.EatingLogsChartDataProducer.DataPoint
-import com.example.mateusz.ifnotes.model.data.EatingLog
-import com.example.mateusz.ifnotes.model.data.LogDate
+import com.example.mateusz.ifnotes.domain.entity.EatingLog
+import com.example.mateusz.ifnotes.domain.entity.LogDate
 import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Test
-import java.lang.IllegalArgumentException
 import java.util.concurrent.TimeUnit
 import kotlin.test.assertFailsWith
 

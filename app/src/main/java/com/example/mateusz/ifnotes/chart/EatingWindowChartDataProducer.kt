@@ -1,6 +1,6 @@
 package com.example.mateusz.ifnotes.chart
 
-import com.example.mateusz.ifnotes.model.data.EatingLog
+import com.example.mateusz.ifnotes.domain.entity.EatingLog
 
 class EatingWindowChartDataProducer(timeWindowValidator: TimeWindowValidator)
     : EatingLogsChartDataProducer(timeWindowValidator) {

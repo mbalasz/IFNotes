@@ -4,35 +4,34 @@ import android.app.Application
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.IODispatcher
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScheduler
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScope
 import com.example.mateusz.ifnotes.database.IFNotesDatabaseTestModule
-import com.example.mateusz.ifnotes.ifnotes.IFNotesViewModel.TimeSinceLastActivityChronometerData
+import com.example.mateusz.ifnotes.domain.entity.EatingLog
+import com.example.mateusz.ifnotes.domain.entity.LogDate
+import com.example.mateusz.ifnotes.domain.usecases.LogMostRecentMeal
+import com.example.mateusz.ifnotes.domain.usecases.ObserveMostRecentEatingLog
 import com.example.mateusz.ifnotes.lib.SystemClockWrapper
-import com.example.mateusz.ifnotes.model.Repository
-import com.example.mateusz.ifnotes.model.data.EatingLog
-import com.example.mateusz.ifnotes.model.data.LogDate
+import com.example.mateusz.ifnotes.livedata.testObserve
+import com.example.mateusz.ifnotes.presentation.ifnotes.IFNotesViewModel
+import com.example.mateusz.ifnotes.presentation.ifnotes.IFNotesViewModel.Companion.DARK_GREEN
+import com.example.mateusz.ifnotes.presentation.ifnotes.IFNotesViewModel.Companion.DARK_RED
+import com.example.mateusz.ifnotes.presentation.ifnotes.IFNotesViewModel.TimeSinceLastActivityChronometerData
 import com.google.common.base.Optional
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.argumentCaptor
-import com.nhaarman.mockitokotlin2.never
 import com.nhaarman.mockitokotlin2.verify
 import com.nhaarman.mockitokotlin2.whenever
 import dagger.BindsInstance
 import dagger.Component
-import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import io.reactivex.Scheduler
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.schedulers.TestScheduler
-import io.reactivex.subjects.PublishSubject
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.runBlockingTest
-import org.hamcrest.CoreMatchers.`is`
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.CoreMatchers.nullValue
+import org.hamcrest.CoreMatchers.*
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
 import org.junit.Before
@@ -48,11 +47,26 @@ import javax.inject.Singleton
 
 @RunWith(AndroidJUnit4::class)
 class IFNotesViewModelTest {
-    @Mock private lateinit var repository: Repository
-    @Mock private lateinit var clock: Clock
-    @Mock private lateinit var systemClock: SystemClockWrapper
+    @Mock
+    private lateinit var clock: Clock
+    @Mock
+    private lateinit var systemClock: SystemClockWrapper
+    @Mock
+    private lateinit var logMostRecentMeal: LogMostRecentMeal
+    @Mock
+    private lateinit var observeMostRecentEatingLog: ObserveMostRecentEatingLog
     private val testScope = TestCoroutineScope()
     private val testScheduler = Schedulers.trampoline()
+    private val testDispatcher = TestCoroutineDispatcher()
+
+    private val finishedEatingLog =
+        EatingLog(
+            startTime = LogDate(2000L, ""),
+            endTime = LogDate(4000L, ""))
+
+    private val unfinishedEatingLog =
+        EatingLog(
+            startTime = LogDate(2000L, ""))
 
     @get:Rule
     val mockitoRule: MockitoRule = MockitoJUnit.rule()
@@ -60,18 +74,26 @@ class IFNotesViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
-    @Inject lateinit var ifNotesViewModel: IFNotesViewModel
+    @Inject
+    lateinit var ifNotesViewModel: IFNotesViewModel
+
     private lateinit var component: TestComponent
 
     @Before
     fun setUp() {
-        whenever(repository.getMostRecentEatingLog())
-            .thenReturn(Flowable.fromArray(Optional.absent()))
         val application = ApplicationProvider.getApplicationContext<Application>()
         component =
             DaggerIFNotesViewModelTest_TestComponent
                 .factory()
-                .create(application, repository, clock, systemClock, testScope, testScheduler)
+                .create(application,
+                    clock,
+                    systemClock,
+                    testScope,
+                    testScheduler,
+                    testDispatcher,
+                    logMostRecentMeal,
+                    observeMostRecentEatingLog)
+        createIfNotesViewModel()
     }
 
     @After
@@ -80,88 +102,73 @@ class IFNotesViewModelTest {
     }
 
     @Test
-    fun timeSinceLastActivity_initValueIsNull() = testScope.runBlockingTest {
-        createIfNotesViewModel()
-        assertThat(ifNotesViewModel.timeSinceLastActivity.value, `is`(nullValue()))
-    }
-
-    @Suppress("DeferredResultUnused")
-    @Test
-    fun onLogButtonClicked_initEatingLogStillBeingLoaded_noop() = runBlocking<Unit> {
-        val initEatingLogPublisher = PublishSubject.create<Optional<EatingLog>>()
-        whenever(repository.getMostRecentEatingLog())
-            .thenReturn(initEatingLogPublisher.toFlowable(BackpressureStrategy.BUFFER))
-        whenever(clock.millis()).thenReturn(1200L)
-
-        createIfNotesViewModel()
-
-        testScope.runBlockingTest {
-            ifNotesViewModel.onLogButtonClicked()
-            verify(repository, never()).insertEatingLog(any())
-            verify(repository, never()).updateEatingLog(any())
-
-            initEatingLogPublisher.onNext(Optional.of(EatingLog(startTime = LogDate(100L))))
-        }
-
-        verify(repository).updateEatingLog(any())
+    fun timeSinceLastActivity_mostRecentEatingLogIsNull() {
+        whenever(observeMostRecentEatingLog()).thenReturn(Flowable.fromArray(Optional.absent()))
+        assertThat(ifNotesViewModel.timeSinceLastActivity.testObserve(), `is`(nullValue()))
     }
 
     @Test
-    fun onLogButtonClicked_noEatingLogInProgress_createsNewEatingLog() = runBlocking<Unit> {
-        createIfNotesViewModel()
-        whenever(clock.millis()).thenReturn(1200L)
+    fun onLogButtonClicked_logsMostRecentMeal() = testScope.runBlockingTest {
+        whenever(clock.millis()).thenReturn(2000L)
+        ifNotesViewModel.onLogButtonClicked()
 
-        testScope.runBlockingTest {
-            ifNotesViewModel.onLogButtonClicked()
-        }
-
-        argumentCaptor<EatingLog>().apply {
-            verify(repository).insertEatingLog(capture())
-            assertThat(firstValue.startTime!!.dateTimeInMillis, `is`(equalTo(1200L)))
-        }
+        verify(logMostRecentMeal).invoke(LogDate(2000L, ""))
     }
 
     @Test
-    fun onLogButtonClicked_eatingLogInProgress_updatesCurrentEatingLog() = runBlocking<Unit> {
-        val eatingLogInProgress = EatingLog(id = 1, startTime = LogDate(300L))
-        whenever(repository.getMostRecentEatingLog())
-            .thenReturn(Flowable.fromArray(Optional.of(eatingLogInProgress)))
-        createIfNotesViewModel()
-        whenever(clock.millis()).thenReturn(1200L)
+    fun onLogButtonClicked_calledMultipleTimes_logEachTime() = testScope.runBlockingTest {
+        whenever(clock.millis()).thenReturn(2000L)
+        ifNotesViewModel.onLogButtonClicked()
+        verify(logMostRecentMeal).invoke(LogDate(2000L, ""))
 
-        testScope.runBlockingTest {
-            ifNotesViewModel.onLogButtonClicked()
-        }
-
-        argumentCaptor<EatingLog>().apply {
-            verify(repository).updateEatingLog(capture())
-            assertThat(firstValue.endTime!!.dateTimeInMillis, `is`(equalTo(1200L)))
-        }
+        whenever(clock.millis()).thenReturn(5000L)
+        ifNotesViewModel.onLogButtonClicked()
+        verify(logMostRecentMeal).invoke(LogDate(5000L, ""))
     }
 
     @Test
-    fun mostRecentLogUpdated_timeSinceLastActivityIsUpdated() = testScope.runBlockingTest {
-        val initEatingLogPublisher = PublishSubject.create<Optional<EatingLog>>()
-        whenever(repository.getMostRecentEatingLog())
-            .thenReturn(initEatingLogPublisher.toFlowable(BackpressureStrategy.BUFFER))
-        createIfNotesViewModel()
-        whenever(clock.millis()).thenReturn(200L)
-        whenever(systemClock.elapsedRealtime()).thenReturn(500L)
+    fun timeSinceLastActivity_currentEatinLogFinised() {
+        whenever(observeMostRecentEatingLog()).thenReturn(Flowable.fromArray(Optional.of(finishedEatingLog)))
+        setCurrentTime(6000L)
 
-        initEatingLogPublisher.onNext(Optional.of(EatingLog(startTime = LogDate(100L))))
+        assertThat(ifNotesViewModel.timeSinceLastActivity.testObserve(),
+            `is`(equalTo(TimeSinceLastActivityChronometerData(getAdjustedTimeSinceLastActivity(2000L), DARK_GREEN))))
+    }
 
-        var expectedTimeSinceLastActivityChronometerData: TimeSinceLastActivityChronometerData? = null
-        ifNotesViewModel.timeSinceLastActivity.observeForever {
-            expectedTimeSinceLastActivityChronometerData = it
-        }
+    @Test
+    fun timeSinceLastActivity_currentEatinLogUnfinised() {
+        whenever(observeMostRecentEatingLog()).thenReturn(Flowable.fromArray(Optional.of(unfinishedEatingLog)))
+        setCurrentTime(6000L)
 
-        assertThat(
-            expectedTimeSinceLastActivityChronometerData,
-            `is`(equalTo(TimeSinceLastActivityChronometerData(400L, IFNotesViewModel.DARK_RED))))
+        assertThat(ifNotesViewModel.timeSinceLastActivity.testObserve(),
+            `is`(equalTo(TimeSinceLastActivityChronometerData(getAdjustedTimeSinceLastActivity(4000L), DARK_RED))))
+    }
+
+    @Test
+    fun logButtonState_currentEatingLogUnfinished_isLastMeal() {
+        whenever(observeMostRecentEatingLog()).thenReturn(Flowable.fromArray(Optional.of(unfinishedEatingLog)))
+
+        assertThat(ifNotesViewModel.logButtonState.testObserve(), `is`(equalTo(IFNotesViewModel.LogState.LAST_MEAL)))
+    }
+
+    @Test
+    fun logButtonState_currentEatingLogFinished_isFirstMeal() {
+        whenever(observeMostRecentEatingLog()).thenReturn(Flowable.fromArray(Optional.of(finishedEatingLog)))
+
+        assertThat(ifNotesViewModel.logButtonState.testObserve(), `is`(equalTo(IFNotesViewModel.LogState.FIRST_MEAL)))
     }
 
     private fun createIfNotesViewModel() {
         component.inject(this@IFNotesViewModelTest)
+    }
+
+    private fun getAdjustedTimeSinceLastActivity(baseTime: Long): Long {
+        return systemClock.elapsedRealtime() - baseTime
+    }
+
+    private fun setCurrentTime(time: Long) {
+        whenever(clock.millis()).thenReturn(time)
+        whenever(systemClock.elapsedRealtime()).thenReturn(time)
     }
 
     @Singleton
@@ -172,11 +179,13 @@ class IFNotesViewModelTest {
         @Component.Factory
         interface Factory {
             fun create(@BindsInstance application: Application,
-                       @BindsInstance repository: Repository,
                        @BindsInstance clock: Clock,
                        @BindsInstance systemClock: SystemClockWrapper,
                        @BindsInstance @MainScope testScope: CoroutineScope,
-                       @BindsInstance @MainScheduler testScheduler: Scheduler)
+                       @BindsInstance @MainScheduler testScheduler: Scheduler,
+                       @BindsInstance @IODispatcher ioDispatcher: CoroutineDispatcher,
+                       @BindsInstance logMostRecentMeal: LogMostRecentMeal,
+                       @BindsInstance observeMostRecentEatingLog: ObserveMostRecentEatingLog)
                 : TestComponent
         }
     }

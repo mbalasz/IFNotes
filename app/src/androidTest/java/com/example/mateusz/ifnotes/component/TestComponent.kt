@@ -3,11 +3,13 @@ package com.example.mateusz.ifnotes.component
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.IODispatcher
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScheduler
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScope
+import com.example.mateusz.ifnotes.data.RepositoryModule
 import com.example.mateusz.ifnotes.database.IFNotesDatabaseTestModule
+import com.example.mateusz.ifnotes.domain.usecases.InsertEatingLog
+import com.example.mateusz.ifnotes.domain.usecases.ObserveEatingLogs
 import com.example.mateusz.ifnotes.eatinglogs.EatingLogsModule
 import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogModule
-import com.example.mateusz.ifnotes.ifnotes.IFNotesModule
-import com.example.mateusz.ifnotes.model.Repository
+import com.example.mateusz.ifnotes.presentation.ifnotes.IFNotesModule
 import dagger.BindsInstance
 import dagger.Component
 import dagger.android.AndroidInjectionModule
@@ -24,6 +26,7 @@ import javax.inject.Singleton
 @Component(modules = [
     AndroidInjectionModule::class,
     IFNotesDatabaseTestModule::class,
+    RepositoryModule::class,
     EditEatingLogModule::class,
     EatingLogsModule::class,
     IFNotesModule::class,
@@ -40,6 +43,8 @@ interface TestComponent : AndroidInjector<IFNotesApplication> {
             @BindsInstance clock: Clock): TestComponent
     }
 
-    fun repository(): Repository
+    fun insertEatignLog(): InsertEatingLog
+
+    fun observeEatingLogs(): ObserveEatingLogs
 }
 

@@ -1,9 +1,9 @@
-package com.example.mateusz.ifnotes.ifnotes
+package com.example.mateusz.ifnotes.presentation.ifnotes
 
 import androidx.lifecycle.ViewModel
 import com.example.mateusz.ifnotes.component.ActivityScope
 import com.example.mateusz.ifnotes.component.ViewModelKey
-import com.example.mateusz.ifnotes.ifnotes.ui.IFNotesActivity
+import com.example.mateusz.ifnotes.presentation.ifnotes.ui.IFNotesActivity
 import dagger.Binds
 import dagger.Module
 import dagger.android.ContributesAndroidInjector

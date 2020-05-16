@@ -12,8 +12,8 @@ import com.example.mateusz.ifnotes.R
 import com.example.mateusz.ifnotes.component.ViewModelFactory
 import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel
 import dagger.android.AndroidInjection
-import kotlinx.android.synthetic.main.activity_eating_logs.toolbar
-import kotlinx.android.synthetic.main.content_eating_logs.eatingLogsRecyclerView
+import kotlinx.android.synthetic.main.activity_eating_logs.*
+import kotlinx.android.synthetic.main.content_eating_logs.*
 import javax.inject.Inject
 
 class EatingLogsActivity : AppCompatActivity() {

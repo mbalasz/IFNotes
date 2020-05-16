@@ -13,18 +13,18 @@ abstract class ConcurrencyModule {
 
     @Module
     companion object {
+        @Retention(AnnotationRetention.RUNTIME)
         internal annotation class MainScope
 
-        @JvmStatic
         @Provides
         @MainScope
         fun mainScope(): CoroutineScope {
             return kotlinx.coroutines.MainScope()
         }
 
+        @Retention(AnnotationRetention.RUNTIME)
         internal annotation class IODispatcher
 
-        @JvmStatic
         @Provides
         @IODispatcher
         fun ioDispatcher(): CoroutineDispatcher {
@@ -32,9 +32,9 @@ abstract class ConcurrencyModule {
         }
 
 
+        @Retention(AnnotationRetention.RUNTIME)
         internal annotation class MainScheduler
 
-        @JvmStatic
         @Provides
         @MainScheduler
         fun mainScheduler(): Scheduler {

@@ -2,9 +2,10 @@ package com.example.mateusz.ifnotes.chart
 
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.example.mateusz.ifnotes.model.Repository
-import com.example.mateusz.ifnotes.model.data.EatingLog
-import com.example.mateusz.ifnotes.model.data.LogDate
+import com.example.mateusz.ifnotes.domain.entity.EatingLog
+import com.example.mateusz.ifnotes.domain.entity.LogDate
+import com.example.mateusz.ifnotes.domain.usecases.ObserveEatingLogs
+import com.example.mateusz.ifnotes.livedata.testObserve
 import com.nhaarman.mockitokotlin2.whenever
 import io.reactivex.Flowable
 import org.hamcrest.CoreMatchers.`is`
@@ -21,7 +22,7 @@ import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 class EatingLogsChartViewModelTest {
-    @Mock private lateinit var repository: Repository
+    @Mock private lateinit var observeEatingLogs: ObserveEatingLogs
     private lateinit var eatingLogsChartViewModel: EatingLogsChartViewModel
 
     @get:Rule
@@ -29,7 +30,7 @@ class EatingLogsChartViewModelTest {
 
     @Before
     fun setUp() {
-        whenever(repository.getEatingLogsObservable()).thenReturn(Flowable.empty())
+        whenever(observeEatingLogs()).thenReturn(Flowable.empty())
     }
 
     @Test
@@ -41,19 +42,17 @@ class EatingLogsChartViewModelTest {
             10L
         )
         val eatingLogs = createEatingLogsWithFastingWindows(fastingWindowsHours)
-        whenever(repository.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
+        whenever(observeEatingLogs()).thenReturn(Flowable.fromArray(eatingLogs))
 
         eatingLogsChartViewModel =
-            EatingLogsChartViewModel(ApplicationProvider.getApplicationContext(), repository)
+            EatingLogsChartViewModel(ApplicationProvider.getApplicationContext(), observeEatingLogs)
 
-        eatingLogsChartViewModel.eatingLogsChartDataLiveData.observeForever {
-            val entryPoints = it.entryPoints
-            assertThat(entryPoints.size, `is`(equalTo(fastingWindowsHours.size)))
-            for (i in entryPoints.indices) {
-                assertThat(
-                    entryPoints[i].y,
-                    `is`(equalTo(TimeUnit.HOURS.toMinutes(fastingWindowsHours[i]) / 60f)))
-            }
+        val entryPoints = eatingLogsChartViewModel.eatingLogsChartDataLiveData.testObserve().entryPoints
+        assertThat(entryPoints.size, `is`(equalTo(fastingWindowsHours.size)))
+        for (i in entryPoints.indices) {
+            assertThat(
+                entryPoints[i].y,
+                `is`(equalTo(TimeUnit.HOURS.toMinutes(fastingWindowsHours[i]) / 60f)))
         }
     }
 

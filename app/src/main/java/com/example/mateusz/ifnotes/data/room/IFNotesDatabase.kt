@@ -1,9 +1,9 @@
-package com.example.mateusz.ifnotes.model.data
+package com.example.mateusz.ifnotes.data.room
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
 
-@Database(entities = [EatingLog::class], version = 1)
+@Database(entities = [EatingLogData::class], version = 1)
 abstract class IFNotesDatabase : RoomDatabase() {
     abstract fun eatingLogDao(): EatingLogDao
 }

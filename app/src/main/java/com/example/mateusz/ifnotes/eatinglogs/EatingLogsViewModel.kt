@@ -7,13 +7,16 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScope
+import com.example.mateusz.ifnotes.domain.entity.EatingLog
+import com.example.mateusz.ifnotes.domain.usecases.DeleteAllEatingLogs
+import com.example.mateusz.ifnotes.domain.usecases.DeleteEatingLog
+import com.example.mateusz.ifnotes.domain.usecases.InsertEatingLog
+import com.example.mateusz.ifnotes.domain.usecases.ObserveEatingLogs
 import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogViewModel
 import com.example.mateusz.ifnotes.eatinglogs.editlog.ui.EditEatingLogActivity
 import com.example.mateusz.ifnotes.lib.BackupManager
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.lib.Event
-import com.example.mateusz.ifnotes.model.Repository
-import com.example.mateusz.ifnotes.model.data.EatingLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.Clock
@@ -21,11 +24,14 @@ import javax.inject.Inject
 
 class EatingLogsViewModel @Inject constructor (
     application: Application,
-    private val repository: Repository,
     @MainScope mainScope: CoroutineScope,
     private val csvLogsManager: CSVLogsManager,
     private val backupManager: BackupManager,
-    private val clock: Clock
+    private val clock: Clock,
+    private val insertEatingLog: InsertEatingLog,
+    observeEatingLogs: ObserveEatingLogs,
+    private val deleteEatingLog: DeleteEatingLog,
+    private val deleteAllEatingLogs: DeleteAllEatingLogs
 ) : AndroidViewModel(application), CoroutineScope by mainScope {
     companion object {
         const val CHOOSE_CSV_LOGS_TO_IMPORT_REQUEST_CODE = 1
@@ -37,7 +43,7 @@ class EatingLogsViewModel @Inject constructor (
 
     data class ActivityForResultsData(val intent: Intent, val requestCode: Int)
 
-    private var eatingLogs: List<EatingLog> = emptyList()
+    private var eatingLog: List<EatingLog> = emptyList()
     private val _startActivityForResult = MutableLiveData<Event<ActivityForResultsData>>()
     private val _refreshData = MutableLiveData<Event<Unit>>()
     private var eatingLogItemRemovedFlag = false
@@ -48,9 +54,12 @@ class EatingLogsViewModel @Inject constructor (
         get() = _refreshData
 
     init {
-        repository.getEatingLogsObservable().subscribe {
-            eatingLogs = it.sortedWith(
-                    Comparator { a, b -> compareValuesBy(b, a, { it.startTime?.dateTimeInMillis }, { it.endTime?.dateTimeInMillis }) })
+        observeEatingLogs().subscribe {
+            eatingLog = it.sortedWith(
+                Comparator { a, b ->
+                    compareValuesBy(b, a,
+                        { it.startTime?.dateTimeInMillis }, { it.endTime?.dateTimeInMillis })
+                })
             _refreshData.postValue(Event(Unit))
         }
     }
@@ -60,10 +69,10 @@ class EatingLogsViewModel @Inject constructor (
     }
 
     fun onEditEatingLogItemClicked(position: Int) {
-        if (position < 0 || eatingLogs.size - 1 < position) {
+        if (position < 0 || eatingLog.size - 1 < position) {
             return
         }
-        val eatingLog = eatingLogs[position]
+        val eatingLog = eatingLog[position]
         val intent = Intent(getApplication(), EditEatingLogActivity::class.java).apply {
             putExtra(EditEatingLogViewModel.EXTRA_EATING_LOG_ID, eatingLog.id)
         }
@@ -72,24 +81,24 @@ class EatingLogsViewModel @Inject constructor (
     }
 
     fun onRemoveEatingLogItemClicked(position: Int) {
-        if (position < 0 || eatingLogs.size - 1 < position) {
+        if (position < 0 || eatingLog.size - 1 < position) {
             return
         }
         eatingLogItemRemovedFlag = true
         launch {
-            repository.deleteEatingLog(eatingLogs[position])
+            deleteEatingLog(eatingLog[position])
         }
     }
 
     fun getEatingLogsCount(): Int {
-        return eatingLogs.size
+        return eatingLog.size
     }
 
     fun onBindEatingLogsItemView(eatingLogsItemView: EatingLogsItemView, position: Int) {
-        if (position < 0 || eatingLogs.size - 1 < position) {
+        if (position < 0 || eatingLog.size - 1 < position) {
             return
         }
-        val eatingLog = eatingLogs[position]
+        val eatingLog = eatingLog[position]
         eatingLog.startTime?.let {startTime ->
             eatingLogsItemView.setStartTme(startTime.dateTimeInMillis)
             eatingLog.endTime?.let { endTime ->
@@ -126,9 +135,9 @@ class EatingLogsViewModel @Inject constructor (
                     launch {
                         val eatingLogs = csvLogsManager.getEatingLogsFromCsv(it)
                         if (eatingLogs.isNotEmpty()) {
-                            repository.deleteAll()
+                            deleteAllEatingLogs()
                             for (eatingLog in eatingLogs) {
-                                repository.insertEatingLog(eatingLog)
+                                insertEatingLog(eatingLog)
                             }
                         }
                     }
@@ -139,7 +148,7 @@ class EatingLogsViewModel @Inject constructor (
                 data?.data?.let {
                     launch {
                         backupManager.backupLogsToFile(
-                            it, csvLogsManager.createCsvFromEatingLogs(eatingLogs))
+                            it, csvLogsManager.createCsvFromEatingLogs(eatingLog))
                     }
                 }
             }

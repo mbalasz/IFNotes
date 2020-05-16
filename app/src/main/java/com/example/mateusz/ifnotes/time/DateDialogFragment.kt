@@ -1,5 +1,6 @@
 package com.example.mateusz.ifnotes.time
 
+import android.R.string
 import android.app.DatePickerDialog
 import android.app.Dialog
 import android.content.Context
@@ -7,8 +8,7 @@ import android.content.DialogInterface.BUTTON_NEGATIVE
 import android.os.Bundle
 import android.widget.DatePicker
 import androidx.fragment.app.DialogFragment
-import android.R.string
-import java.util.Calendar
+import java.util.*
 
 class DateDialogFragment() : DialogFragment(), DatePickerDialog.OnDateSetListener {
     companion object {

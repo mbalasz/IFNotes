@@ -3,14 +3,13 @@ package com.example.mateusz.ifnotes.eatinglogs
 import android.content.Context
 import android.net.Uri
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.IODispatcher
+import com.example.mateusz.ifnotes.domain.entity.EatingLog
+import com.example.mateusz.ifnotes.domain.entity.LogDate
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
-import com.example.mateusz.ifnotes.model.data.EatingLog
-import com.example.mateusz.ifnotes.model.data.LogDate
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.lang.IllegalStateException
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -49,11 +48,11 @@ open class CSVLogsManager @Inject constructor(
         eatingLogs
     }
 
-    open fun createCsvFromEatingLogs(eatingLogs: List<EatingLog>): String {
+    open fun createCsvFromEatingLogs(eatingLog: List<EatingLog>): String {
         val csvLogsBuilder = StringBuilder()
         val csvDateTimeFormat = SimpleDateFormat("${getDateFormat()},${getTimeFormat()}", Locale.ENGLISH)
         csvLogsBuilder.appendln("Start date,Start time,End date,End time")
-        for (eatingLog in eatingLogs) {
+        for (eatingLog in eatingLog) {
             eatingLog.startTime?.let {
                 val startDateTime = DateTimeUtils.toDateTimeString(it.dateTimeInMillis, csvDateTimeFormat)
                 csvLogsBuilder.append(startDateTime)

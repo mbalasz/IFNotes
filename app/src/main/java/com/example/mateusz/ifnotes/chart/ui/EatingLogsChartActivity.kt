@@ -11,7 +11,7 @@ import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.ValueFormatter
 import dagger.android.AndroidInjection
-import kotlinx.android.synthetic.main.content_chart.eatingLogsChart
+import kotlinx.android.synthetic.main.content_chart.*
 import javax.inject.Inject
 
 class EatingLogsChartActivity : AppCompatActivity() {

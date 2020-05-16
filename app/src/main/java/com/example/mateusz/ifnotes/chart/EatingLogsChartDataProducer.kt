@@ -1,11 +1,10 @@
 package com.example.mateusz.ifnotes.chart
 
-import com.example.mateusz.ifnotes.model.data.EatingLog
-import java.lang.IllegalArgumentException
+import com.example.mateusz.ifnotes.domain.entity.EatingLog
 
 abstract class EatingLogsChartDataProducer(protected val timeWindowValidator: TimeWindowValidator) {
 
-    abstract fun getDataPoints(eatingLogs: List<EatingLog>): List<DataPoint>
+    abstract fun getDataPoints(eatingLog: List<EatingLog>): List<DataPoint>
 
     data class DataPoint(val eatingLog: EatingLog, val windowDurationMs: Long)
 
