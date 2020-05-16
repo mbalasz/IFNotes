@@ -11,6 +11,8 @@ interface EatingLogsLocalDataSource {
 
     fun observeEatingLogs(): Flowable<List<EatingLog>>
 
+    suspend fun getEatingLog(eatingLogId: Int): EatingLog?
+
     suspend fun getEatingLogs(): List<EatingLog>
 
     suspend fun insertEatingLog(eatingLog: EatingLog)

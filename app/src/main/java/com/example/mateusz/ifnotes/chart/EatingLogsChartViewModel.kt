@@ -5,18 +5,17 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.mateusz.ifnotes.chart.EatingLogsChartDataProducer.DataPoint
+import com.example.mateusz.ifnotes.domain.usecases.ObserveEatingLogs
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
-import com.example.mateusz.ifnotes.data.EatingLogsRepositoryImpl
 import com.github.mikephil.charting.data.Entry
 import io.reactivex.disposables.Disposable
-import java.lang.IllegalStateException
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 class EatingLogsChartViewModel @Inject constructor(
     application: Application,
-    EatingLogsRepositoryImpl: EatingLogsRepositoryImpl
-) : AndroidViewModel(application) {
+    observeEatingLogs: ObserveEatingLogs
+    ) : AndroidViewModel(application) {
     companion object {
         private const val MAX_WINDOW_HOURS = 19L
     }
@@ -30,12 +29,12 @@ class EatingLogsChartViewModel @Inject constructor(
     private val windowValidator = TimeWindowValidator(MAX_WINDOW_HOURS)
 
     init {
-        eatingLogsSubscription = EatingLogsRepositoryImpl.getEatingLogsObservable().subscribe {
+        eatingLogsSubscription = observeEatingLogs().subscribe {
             val eatingLogs = it.sortedWith(
-                    Comparator { a, b -> compareValuesBy(a, b, { it.startTime?.dateTimeInMillis }, { it.endTime?.dateTimeInMillis }) })
+                Comparator { a, b -> compareValuesBy(a, b, { it.startTime?.dateTimeInMillis }, { it.endTime?.dateTimeInMillis }) })
             val dataPoints = FastingWindowChartDataProducer(windowValidator).getDataPoints(eatingLogs)
             val chartData =
-                    ChartData(getEntriesFromDataPoints(dataPoints), getLabelsFromDataPoints(dataPoints))
+                ChartData(getEntriesFromDataPoints(dataPoints), getLabelsFromDataPoints(dataPoints))
             _eatingLogsChartDataLiveData.postValue(chartData)
         }
     }
@@ -58,7 +57,7 @@ class EatingLogsChartViewModel @Inject constructor(
     private fun getLabelsFromDataPoints(dataPoints: List<DataPoint>): List<String> {
         val labels = arrayListOf<String>()
         for (dataPoint in dataPoints) {
-            val eatingLog = dataPoint.eatingLogData
+            val eatingLog = dataPoint.eatingLog
             eatingLog.startTime?.let {
                 labels.add(DateTimeUtils.toDateString(it.dateTimeInMillis))
             } ?: throw IllegalStateException("DataPoint's EatingLog has no start time")

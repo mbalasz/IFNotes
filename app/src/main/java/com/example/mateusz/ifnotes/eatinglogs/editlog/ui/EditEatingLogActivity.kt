@@ -10,12 +10,7 @@ import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogViewModel
 import com.example.mateusz.ifnotes.time.DateDialogFragment
 import com.example.mateusz.ifnotes.time.TimeDialogFragment
 import dagger.android.AndroidInjection
-import kotlinx.android.synthetic.main.activity_edit_eating_log.discardButton
-import kotlinx.android.synthetic.main.activity_edit_eating_log.editFirstMealButton
-import kotlinx.android.synthetic.main.activity_edit_eating_log.editLastMealButton
-import kotlinx.android.synthetic.main.activity_edit_eating_log.saveButton
-import kotlinx.android.synthetic.main.activity_edit_eating_log.timeOfFirstMealTextView
-import kotlinx.android.synthetic.main.activity_edit_eating_log.timeOfLastMealTextView
+import kotlinx.android.synthetic.main.activity_edit_eating_log.*
 import javax.inject.Inject
 
 class EditEatingLogActivity :

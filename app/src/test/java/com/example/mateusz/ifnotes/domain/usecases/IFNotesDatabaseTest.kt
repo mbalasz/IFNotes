@@ -4,12 +4,13 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.mateusz.ifnotes.data.room.EatingLogDao
-import com.example.mateusz.ifnotes.database.IFNotesDatabaseTestModule
 import com.example.mateusz.ifnotes.data.room.EatingLogData
 import com.example.mateusz.ifnotes.data.room.IFNotesDatabase
 import com.example.mateusz.ifnotes.data.room.LogDateData
+import com.example.mateusz.ifnotes.database.IFNotesDatabaseTestModule
 import dagger.BindsInstance
 import dagger.Component
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,8 +40,10 @@ class IFNotesDatabaseTest {
         val eatingLog1 = EatingLogData(startTime = LogDateData(10L))
         val eatingLog2 = EatingLogData(startTime = LogDateData(11L))
 
-        eatingLogDao.insert(eatingLog1)
-        eatingLogDao.insert(eatingLog2)
+        runBlocking {
+            eatingLogDao.insert(eatingLog1)
+            eatingLogDao.insert(eatingLog2)
+        }
 
         eatingLogDao.getEatingLogsFlowable().map { eatingLogs ->
             eatingLogs.map {
@@ -55,9 +58,11 @@ class IFNotesDatabaseTest {
         val eatingLog2 = EatingLogData(startTime = LogDateData(11L))
         val eatingLog3 = EatingLogData(startTime = LogDateData(9L))
 
-        eatingLogDao.insert(eatingLog1)
-        eatingLogDao.insert(eatingLog2)
-        eatingLogDao.insert(eatingLog3)
+        runBlocking {
+            eatingLogDao.insert(eatingLog1)
+            eatingLogDao.insert(eatingLog2)
+            eatingLogDao.insert(eatingLog3)
+        }
 
         eatingLogDao.observeMostRecentEatingLog()
                 .map { it[0].startTime!!.dateTimeInMillis }

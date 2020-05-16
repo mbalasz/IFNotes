@@ -3,14 +3,13 @@ package com.example.mateusz.ifnotes.eatinglogs
 import android.content.Context
 import android.net.Uri
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.IODispatcher
-import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.domain.entity.EatingLog
 import com.example.mateusz.ifnotes.domain.entity.LogDate
+import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.lang.IllegalStateException
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject

@@ -9,22 +9,23 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Transformations
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScope
+import com.example.mateusz.ifnotes.domain.entity.EatingLog
+import com.example.mateusz.ifnotes.domain.entity.LogDate
+import com.example.mateusz.ifnotes.domain.usecases.GetEatingLog
+import com.example.mateusz.ifnotes.domain.usecases.UpdateEatingLog
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.lib.Event
-import com.example.mateusz.ifnotes.data.EatingLogsRepositoryImpl
-import com.example.mateusz.ifnotes.data.room.EatingLogData
-import com.example.mateusz.ifnotes.data.room.LogDateData
 import com.example.mateusz.ifnotes.time.DateDialogFragment
 import com.example.mateusz.ifnotes.time.TimeDialogFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.lang.IllegalStateException
 import javax.inject.Inject
 
 class EditEatingLogViewModel @Inject constructor(
     application: Application,
-    private val EatingLogsRepositoryImpl: EatingLogsRepositoryImpl,
-    @MainScope mainScope: CoroutineScope
+    @MainScope mainScope: CoroutineScope,
+    private val getEatingLog: GetEatingLog,
+    private val updateEatingLog: UpdateEatingLog
 ) : AndroidViewModel(application), CoroutineScope by mainScope {
     companion object {
         const val EXTRA_EATING_LOG_ID = "EXTRA_EATING_LOG_ID"
@@ -36,9 +37,8 @@ class EditEatingLogViewModel @Inject constructor(
         NONE
     }
 
-    // TODO: Implement validation logic in the EatingLogsRepositoryImpl.
     private var editMode = MealType.NONE
-    private lateinit var originalEatingLogData: EatingLogData
+    private lateinit var originalEatingLog: EatingLog
 
     private val _showDialogFragment = MutableLiveData<Event<DialogFragment>>()
     val showDialogFragment: LiveData<Event<DialogFragment>>
@@ -99,12 +99,8 @@ class EditEatingLogViewModel @Inject constructor(
     }
 
     fun onDateSaved(day: Int, month: Int, year: Int) {
-        if (pendingDateTimeEdit != null) {
-            throw IllegalStateException("Attempt to set date on existing pending log edit")
-        }
-        if (editMode == MealType.NONE) {
-            throw IllegalStateException("Attempt to set date on an unknown meal type")
-        }
+        check(pendingDateTimeEdit == null) { "Attempt to set date on existing pending log edit" }
+        check(editMode != MealType.NONE) { "Attempt to set date on an unknown meal type" }
         pendingDateTimeEdit = EatingLogDateTime(year, month, day)
         _showDialogFragment.value = Event(TimeDialogFragment())
     }
@@ -140,13 +136,13 @@ class EditEatingLogViewModel @Inject constructor(
         intent?.extras?.let {
             launch {
                 val eatingLogNullable =
-                    EatingLogsRepositoryImpl.getEatingLog(it[EXTRA_EATING_LOG_ID] as Int) ?: throw RuntimeException(
+                    getEatingLog(it[EXTRA_EATING_LOG_ID] as Int) ?: throw RuntimeException(
                         "Attempted to obtain a non-existent log with id $EXTRA_EATING_LOG_ID")
-                originalEatingLogData = eatingLogNullable
-                originalEatingLogData.startTime?.let {
+                originalEatingLog = eatingLogNullable
+                originalEatingLog.startTime?.let {
                     _logTimeObservables[MealType.FIRST_MEAL]?.value = it.dateTimeInMillis
                 }
-                originalEatingLogData.endTime?.let {
+                originalEatingLog.endTime?.let {
                     _logTimeObservables[MealType.LAST_MEAL]?.value = it.dateTimeInMillis
                 }
             }
@@ -154,11 +150,11 @@ class EditEatingLogViewModel @Inject constructor(
     }
 
     fun onSaveButtonClicked() {
-        val startTime = _logTimeObservables[MealType.FIRST_MEAL]?.value?.let { LogDateData(it, "") } ?: originalEatingLogData.startTime
-        val endTime = _logTimeObservables[MealType.LAST_MEAL]?.value?.let { LogDateData(it, "") } ?: originalEatingLogData.endTime
-        val updatedEatingLog = originalEatingLogData.copy(startTime = startTime, endTime = endTime)
+        val startTime = _logTimeObservables[MealType.FIRST_MEAL]?.value?.let { LogDate(it, "") } ?: originalEatingLog.startTime
+        val endTime = _logTimeObservables[MealType.LAST_MEAL]?.value?.let { LogDate(it, "") } ?: originalEatingLog.endTime
+        val updatedEatingLog = originalEatingLog.copy(startTime = startTime, endTime = endTime)
         launch {
-            EatingLogsRepositoryImpl.updateEatingLog(updatedEatingLog)
+            updateEatingLog(updatedEatingLog)
             _finishActivity.value = Event(Unit)
         }
     }

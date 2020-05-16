@@ -11,9 +11,16 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.mateusz.ifnotes.component.AppTestModule
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.IODispatcher
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScope
+import com.example.mateusz.ifnotes.database.IFNotesDatabaseTestModule
+import com.example.mateusz.ifnotes.domain.entity.EatingLog
+import com.example.mateusz.ifnotes.domain.entity.LogDate
+import com.example.mateusz.ifnotes.domain.usecases.DeleteAllEatingLogs
+import com.example.mateusz.ifnotes.domain.usecases.DeleteEatingLog
+import com.example.mateusz.ifnotes.domain.usecases.InsertEatingLog
+import com.example.mateusz.ifnotes.domain.usecases.ObserveEatingLogs
 import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel.ActivityForResultsData
-import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel.Companion.CHOOSE_CSV_LOGS_TO_IMPORT_REQUEST_CODE
 import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel.Companion.CHOOSE_CSV_FILE_TO_EXPORT_LOGS_CODE
+import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel.Companion.CHOOSE_CSV_LOGS_TO_IMPORT_REQUEST_CODE
 import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel.Companion.EDIT_EATING_LOG_REQUEST_CODE
 import com.example.mateusz.ifnotes.eatinglogs.EatingLogsViewModel.EatingLogsItemView
 import com.example.mateusz.ifnotes.eatinglogs.editlog.EditEatingLogViewModel
@@ -21,24 +28,17 @@ import com.example.mateusz.ifnotes.eatinglogs.editlog.ui.EditEatingLogActivity
 import com.example.mateusz.ifnotes.lib.BackupManager
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.lib.Event
-import com.example.mateusz.ifnotes.data.EatingLogsRepositoryImpl
-import com.example.mateusz.ifnotes.data.room.EatingLogData
-import com.example.mateusz.ifnotes.data.room.LogDateData
+import com.example.mateusz.ifnotes.livedata.testObserve
 import com.nhaarman.mockitokotlin2.*
-import com.nhaarman.mockitokotlin2.verify
 import dagger.BindsInstance
 import dagger.Component
 import io.reactivex.Flowable
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 import kotlinx.coroutines.test.TestCoroutineScope
 import kotlinx.coroutines.test.runBlockingTest
-import org.hamcrest.CoreMatchers.`is`
-import org.hamcrest.CoreMatchers.equalTo
-import org.hamcrest.CoreMatchers.hasItem
-import org.hamcrest.CoreMatchers.notNullValue
+import org.hamcrest.CoreMatchers.*
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Before
 import org.junit.Rule
@@ -57,13 +57,16 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @RunWith(AndroidJUnit4::class)
-class EatingLogsViewModelTestData {
-    @Mock private lateinit var EatingLogsRepositoryImpl: EatingLogsRepositoryImpl
+class EatingLogsViewModelTest {
     @Mock private lateinit var refreshDataObserver: Observer<Event<Unit>>
     @Mock private lateinit var startActivityForResultObserver: Observer<Event<ActivityForResultsData>>
     @Mock private lateinit var eatingLogsItemView: EatingLogsItemView
     @Mock private lateinit var backupManager: BackupManager
     @Mock private lateinit var clock: Clock
+    @Mock private lateinit var deleteAllEatingLogs: DeleteAllEatingLogs
+    @Mock private lateinit var insertEatingLog: InsertEatingLog
+    @Mock private lateinit var deleteEatingLog: DeleteEatingLog
+    @Mock private lateinit var observeEatingLogs: ObserveEatingLogs
 
     private val testScope = TestCoroutineScope()
 
@@ -76,35 +79,35 @@ class EatingLogsViewModelTestData {
     val mockitoRule: MockitoRule = MockitoJUnit.rule()
 
     private val eatingLogs = listOf(
-        EatingLogData(
-            startTime = LogDateData(DateTimeUtils.dateTimeToMillis(
+        EatingLog(
+            startTime = LogDate(DateTimeUtils.dateTimeToMillis(
                 20, 5, 2018, 10, 50)),
-            endTime = LogDateData(DateTimeUtils.dateTimeToMillis(
+            endTime = LogDate(DateTimeUtils.dateTimeToMillis(
                 20, 5, 2018, 18, 50))),
-        EatingLogData(
-            startTime = LogDateData(DateTimeUtils.dateTimeToMillis(
+        EatingLog(
+            startTime = LogDate(DateTimeUtils.dateTimeToMillis(
                 21, 5, 2018, 10, 50)),
-            endTime = LogDateData(DateTimeUtils.dateTimeToMillis(
+            endTime = LogDate(DateTimeUtils.dateTimeToMillis(
                 21, 5, 2018, 18, 50))),
-        EatingLogData(
-            startTime = LogDateData(DateTimeUtils.dateTimeToMillis(
+        EatingLog(
+            startTime = LogDate(DateTimeUtils.dateTimeToMillis(
                 25, 5, 2018, 11, 50)),
-            endTime = LogDateData(DateTimeUtils.dateTimeToMillis(
+            endTime = LogDate(DateTimeUtils.dateTimeToMillis(
                 25, 5, 2018, 18, 50))),
-        EatingLogData(
-            startTime = LogDateData(DateTimeUtils.dateTimeToMillis(
+        EatingLog(
+            startTime = LogDate(DateTimeUtils.dateTimeToMillis(
                 30, 5, 2019, 10, 50)),
-            endTime = LogDateData(DateTimeUtils.dateTimeToMillis(
+            endTime = LogDate(DateTimeUtils.dateTimeToMillis(
                 30, 5, 2019, 18, 50))))
 
     @Before
     fun setUp() {
-        whenever(EatingLogsRepositoryImpl.getEatingLogsObservable()).thenReturn(Flowable.fromArray())
+        whenever(observeEatingLogs()).thenReturn(Flowable.fromArray())
     }
 
     @Test
     fun init_refreshData() {
-        whenever(EatingLogsRepositoryImpl.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
+        whenever(observeEatingLogs()).thenReturn(Flowable.fromArray(eatingLogs))
         createEatingLogsViewModel()
 
         eatingLogsViewModel.refreshData.observeForever(refreshDataObserver)
@@ -113,7 +116,7 @@ class EatingLogsViewModelTestData {
 
     @Test
     fun onBindEatingLogsItemView() {
-        whenever(EatingLogsRepositoryImpl.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
+        whenever(observeEatingLogs()).thenReturn(Flowable.fromArray(eatingLogs))
         createEatingLogsViewModel()
 
         eatingLogsViewModel.onBindEatingLogsItemView(eatingLogsItemView, 0)
@@ -127,15 +130,14 @@ class EatingLogsViewModelTestData {
     }
 
     @Test
-    fun onRemoveEatingLogItemClicked() = runBlocking<Unit> {
-        whenever(EatingLogsRepositoryImpl.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
+    fun onRemoveEatingLogItemClicked() {
+        whenever(observeEatingLogs()).thenReturn(Flowable.fromArray(eatingLogs))
         createEatingLogsViewModel()
 
         testScope.runBlockingTest {
             eatingLogsViewModel.onRemoveEatingLogItemClicked(2)
+            verify(deleteEatingLog).invoke(sortDescendingByStartTime(eatingLogs)[2])
         }
-
-        verify(EatingLogsRepositoryImpl).deleteEatingLog(sortDescendingByStartTime(eatingLogs)[2])
     }
 
     @Test
@@ -148,7 +150,7 @@ class EatingLogsViewModelTestData {
 
     @Test
     fun onEditEatingLogItemClicked() {
-        whenever(EatingLogsRepositoryImpl.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
+        whenever(observeEatingLogs()).thenReturn(Flowable.fromArray(eatingLogs))
         createEatingLogsViewModel()
         eatingLogsViewModel.startActivityForResult.observeForever(startActivityForResultObserver)
 
@@ -169,7 +171,7 @@ class EatingLogsViewModelTestData {
 
     @Test
     fun getEatingLogsCount() {
-        whenever(EatingLogsRepositoryImpl.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
+        whenever(observeEatingLogs()).thenReturn(Flowable.fromArray(eatingLogs))
         createEatingLogsViewModel()
 
         assertThat(eatingLogsViewModel.getEatingLogsCount(), `is`(equalTo(eatingLogs.size)))
@@ -182,47 +184,40 @@ class EatingLogsViewModelTestData {
 
         eatingLogsViewModel.onImportLogs()
 
-        argumentCaptor<Event<ActivityForResultsData>>().apply {
-            verify(startActivityForResultObserver).onChanged(capture())
-            val activityForResultsData = firstValue.getContentIfNotHandled()
-            assertThat(activityForResultsData, notNullValue())
-            assertRequestCode(activityForResultsData, CHOOSE_CSV_LOGS_TO_IMPORT_REQUEST_CODE)
-            activityForResultsData?.intent?.let { intent ->
-                assertThat(intent.action, equalTo(Intent.ACTION_GET_CONTENT))
-                assertThat(intent.categories, hasItem(Intent.CATEGORY_OPENABLE))
-                assertThat(intent.type, equalTo("text/*"))
+        val activityForResultsData = eatingLogsViewModel.startActivityForResult.testObserve().getContentIfNotHandled()
+        assertThat(activityForResultsData, notNullValue())
+        assertRequestCode(activityForResultsData, CHOOSE_CSV_LOGS_TO_IMPORT_REQUEST_CODE)
+        activityForResultsData?.intent?.let { intent ->
+            assertThat(intent.action, equalTo(Intent.ACTION_GET_CONTENT))
+            assertThat(intent.categories, hasItem(Intent.CATEGORY_OPENABLE))
+            assertThat(intent.type, equalTo("text/*"))
 
-            }
         }
     }
 
     @Test
     fun onExportLogs() {
         createEatingLogsViewModel()
-        eatingLogsViewModel.startActivityForResult.observeForever(startActivityForResultObserver)
         whenever(clock.millis()).thenReturn(DateTimeUtils.timeToMillis(25, 4, 1993))
 
         eatingLogsViewModel.onExportLogs()
 
-        argumentCaptor<Event<ActivityForResultsData>>().apply {
-            verify(startActivityForResultObserver).onChanged(capture())
-            val activityForResultsData = firstValue.getContentIfNotHandled()
-            assertThat(activityForResultsData, notNullValue())
-            assertRequestCode(activityForResultsData, CHOOSE_CSV_FILE_TO_EXPORT_LOGS_CODE)
-            activityForResultsData?.intent?.let { intent ->
-                assertThat(intent.action, equalTo(Intent.ACTION_CREATE_DOCUMENT))
-                assertThat(intent.categories, hasItem(Intent.CATEGORY_OPENABLE))
-                assertThat(intent.type, equalTo("text/*"))
-                assertThat(
-                    intent.getStringExtra(Intent.EXTRA_TITLE),
-                    equalTo("eating_logs_25/05/1993.csv"))
-            }
+        val activityForResultsData = eatingLogsViewModel.startActivityForResult.testObserve().getContentIfNotHandled()
+        assertThat(activityForResultsData, notNullValue())
+        assertRequestCode(activityForResultsData, CHOOSE_CSV_FILE_TO_EXPORT_LOGS_CODE)
+        activityForResultsData?.intent?.let { intent ->
+            assertThat(intent.action, equalTo(Intent.ACTION_CREATE_DOCUMENT))
+            assertThat(intent.categories, hasItem(Intent.CATEGORY_OPENABLE))
+            assertThat(intent.type, equalTo("text/*"))
+            assertThat(
+                intent.getStringExtra(Intent.EXTRA_TITLE),
+                equalTo("eating_logs_25/05/1993.csv"))
         }
     }
 
     @Test
-    fun onActivityResult_chooseCsvLogsToImport() = runBlocking<Unit> {
-        whenever(EatingLogsRepositoryImpl.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
+    fun onActivityResult_chooseCsvLogsToImport() = testScope.runBlockingTest {
+        whenever(observeEatingLogs()).thenReturn(Flowable.fromArray(eatingLogs))
         createEatingLogsViewModel()
         val csvLogsPipedOutputStream = PipedOutputStream()
         val csvLogsPipedInputStream = PipedInputStream(csvLogsPipedOutputStream)
@@ -237,10 +232,10 @@ class EatingLogsViewModelTestData {
         eatingLogsViewModel.onActivityResult(
             CHOOSE_CSV_LOGS_TO_IMPORT_REQUEST_CODE, RESULT_OK, resultIntent)
 
-        inOrder(EatingLogsRepositoryImpl) {
-            verify(EatingLogsRepositoryImpl).deleteAll()
-            argumentCaptor<EatingLogData>().apply {
-                verify(EatingLogsRepositoryImpl, times(eatingLogs.size)).insertEatingLog(capture())
+        inOrder(deleteAllEatingLogs, insertEatingLog) {
+            verify(deleteAllEatingLogs).invoke()
+            argumentCaptor<EatingLog>().apply {
+                verify(insertEatingLog, times(eatingLogs.size)).invoke(capture())
 
                 val capturedLogsIterator = allValues.iterator()
                 for (eatingLog in eatingLogs) {
@@ -260,20 +255,19 @@ class EatingLogsViewModelTestData {
     }
 
     @Test
-    fun onActivityResult_chooseCsvLogsToImportAndIntentIsNull_noop() = runBlocking<Unit> {
-        whenever(EatingLogsRepositoryImpl.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
+    fun onActivityResult_chooseCsvLogsToImportAndIntentIsNull_noop() = testScope.runBlockingTest {
+        whenever(observeEatingLogs()).thenReturn(Flowable.fromArray(eatingLogs))
         createEatingLogsViewModel()
 
         eatingLogsViewModel.onActivityResult(
             CHOOSE_CSV_LOGS_TO_IMPORT_REQUEST_CODE, RESULT_OK, null)
 
-        verify(EatingLogsRepositoryImpl, never()).deleteAll()
-        verify(EatingLogsRepositoryImpl, never()).insertEatingLog(any())
+        verifyZeroInteractions(deleteAllEatingLogs, insertEatingLog)
     }
 
     @Test
-    fun onActivityResult_chooseCsvFileToExportLogs() = runBlocking<Unit> {
-        whenever(EatingLogsRepositoryImpl.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
+    fun onActivityResult_chooseCsvFileToExportLogs() = testScope.runBlockingTest {
+        whenever(observeEatingLogs()).thenReturn(Flowable.fromArray(eatingLogs))
         createEatingLogsViewModel()
         val uriString = "file:///mnt/sdcard/logs.csv"
         val resultIntent = Intent.parseUri(uriString, 0)
@@ -287,8 +281,8 @@ class EatingLogsViewModelTestData {
     }
 
     @Test
-    fun onActivityResult_chooseCsvFileToExportLogsAndIntentIsNull_noop() = runBlocking<Unit> {
-        whenever(EatingLogsRepositoryImpl.getEatingLogsObservable()).thenReturn(Flowable.fromArray(eatingLogs))
+    fun onActivityResult_chooseCsvFileToExportLogsAndIntentIsNull_noop() = testScope.runBlockingTest {
+        whenever(observeEatingLogs()).thenReturn(Flowable.fromArray(eatingLogs))
         createEatingLogsViewModel()
 
         eatingLogsViewModel.onActivityResult(
@@ -297,8 +291,8 @@ class EatingLogsViewModelTestData {
         verifyZeroInteractions(backupManager)
     }
 
-    private fun sortDescendingByStartTime(eatingLogData: List<EatingLogData>) : List<EatingLogData> {
-        return eatingLogData.sortedWith(
+    private fun sortDescendingByStartTime(EatingLog: List<EatingLog>) : List<EatingLog> {
+        return EatingLog.sortedWith(
             Comparator { a, b -> compareValuesBy(b, a, { it.startTime?.dateTimeInMillis }, { it.endTime?.dateTimeInMillis }) })
     }
 
@@ -321,27 +315,33 @@ class EatingLogsViewModelTestData {
     private fun createEatingLogsViewModel() {
         DaggerEatingLogsViewModelTest_TestComponent.factory().create(
             ApplicationProvider.getApplicationContext(),
-            EatingLogsRepositoryImpl,
             testScope,
             backupManager,
             clock,
-            TestCoroutineDispatcher()).inject(this)
+            TestCoroutineDispatcher(),
+            deleteAllEatingLogs,
+            insertEatingLog,
+            deleteEatingLog,
+            observeEatingLogs).inject(this)
         shadowContentResolver = Shadows.shadowOf(context.contentResolver)
     }
 
     @Singleton
-    @Component(modules = [AppTestModule::class])
+    @Component(modules = [AppTestModule::class, IFNotesDatabaseTestModule::class])
     interface TestComponent {
-        fun inject(eatingLogsViewModelTest: EatingLogsViewModelTestData)
+        fun inject(eatingLogsViewModelTest: EatingLogsViewModelTest)
 
         @Component.Factory
         interface Factory {
             fun create(@BindsInstance application: Application,
-                       @BindsInstance EatingLogsRepositoryImpl: EatingLogsRepositoryImpl,
                        @BindsInstance @MainScope mainScope: CoroutineScope,
                        @BindsInstance backupManager: BackupManager,
                        @BindsInstance clock: Clock,
-                       @BindsInstance @IODispatcher ioDispatcher: CoroutineDispatcher): TestComponent
+                       @BindsInstance @IODispatcher ioDispatcher: CoroutineDispatcher,
+                       @BindsInstance deleteAllEatingLogs: DeleteAllEatingLogs,
+                       @BindsInstance insertEatingLog: InsertEatingLog,
+                       @BindsInstance deleteEatingLog: DeleteEatingLog,
+                       @BindsInstance observeEatingLogs: ObserveEatingLogs): TestComponent
         }
     }
 }

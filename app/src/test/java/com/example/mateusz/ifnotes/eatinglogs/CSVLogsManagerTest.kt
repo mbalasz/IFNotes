@@ -5,11 +5,11 @@ import android.net.Uri
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.IODispatcher
+import com.example.mateusz.ifnotes.domain.entity.EatingLog
+import com.example.mateusz.ifnotes.domain.entity.LogDate
 import com.example.mateusz.ifnotes.lib.DateTimeUtils
 import com.example.mateusz.ifnotes.matchers.EatingLogEqualsToDate.Companion.endsOn
 import com.example.mateusz.ifnotes.matchers.EatingLogEqualsToDate.Companion.startsOn
-import com.example.mateusz.ifnotes.data.room.EatingLogData
-import com.example.mateusz.ifnotes.data.room.LogDateData
 import dagger.BindsInstance
 import dagger.Component
 import kotlinx.coroutines.CoroutineDispatcher
@@ -200,18 +200,18 @@ class CSVLogsManagerTest {
     @Test
     fun createCsvFromEatingLogs() {
         val eatingLogs = listOf(
-            EatingLogData(
-                startTime = LogDateData(DateTimeUtils.dateTimeToMillis(
+            EatingLog(
+                startTime = LogDate(DateTimeUtils.dateTimeToMillis(
                     10, 4, 2019, 10, 24)),
-                endTime = LogDateData(DateTimeUtils.dateTimeToMillis(
+                endTime = LogDate(DateTimeUtils.dateTimeToMillis(
                     10, 4, 2019, 19, 24))),
-            EatingLogData(
-                startTime = LogDateData(DateTimeUtils.dateTimeToMillis(
+            EatingLog(
+                startTime = LogDate(DateTimeUtils.dateTimeToMillis(
                     11, 4, 2019, 10, 24)),
-                endTime = LogDateData(DateTimeUtils.dateTimeToMillis(
+                endTime = LogDate(DateTimeUtils.dateTimeToMillis(
                     11, 4, 2019, 19, 24))),
-            EatingLogData(
-                startTime = LogDateData(DateTimeUtils.dateTimeToMillis(
+            EatingLog(
+                startTime = LogDate(DateTimeUtils.dateTimeToMillis(
                     12, 4, 2019, 10, 24))
             ))
 

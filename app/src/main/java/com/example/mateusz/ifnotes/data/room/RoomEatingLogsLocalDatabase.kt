@@ -15,6 +15,7 @@ class RoomEatingLogsLocalDatabase @Inject constructor(
     private val dataToEntitiyMapper: EatingLogDataMapper,
     private val entityToDataMapper: EntityToDataMapper,
     @IODispatcher private val ioDispatcher: CoroutineDispatcher) : EatingLogsLocalDataSource {
+
     override fun observeMostRecentEatingLog(): Flowable<Optional<EatingLog>> {
         return iFNotesDatabase.eatingLogDao().observeMostRecentEatingLog().map { list ->
             if (list.isNotEmpty()) {
@@ -38,6 +39,12 @@ class RoomEatingLogsLocalDatabase @Inject constructor(
             list.map {
                 dataToEntitiyMapper.mapFrom(it)
             }
+        }
+    }
+
+    override suspend fun getEatingLog(eatingLogId: Int): EatingLog? = withContext(ioDispatcher) {
+        iFNotesDatabase.eatingLogDao().getEatingLog(eatingLogId)?.let {
+            dataToEntitiyMapper.mapFrom(it)
         }
     }
 

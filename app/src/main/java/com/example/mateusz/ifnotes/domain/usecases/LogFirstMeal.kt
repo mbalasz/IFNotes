@@ -14,6 +14,7 @@ class LogFirstMeal @Inject constructor(private val eatingLogsRepository: EatingL
     }
 
     private suspend fun logFirstMeal(logDate: LogDate): ValidationStatus {
+        // TODO: make sure to convert logDate to UTC before storing in the database.
         val currentMostRecentEatingLog = eatingLogsRepository.getMostRecentEatingLog()
         if (currentMostRecentEatingLog != null && !currentMostRecentEatingLog.isFinished()) {
             return ValidationStatus.ERROR_MOST_RECENT_EATING_LOG_NOT_FINISHED

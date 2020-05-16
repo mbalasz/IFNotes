@@ -1,8 +1,8 @@
 package com.example.mateusz.ifnotes.domain
 
 import com.example.mateusz.ifnotes.domain.entity.EatingLog
-import io.reactivex.Flowable
 import com.google.common.base.Optional
+import io.reactivex.Flowable
 
 interface EatingLogsRepository {
     // TODO: replace Flowable with Observable. There shouldn't be a need for backpressure strategy.
@@ -10,6 +10,8 @@ interface EatingLogsRepository {
     fun observeMostRecentEatingLog(): Flowable<Optional<EatingLog>>
 
     fun observeEatingLogs(): Flowable<List<EatingLog>>
+
+    suspend fun getEatingLog(eatingLogId: Int): EatingLog?
 
     suspend fun getMostRecentEatingLog(): EatingLog?
 

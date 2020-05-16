@@ -8,8 +8,6 @@ import android.os.Bundle
 import androidx.fragment.app.DialogFragment
 import com.example.mateusz.ifnotes.R
 import kotlinx.android.synthetic.main.dialog_date_time.view.*
-import java.lang.ClassCastException
-import java.lang.IllegalStateException
 
 class TimeDialogFragment : DialogFragment() {
     companion object {

@@ -4,7 +4,8 @@ import com.example.mateusz.ifnotes.domain.EatingLogsRepository
 import com.example.mateusz.ifnotes.domain.entity.LogDate
 import javax.inject.Inject
 
-class LogLastMeal @Inject constructor(private val eatingLogsRepository: EatingLogsRepository) {
+class LogLastMeal @Inject constructor(private val eatingLogsRepository: EatingLogsRepository,
+                                      private val updateEatingLog: UpdateEatingLog) {
     suspend operator fun invoke(logDate: LogDate) : ValidationStatus {
         return eatingLogsRepository.runInTransaction {
             logLastMeal(logDate)
@@ -12,6 +13,7 @@ class LogLastMeal @Inject constructor(private val eatingLogsRepository: EatingLo
     }
 
     private suspend fun logLastMeal(logDate: LogDate): ValidationStatus {
+        // TODO: make sure to convert logDate to UTC before storing in the database.
         val currentMostRecentEatingLog = eatingLogsRepository.getMostRecentEatingLog()
 
         if (currentMostRecentEatingLog == null || currentMostRecentEatingLog.isFinished()) {
@@ -24,7 +26,7 @@ class LogLastMeal @Inject constructor(private val eatingLogsRepository: EatingLo
 
         if (validationStatus == ValidationStatus.SUCCESS) {
             val updatedEatingLog = currentMostRecentEatingLog.copy(endTime = logDate)
-            eatingLogsRepository.updateEatingLog(updatedEatingLog)
+            updateEatingLog(updatedEatingLog)
         }
 
         return validationStatus

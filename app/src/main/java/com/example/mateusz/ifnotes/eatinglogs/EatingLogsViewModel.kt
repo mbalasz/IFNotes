@@ -7,8 +7,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.mateusz.ifnotes.component.ConcurrencyModule.Companion.MainScope
-import com.example.mateusz.ifnotes.data.EatingLogsRepositoryImpl
-import com.example.mateusz.ifnotes.data.room.EatingLogDataMapper
 import com.example.mateusz.ifnotes.domain.entity.EatingLog
 import com.example.mateusz.ifnotes.domain.usecases.DeleteAllEatingLogs
 import com.example.mateusz.ifnotes.domain.usecases.DeleteEatingLog
@@ -26,14 +24,12 @@ import javax.inject.Inject
 
 class EatingLogsViewModel @Inject constructor (
     application: Application,
-    private val eatingLogsRepositoryImpl: EatingLogsRepositoryImpl,
     @MainScope mainScope: CoroutineScope,
     private val csvLogsManager: CSVLogsManager,
     private val backupManager: BackupManager,
     private val clock: Clock,
     private val insertEatingLog: InsertEatingLog,
     observeEatingLogs: ObserveEatingLogs,
-    private val eatingLogDataMapper: EatingLogDataMapper,
     private val deleteEatingLog: DeleteEatingLog,
     private val deleteAllEatingLogs: DeleteAllEatingLogs
 ) : AndroidViewModel(application), CoroutineScope by mainScope {
@@ -60,8 +56,10 @@ class EatingLogsViewModel @Inject constructor (
     init {
         observeEatingLogs().subscribe {
             eatingLog = it.sortedWith(
-                    Comparator { a, b -> compareValuesBy(b, a,
-                        { it.startTime?.dateTimeInMillis }, { it.endTime?.dateTimeInMillis }) })
+                Comparator { a, b ->
+                    compareValuesBy(b, a,
+                        { it.startTime?.dateTimeInMillis }, { it.endTime?.dateTimeInMillis })
+                })
             _refreshData.postValue(Event(Unit))
         }
     }

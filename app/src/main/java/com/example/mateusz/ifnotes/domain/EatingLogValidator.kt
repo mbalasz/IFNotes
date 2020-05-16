@@ -1,7 +1,6 @@
 package com.example.mateusz.ifnotes.domain
 
 import com.example.mateusz.ifnotes.domain.entity.EatingLog
-import java.lang.IllegalStateException
 import java.time.Clock
 import javax.inject.Inject
 import javax.inject.Singleton

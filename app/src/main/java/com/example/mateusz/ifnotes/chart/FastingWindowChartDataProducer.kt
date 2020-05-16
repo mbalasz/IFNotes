@@ -1,23 +1,23 @@
 package com.example.mateusz.ifnotes.chart
 
-import com.example.mateusz.ifnotes.data.room.EatingLogData
+import com.example.mateusz.ifnotes.domain.entity.EatingLog
 
 class FastingWindowChartDataProducer(timeWindowValidator: TimeWindowValidator)
     : EatingLogsChartDataProducer(timeWindowValidator) {
-    override fun getDataPoints(eatingLogData: List<EatingLogData>): List<DataPoint> {
-        if (eatingLogData.isEmpty() || eatingLogData.size == 1) {
+    override fun getDataPoints(eatingLog: List<EatingLog>): List<DataPoint> {
+        if (eatingLog.isEmpty() || eatingLog.size == 1) {
             return emptyList()
         }
 
-        checkEatingLogValid(eatingLogData[0])
+        checkEatingLogValid(eatingLog[0])
         val dataPoints = arrayListOf<DataPoint>()
-        for (i in eatingLogData.indices) {
+        for (i in eatingLog.indices) {
             if (i == 0) {
                 continue
             }
-            val currEatingLog = eatingLogData[i]
+            val currEatingLog = eatingLog[i]
             checkEatingLogValid(currEatingLog)
-            val prevEatingLog = eatingLogData[i - 1]
+            val prevEatingLog = eatingLog[i - 1]
             if (currEatingLog.startTime == null || prevEatingLog.endTime == null) {
                 continue
             }

@@ -3,8 +3,6 @@ package com.example.mateusz.ifnotes.data.room
 import android.app.Application
 import androidx.room.Room
 import com.example.mateusz.ifnotes.data.EatingLogsLocalDataSource
-import com.example.mateusz.ifnotes.domain.common.Mapper
-import com.example.mateusz.ifnotes.domain.entity.EatingLog
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
